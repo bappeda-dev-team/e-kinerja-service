@@ -1,0 +1,328 @@
+# E-Kinerja – Database Schema & Tech Stack Documentation
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 14 (App Router), Tailwind CSS, shadcn/ui |
+| Backend | Golang + Echo Framework |
+| Database | PostgreSQL |
+| Cache / Session | Redis |
+| Auth | JWT (access + refresh token) |
+| DB Migration | golang-migrate |
+
+---
+
+## Database Schema
+
+### Overview
+
+Semua tabel menggunakan `UUID` sebagai primary key dengan default `gen_random_uuid()`.
+
+---
+
+### 1. `roles`
+
+```sql
+CREATE TABLE roles (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name        VARCHAR(50) NOT NULL UNIQUE,  -- 'super_admin', 'admin', 'programmer', 'level2', dll
+    description TEXT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+### 2. `users`
+
+```sql
+CREATE TABLE users (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    role_id      UUID NOT NULL REFERENCES roles(id),
+    username     VARCHAR(100) NOT NULL UNIQUE,
+    full_name    VARCHAR(255) NOT NULL,
+    password     TEXT NOT NULL,                -- bcrypt hashed
+    is_active    BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+### 3. `master_pemda`
+
+```sql
+CREATE TABLE master_pemda (
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name       VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+### 4. `master_aplikasi`
+
+```sql
+CREATE TABLE master_aplikasi (
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name       VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+### 5. `permintaan` (Client Requests / Daftar Kebutuhan Pemda)
+
+```sql
+CREATE TABLE permintaan (
+    id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    pemda_id             UUID NOT NULL REFERENCES master_pemda(id),
+    aplikasi_id          UUID NOT NULL REFERENCES master_aplikasi(id),
+    menu                 VARCHAR(255) NOT NULL,
+    kondisi_awal         TEXT NOT NULL,           -- Kondisi Sekarang
+    kondisi_diharapkan   TEXT NOT NULL,
+    tanggal_pesanan      DATE NOT NULL,
+    tanggal_deadline     DATE NOT NULL,
+    created_by           UUID NOT NULL REFERENCES users(id),  -- Super Admin
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+### 6. `distribusi` (Admin assigns to Programmer)
+
+```sql
+CREATE TABLE distribusi (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    permintaan_id UUID NOT NULL REFERENCES permintaan(id) ON DELETE CASCADE,
+    admin_id      UUID NOT NULL REFERENCES users(id),
+    komentar      TEXT,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+### 7. `distribusi_pelaksana` (Many-to-many: distribusi ↔ programmer)
+
+```sql
+CREATE TABLE distribusi_pelaksana (
+    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    distribusi_id  UUID NOT NULL REFERENCES distribusi(id) ON DELETE CASCADE,
+    programmer_id  UUID NOT NULL REFERENCES users(id),
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (distribusi_id, programmer_id)
+);
+```
+
+---
+
+### 8. `laporan_kinerja` (Progress report from Programmer)
+
+```sql
+CREATE TABLE laporan_kinerja (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    permintaan_id   UUID NOT NULL REFERENCES permintaan(id) ON DELETE CASCADE,
+    programmer_id   UUID NOT NULL REFERENCES users(id),
+    laporan_progress TEXT NOT NULL,
+    status          VARCHAR(20) NOT NULL DEFAULT 'putih'
+                    CHECK (status IN ('putih', 'merah', 'orange', 'kuning', 'hijau')),
+    -- putih=0%, merah=25%, orange=50%, kuning=75%, hijau=100%
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+### 9. `verifikasi` (Verification + Comment by Level 2)
+
+```sql
+CREATE TABLE verifikasi (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    laporan_id       UUID NOT NULL REFERENCES laporan_kinerja(id) ON DELETE CASCADE,
+    verifikator_id   UUID NOT NULL REFERENCES users(id),
+    komentar         TEXT,
+    status_verified  VARCHAR(20) NOT NULL DEFAULT 'pending'
+                     CHECK (status_verified IN ('pending', 'approved', 'revision')),
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+## Entity Relationship Diagram (Ringkasan)
+
+```
+roles ──< users
+              │
+              ├──[super_admin]── permintaan ──> master_pemda
+              │                      │          master_aplikasi
+              │                      │
+              ├──[admin]──────── distribusi ──> permintaan
+              │                      │
+              │               distribusi_pelaksana
+              │                      │
+              └──[programmer]── laporan_kinerja ──> permintaan
+              │                      │
+              └──[level2]────── verifikasi ──> laporan_kinerja
+```
+
+---
+
+## Status Mapping
+
+| Status Value | Label | Persentase |
+|---|---|---|
+| `putih` | Putih / Abu-abu | 0% |
+| `merah` | Merah | 25% |
+| `orange` | Orange | 50% |
+| `kuning` | Kuning | 75% |
+| `hijau` | Hijau | 100% |
+
+---
+
+## Role Mapping
+
+| Role Name | Aksi |
+|---|---|
+| `super_admin` | Membuat permintaan klien, kelola master data |
+| `admin` | Distribusi permintaan ke programmer |
+| `programmer` | Membuat laporan kinerja & progress |
+| `level2` | Verifikasi laporan & memberi komentar |
+
+---
+
+## golang-migrate: Migration Files
+
+Urutan file migration (prefix angka):
+
+```
+migrations/
+├── 000001_create_roles.up.sql
+├── 000001_create_roles.down.sql
+├── 000002_create_users.up.sql
+├── 000002_create_users.down.sql
+├── 000003_create_master_pemda.up.sql
+├── 000003_create_master_pemda.down.sql
+├── 000004_create_master_aplikasi.up.sql
+├── 000004_create_master_aplikasi.down.sql
+├── 000005_create_permintaan.up.sql
+├── 000005_create_permintaan.down.sql
+├── 000006_create_distribusi.up.sql
+├── 000006_create_distribusi.down.sql
+├── 000007_create_distribusi_pelaksana.up.sql
+├── 000007_create_distribusi_pelaksana.down.sql
+├── 000008_create_laporan_kinerja.up.sql
+├── 000008_create_laporan_kinerja.down.sql
+├── 000009_create_verifikasi.up.sql
+└── 000009_create_verifikasi.down.sql
+```
+
+Jalankan migration:
+```bash
+migrate -path ./migrations -database "postgres://user:pass@localhost:5432/ekinerja?sslmode=disable" up
+```
+
+---
+
+## Redis Usage
+
+| Key Pattern | Value | TTL | Keterangan |
+|---|---|---|---|
+| `session:{user_id}` | refresh_token | 7 days | Refresh token store |
+| `blacklist:{jti}` | "1" | access token TTL | Invalidate logout |
+
+---
+
+## JWT Payload
+
+```json
+{
+  "sub": "<user_uuid>",
+  "role": "admin",
+  "username": "budi01",
+  "exp": 1740000000,
+  "jti": "<uuid>"
+}
+```
+
+- **Access Token**: expire 15 menit
+- **Refresh Token**: expire 7 hari, disimpan di Redis
+
+---
+
+## Backend Endpoint Outline (Echo)
+
+```
+POST   /api/auth/login
+POST   /api/auth/refresh
+POST   /api/auth/logout
+
+GET    /api/master/pemda
+POST   /api/master/pemda
+GET    /api/master/aplikasi
+POST   /api/master/aplikasi
+GET    /api/master/users
+POST   /api/master/users
+
+GET    /api/permintaan
+POST   /api/permintaan          [super_admin]
+GET    /api/permintaan/:id
+
+POST   /api/distribusi          [admin]
+GET    /api/distribusi
+
+POST   /api/laporan             [programmer]
+PUT    /api/laporan/:id
+GET    /api/laporan
+
+POST   /api/verifikasi/:laporan_id   [level2]
+GET    /api/verifikasi
+```
+
+---
+
+## Frontend Structure (Next.js App Router)
+
+```
+app/
+├── (auth)/
+│   └── login/page.tsx
+├── (dashboard)/
+│   ├── layout.tsx              -- sidebar + auth guard
+│   ├── permintaan/
+│   │   ├── page.tsx            -- daftar permintaan
+│   │   └── new/page.tsx
+│   ├── distribusi/
+│   │   └── page.tsx
+│   ├── laporan/
+│   │   └── page.tsx
+│   ├── verifikasi/
+│   │   └── page.tsx
+│   └── master/
+│       ├── pemda/page.tsx
+│       ├── aplikasi/page.tsx
+│       └── users/page.tsx
+└── api/                        -- Next.js route handlers (opsional proxy)
+```
+
+---
+
+## Catatan Implementasi
+
+- Gunakan `pgcrypto` extension untuk `gen_random_uuid()`: `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
+- Semua kolom `updated_at` sebaiknya di-trigger otomatis via PostgreSQL trigger.
+- shadcn/ui komponen yang relevan: `DataTable`, `Badge` (untuk status warna), `Dialog`, `Select`, `Form`.
+- Status badge warna dapat di-map langsung dari nilai enum ke Tailwind class (merah → `bg-red-500`, hijau → `bg-green-500`, dst).

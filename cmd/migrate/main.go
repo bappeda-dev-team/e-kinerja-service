@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
@@ -18,7 +18,7 @@ func main() {
 	command := os.Args[1]
 
 	// sesuaikan database kamu
-	dsn := "mysql://root:@tcp(127.0.0.1:3306)/golang_api?parseTime=true"
+	dsn := "postgres://postgres:psg2026@127.0.0.1:5432/db_internal?sslmode=disable"
 
 	m, err := migrate.New(
 		"file://migrations",

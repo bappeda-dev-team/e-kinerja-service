@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 var DB *sql.DB
@@ -13,9 +13,9 @@ var DB *sql.DB
 func ConnectDB() {
 	var err error
 
-	dsn := "root:@tcp(127.0.0.1:3306)/db_internal?parseTime=true"
+	dsn := "host=127.0.0.1 port=5432 user=postgres password=psg2026 dbname=db_internal sslmode=disable"
 
-	DB, err = sql.Open("mysql", dsn)
+	DB, err = sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatal("Gagal konek DB:", err)
 	}
