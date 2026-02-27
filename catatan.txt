@@ -326,3 +326,12 @@ app/
 - Semua kolom `updated_at` sebaiknya di-trigger otomatis via PostgreSQL trigger.
 - shadcn/ui komponen yang relevan: `DataTable`, `Badge` (untuk status warna), `Dialog`, `Select`, `Form`.
 - Status badge warna dapat di-map langsung dari nilai enum ke Tailwind class (merah → `bg-red-500`, hijau → `bg-green-500`, dst).
+
+
+| PostgreSQL  | Go        |
+| ----------- | --------- |
+| UUID        | string    |
+| VARCHAR     | string    |
+| TEXT        | string    |
+| BOOLEAN     | bool      |
+| TIMESTAMPTZ | time.Time |

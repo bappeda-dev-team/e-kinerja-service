@@ -1,4 +1,4 @@
-package controllers
+package permintaan
 
 import "github.com/gin-gonic/gin"
 
