@@ -25,7 +25,23 @@ func GetDistribusi(c *gin.Context) {
 }
 
 func GetDistribusiId(c *gin.Context) {
+	id := c.Param("id")
 
+	pemda, err := GetDistribusiServicesID(id)
+
+	if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
+    }
+
+	c.JSON(http.StatusOK, APIResponse{
+		Code: 200,
+		Success: true,
+		Message: "Berhasil mengambil data",
+		Data: pemda,
+	})
 }
 
 func CreateDistribusi(c *gin.Context) {

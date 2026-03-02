@@ -13,6 +13,11 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type Roles struct {
+	ID        	 string    `json:"id"`
+	Name    	 string    `json:"name"`
+}
+
 type APIResponse struct {
 	Code    int         `json:"code"`
     Success bool        `json:"success"`

@@ -24,3 +24,15 @@ func GetAllPelaksana() ([]Pelaksana, error) {
 	return pelaksana, err
 
 }
+
+func GetId(id string) (Pelaksana, error){
+	var data Pelaksana
+	err := config.DB.QueryRow("SELECT dp.id, mp.name, ma.name, u.full_name, dp.created_at FROM distribusi_pelaksana dp LEFT JOIN distribusi d ON dp.distribusi_id = d.id LEFT JOIN permintaan p ON d.permintaan_id = p.id LEFT JOIN users u ON dp.programmer_id = u.id LEFT JOIN master_pemda mp ON p.pemda_id = mp.id LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id WHERE dp.id=$1", id).
+		Scan(&data.ID, &data.Pemda, &data.Aplikasi, &data.Programmer, &data.CreatedAt)
+
+	if err != nil {
+		return Pelaksana{}, err
+	}
+
+	return data, err
+}

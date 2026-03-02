@@ -23,3 +23,15 @@ func GetAllMasterPemda() ([]MasterPemda, error) {
 	return master_pemda, err
 
 }
+
+func GetMasterPemdaId(id string) (MasterPemda, error){
+	var pemda MasterPemda
+	err := config.DB.QueryRow("SELECT id, name, created_at, updated_at FROM master_pemda WHERE id=$1", id).
+		Scan(&pemda.ID, &pemda.Name, &pemda.CreatedAt, &pemda.UpdatedAt)
+
+	if err != nil {
+		return MasterPemda{}, err
+	}
+
+	return pemda, err
+}

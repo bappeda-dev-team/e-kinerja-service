@@ -24,3 +24,15 @@ func GetAllDistribusi() ([]Distribusi, error) {
 	return distribusi, err
 
 }
+
+func GetId(id string) (Distribusi, error){
+	var distribusi Distribusi
+	err := config.DB.QueryRow("SELECT d.id, mp.name, ma.name, u.full_name, d.komentar, d.created_at, d.updated_at FROM distribusi d LEFT JOIN permintaan p ON d.permintaan_id = p.id LEFT JOIN users u ON d.admin_id = u.id LEFT JOIN master_pemda mp ON p.pemda_id = mp.id LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id WHERE d.id=$1", id).
+		Scan(&distribusi.ID, &distribusi.Pemda, &distribusi.Aplikasi, &distribusi.Admin, &distribusi.Komentar, &distribusi.CreatedAt, &distribusi.UpdatedAt)
+
+	if err != nil {
+		return Distribusi{}, err
+	}
+
+	return distribusi, err
+}

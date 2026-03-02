@@ -25,7 +25,23 @@ func GetAplikasi(c *gin.Context) {
 }
 
 func GetAplikasiID(c *gin.Context) {
+	id := c.Param("id")
 
+	aplikasi, err := GetMasterAplikasiServicesID(id)
+
+	if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
+    }
+
+	c.JSON(http.StatusOK, APIResponse{
+		Code: 200,
+		Success: true,
+		Message: "Berhasil mengambil data",
+		Data: aplikasi,
+	})
 }
 
 func CreateAplikasi(c *gin.Context) {

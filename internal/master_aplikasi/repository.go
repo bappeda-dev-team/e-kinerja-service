@@ -23,3 +23,15 @@ func GetAllMasterAplikasi() ([]MasterAplikasi, error) {
 	return master_aplikasi, err
 
 }
+
+func GetMasterAplikasiId(id string) (MasterAplikasi, error){
+	var aplikasi MasterAplikasi
+	err := config.DB.QueryRow("SELECT id, name, created_at, updated_at FROM master_aplikasi WHERE id=$1", id).
+		Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
+
+	if err != nil {
+		return MasterAplikasi{}, err
+	}
+
+	return aplikasi, err
+}

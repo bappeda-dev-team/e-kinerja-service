@@ -25,7 +25,23 @@ func GetPermintaan(c *gin.Context) {
 }
 
 func GetPermintaanId(c *gin.Context) {
+	id := c.Param("id")
 
+	pemda, err := GetPermintaanServicesID(id)
+
+	if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
+    }
+
+	c.JSON(http.StatusOK, APIResponse{
+		Code: 200,
+		Success: true,
+		Message: "Berhasil mengambil data",
+		Data: pemda,
+	})
 }
 
 func CreatePermintaan(c *gin.Context) {
