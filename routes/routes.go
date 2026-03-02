@@ -48,7 +48,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.DELETE("/distribusi/:id", distribusi.DeleteDistribusi) // hanya superadmin 
 
 	r.GET("/pelaksana", pelaksana.GetPelaksana) // semua users dapat mengakses						SELESAI
-	r.GET("/pelaksana/:id", pelaksana.GetPelaksanaID) // semua users dapat mengakses
+	r.GET("/pelaksana/:id", pelaksana.GetPelaksanaID) // semua users dapat mengakses				SELESAI
 	r.POST("/pelaksana", pelaksana.CreatePelaksana) // hanya superadmin & admin 
 	r.PUT("/pelaksana/:id", pelaksana.UpdatePelaksana) // hanya superadmin & admin 
 	r.DELETE("/pelaksana/:id", pelaksana.DeletePelaksana) // hanya superadmin & admin
