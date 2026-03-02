@@ -16,7 +16,7 @@ import (
 
 func SetupRoutes(r *gin.Engine) {
 
-	r.GET("/roles", roles.GetRoles)
+	r.GET("/roles", roles.GetRoles) // 													    		SELESAI
 	
 	r.GET("/login", user.Login)
 	r.GET("/register", user.Register)
@@ -24,31 +24,31 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/auth", user.Auth)
 	r.POST("/register", user.CreateRegister)
 
-	r.GET("/master-aplikasi", master_aplikasi.GetAplikasi) // hanya superadmin
+	r.GET("/master-aplikasi", master_aplikasi.GetAplikasi) // hanya superadmin 						SELESAI
 	r.GET("/master-aplikasi/:id", master_aplikasi.GetAplikasiID) // hanya superadmin
 	r.POST("/master-aplikasi", master_aplikasi.CreateAplikasi) // hanya superadmin
 	r.PUT("/master-aplikasi/:id", master_aplikasi.UpdateAplikasi) // hanya superadmin
 	r.DELETE("/master-aplikasi/:id", master_aplikasi.DeleteAplikasi) // hanya superadmin
 
-	r.GET("/master-pemda", master_pemda.GetPemda) // hanya superadmin
+	r.GET("/master-pemda", master_pemda.GetPemda) // hanya superadmin								SELESAI
 	r.GET("/master-pemda/:id", master_pemda.GetPemdaID) // hanya superadmin
 	r.POST("/master-pemda", master_pemda.CreatePemda) // hanya superadmin
 	r.PUT("/master-pemda/:id", master_pemda.UpdatePemda) // hanya superadmin
 	r.DELETE("/master-pemda/:id", master_pemda.DeletePemda) // hanya superadmin	
 
-	r.GET("/permintaan", permintaan.GetPermintaan) // semua users dapat mengakses
+	r.GET("/permintaan", permintaan.GetPermintaan) // semua users dapat mengakses					SELESAI
 	r.GET("/permintaan/:id", permintaan.GetPermintaanId) // semua users dapat mengakses
 	r.POST("/permintaan", permintaan.CreatePermintaan) // hanya superadmin
 	r.PUT("/permintaan/:id", permintaan.UpdatePermintaan) // hanya superadmin
 	r.DELETE("/permintaan/:id", permintaan.DeletePermintaan) // hanya superadmin
 
-	r.GET("/distribusi", distribusi.GetDistribusi) // semua users dapat mengakses
+	r.GET("/distribusi", distribusi.GetDistribusi) // semua users dapat mengakses					SELESAI
 	r.GET("/distribusi/:id", distribusi.GetDistribusiId) // semua users dapat mengakses
 	r.POST("/distribusi", distribusi.CreateDistribusi) // hanya superadmin 
 	r.PUT("/distribusi/:id", distribusi.UpdateDistribusi) // hanya superadmin 
 	r.DELETE("/distribusi/:id", distribusi.DeleteDistribusi) // hanya superadmin 
 
-	r.GET("/pelaksana", pelaksana.GetPelaksana) // semua users dapat mengakses
+	r.GET("/pelaksana", pelaksana.GetPelaksana) // semua users dapat mengakses						SELESAI
 	r.GET("/pelaksana/:id", pelaksana.GetPelaksanaID) // semua users dapat mengakses
 	r.POST("/pelaksana", pelaksana.CreatePelaksana) // hanya superadmin & admin 
 	r.PUT("/pelaksana/:id", pelaksana.UpdatePelaksana) // hanya superadmin & admin 

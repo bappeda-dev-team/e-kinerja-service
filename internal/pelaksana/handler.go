@@ -1,9 +1,27 @@
 package pelaksana
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 func GetPelaksana(c *gin.Context) {
+	pelaksana, err := GetPelaksanaServices()
 
+	if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
+    }
+
+	c.JSON(http.StatusOK, APIResponse{
+		Code: 200,
+		Success: true,
+		Message: "Berhasil mengambil data",
+		Data: pelaksana,
+	})
 }
 
 func GetPelaksanaID(c *gin.Context) {
