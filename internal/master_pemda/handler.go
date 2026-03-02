@@ -7,7 +7,7 @@ import (
 )
 
 func GetPemda(c *gin.Context) {
-	pemda, err := GetAllMasterPemda()
+	pemda, err := GetMasterPemdaServices()
 
 	if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{
@@ -16,7 +16,11 @@ func GetPemda(c *gin.Context) {
         return
     }
 
-	c.JSON(http.StatusOK, pemda)
+	c.JSON(http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Berhasil mengambil data",
+		Data: pemda,
+	})
 }
 
 func GetPemdaID(c *gin.Context) {

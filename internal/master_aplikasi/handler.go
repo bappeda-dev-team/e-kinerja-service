@@ -7,7 +7,7 @@ import (
 )
 
 func GetAplikasi(c *gin.Context) {
-	aplikasi, err := GetAllMasterAplikasi()
+	aplikasi, err := GetMasterAplikasiServices()
 
 	if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{
@@ -16,7 +16,11 @@ func GetAplikasi(c *gin.Context) {
         return
     }
 
-	c.JSON(http.StatusOK, aplikasi)
+	c.JSON(http.StatusOK, APIResponse{
+		Success: true,
+		Message: "Berhasil mengambil data",
+		Data: aplikasi,
+	})
 }
 
 func GetAplikasiID(c *gin.Context) {

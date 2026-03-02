@@ -8,3 +8,11 @@ type MasterAplikasi struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+type APIResponse struct {
+	Status    int       `json:"status"`
+    Success bool        `json:"success"`
+    Message string      `json:"message"`
+    Data    interface{} `json:"data,omitempty"`
+    Errors  interface{} `json:"errors,omitempty"`
+}
