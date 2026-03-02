@@ -1,9 +1,22 @@
 package master_aplikasi
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 func GetAplikasi(c *gin.Context) {
+	aplikasi, err := GetAllMasterAplikasi()
 
+	if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
+    }
+
+	c.JSON(http.StatusOK, aplikasi)
 }
 
 func GetAplikasiID(c *gin.Context) {
