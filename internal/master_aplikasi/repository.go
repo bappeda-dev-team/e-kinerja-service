@@ -3,7 +3,7 @@ package master_aplikasi
 import "aplikasi-internal/config"
 
 func GetAllMasterAplikasi() ([]MasterAplikasi, error) {
-	rows, err := config.DB.Query("SELECT id, name FROM master_aplikasi")
+	rows, err := config.DB.Query("SELECT id, name, created_at, updated_at FROM master_aplikasi")
 	if err != nil {
 		return nil, err
 	}
@@ -13,7 +13,7 @@ func GetAllMasterAplikasi() ([]MasterAplikasi, error) {
 
 	for rows.Next() {
 		var aplikasi MasterAplikasi
-		err := rows.Scan(&aplikasi.ID, &aplikasi.Name)
+		err := rows.Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

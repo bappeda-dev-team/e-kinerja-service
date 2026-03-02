@@ -17,6 +17,7 @@ func GetRoles(c *gin.Context) {
     }
 
 	c.JSON(http.StatusOK, APIResponse{
+		Code: 200,
 		Success: true,
 		Message: "Berhasil mengambil data",
 		Data: roles,
