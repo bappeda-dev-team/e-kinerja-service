@@ -8,9 +8,15 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Gagal load .env")
+	}
+	
 	if len(os.Args) < 2 {
 		log.Fatal("Gunakan: go run cmd/migrate/main.go [up|down]")
 	}
@@ -18,7 +24,15 @@ func main() {
 	command := os.Args[1]
 
 	// sesuaikan database kamu
-	dsn := "postgres://postgres:psg2026@127.0.0.1:5432/db_internal?sslmode=disable"
+	dsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASS"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("DB_SSLMODE"),
+	)
 
 	m, err := migrate.New(
 		"file://migrations",

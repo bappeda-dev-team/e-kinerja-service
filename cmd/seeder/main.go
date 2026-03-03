@@ -2,40 +2,43 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"os"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	db, err := sql.Open("postgres", "postgres://postgres:psg2026@127.0.0.1:5432/db_internal?sslmode=disable")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Gagal load .env")
+	}
+
+	dsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASS"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("DB_SSLMODE"),
+	)
+
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer db.Close()
 
-	seedRoles(db)
+	// Panggil semua seeder di sini
+	SeedRoles(db)
+
+	log.Println("✅ Semua seeder berhasil dijalankan")
 }
 
-func seedRoles(db *sql.DB) {
-	query := `
-	INSERT INTO roles (name, description)
-	VALUES 
-	('super_admin', 'Super Administrator'),
-	('admin', 'Administrator'),
-	('programmer', 'Programmer'),
-	('level2', 'Programmer & Verifikator')
-	ON CONFLICT (name) DO NOTHING;
-	`
 
-	_, err := db.Exec(query)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println("Roles seeded successfully")
-}
 
 
 

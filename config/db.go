@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -13,7 +14,15 @@ var DB *sql.DB
 func ConnectDB() {
 	var err error
 
-	dsn := "host=127.0.0.1 port=5432 user=postgres password=psg2026 dbname=db_internal sslmode=disable"
+	dsn := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASS"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("DB_SSLMODE"),
+	)
 
 	DB, err = sql.Open("postgres", dsn)
 	if err != nil {
