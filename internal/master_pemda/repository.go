@@ -1,6 +1,9 @@
 package master_pemda
 
-import "aplikasi-internal/config"
+import (
+	"aplikasi-internal/config"
+	"database/sql"
+)
 
 func GetAllMasterPemda() ([]MasterPemda, error) {
 	rows, err := config.DB.Query("SELECT id, name, created_at, updated_at FROM master_pemda")
@@ -34,4 +37,64 @@ func GetMasterPemdaId(id string) (MasterPemda, error){
 	}
 
 	return pemda, err
+}
+
+func CreateMasterPemda(data *MasterPemda) error {
+	query := `
+		INSERT INTO master_pemda (name)
+		VALUES ($1)
+		RETURNING id, created_at, updated_at
+	`
+
+	err := config.DB.QueryRow(
+		query,
+		data.Name,
+	).Scan(
+		&data.ID,
+		&data.CreatedAt,
+		&data.UpdatedAt,
+	)
+
+	return err
+}
+
+func UpdateMasterPemda(id string, data *MasterPemda) error {
+	query := `
+		UPDATE master_pemda
+		SET name = $1,
+		    updated_at = NOW()
+		WHERE id = $2
+		RETURNING updated_at
+	`
+
+	err := config.DB.QueryRow(
+		query,
+		data.Name,
+		id,
+	).Scan(&data.UpdatedAt)
+
+	return err
+}
+
+func DeleteMasterPemda(id string) error {
+	query := `
+		DELETE FROM master_pemda
+		WHERE id = $1
+	`
+
+	result, err := config.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }

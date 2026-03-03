@@ -34,9 +34,9 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/master-pemda", master_pemda.GetPemda) // hanya superadmin								SELESAI
 	r.GET("/master-pemda/:id", master_pemda.GetPemdaID) // hanya superadmin							SELESAI
-	r.POST("/master-pemda", master_pemda.CreatePemda) // hanya superadmin
-	r.PUT("/master-pemda/:id", master_pemda.UpdatePemda) // hanya superadmin
-	r.DELETE("/master-pemda/:id", master_pemda.DeletePemda) // hanya superadmin	
+	r.POST("/master-pemda", master_pemda.CreatePemda) // hanya superadmin							SELESAI
+	r.PUT("/master-pemda/:id", master_pemda.UpdatePemda) // hanya superadmin						SELESAI
+	r.DELETE("/master-pemda/:id", master_pemda.DeletePemda) // hanya superadmin						SELESAI
 
 	r.GET("/permintaan", permintaan.GetPermintaan) // semua users dapat mengakses					SELESAI
 	r.GET("/permintaan/:id", permintaan.GetPermintaanId) // semua users dapat mengakses				SELESAI
