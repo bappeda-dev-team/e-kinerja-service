@@ -5,6 +5,7 @@ import (
 	"aplikasi-internal/internal/laporan"
 	"aplikasi-internal/internal/master_aplikasi"
 	"aplikasi-internal/internal/master_pemda"
+	"aplikasi-internal/internal/middleware"
 	"aplikasi-internal/internal/pelaksana"
 	"aplikasi-internal/internal/permintaan"
 	"aplikasi-internal/internal/roles"
@@ -16,6 +17,8 @@ import (
 
 func SetupRoutes(r *gin.Engine) {
 
+	r.Use(middleware.ErrorHandler())
+
 	r.GET("/roles", roles.GetRoles) // 													    		SELESAI
 	
 	r.GET("/register", user.Register) //															SELESAI
@@ -25,9 +28,9 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/master-aplikasi", master_aplikasi.GetAplikasi) // hanya superadmin 						SELESAI
 	r.GET("/master-aplikasi/:id", master_aplikasi.GetAplikasiID) // hanya superadmin				SELESAI
-	r.POST("/master-aplikasi", master_aplikasi.CreateAplikasi) // hanya superadmin
-	r.PUT("/master-aplikasi/:id", master_aplikasi.UpdateAplikasi) // hanya superadmin
-	r.DELETE("/master-aplikasi/:id", master_aplikasi.DeleteAplikasi) // hanya superadmin
+	r.POST("/master-aplikasi", master_aplikasi.CreateAplikasi) // hanya superadmin					SELESAI
+	r.PUT("/master-aplikasi/:id", master_aplikasi.UpdateAplikasi) // hanya superadmin				SELESAI
+	r.DELETE("/master-aplikasi/:id", master_aplikasi.DeleteAplikasi) // hanya superadmin			SELESAI
 
 	r.GET("/master-pemda", master_pemda.GetPemda) // hanya superadmin								SELESAI
 	r.GET("/master-pemda/:id", master_pemda.GetPemdaID) // hanya superadmin							SELESAI

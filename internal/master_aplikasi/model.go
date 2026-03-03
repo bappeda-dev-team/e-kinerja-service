@@ -16,3 +16,7 @@ type APIResponse struct {
     Data    interface{} `json:"data,omitempty"`
     Errors  interface{} `json:"errors,omitempty"`
 }
+
+type CreateMasterAplikasiRequest struct {
+	Name string `json:"name" binding:"required,min=3"`
+}
