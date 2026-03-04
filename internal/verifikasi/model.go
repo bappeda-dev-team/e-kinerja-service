@@ -12,10 +12,9 @@ type Verifikasi struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
-type APIResponse struct {
-	Code    int         `json:"code"`
-    Success bool        `json:"success"`
-    Message string      `json:"message"`
-    Data    interface{} `json:"data,omitempty"`
-    Errors  interface{} `json:"errors,omitempty"`
+type VerifikasiRequest struct {
+	LaporanID 		string `json:"laporan_id" binding:"required"`
+	VerifikatorID	string `json:"verifikator_id" binding:"required"`
+	Komentar  	    string `json:"komentar"`
+	StatusVerified  string `json:"status_verified" binding:"required"`
 }

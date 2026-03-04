@@ -67,6 +67,9 @@ func SetupRoutes(r *gin.Engine) {
 	r.PUT("/laporan/:id", laporan.UpdateLaporan) // SELESAI
 	r.DELETE("/laporan/:id", laporan.DeleteLaporan) // SELESAI
 
-	r.GET("/verifikasi", verifikasi.GetVerifikasi) 
-	r.POST("/verifikasi", verifikasi.CreateVerifikasi) 
+	r.GET("/verifikasi", verifikasi.GetVerifikasi) // SELESAI
+	r.GET("/verifikasi/:id", verifikasi.GetVerifikasiID) // SELESAI
+	r.POST("/verifikasi", verifikasi.CreateVerifikasi) // SELESAI
+	r.PUT("/verifikasi/:id", verifikasi.UpdateVerifikasi) // SELESAI
+	r.DELETE("/verifikasi/:id", verifikasi.DeleteVerifikasi) // SELESAI
 }
