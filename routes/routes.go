@@ -55,9 +55,11 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/pelaksana", pelaksana.GetPelaksana) // SELESAI
 	r.GET("/pelaksana/:id", pelaksana.GetPelaksanaID) // SELESAI
-	r.POST("/pelaksana", pelaksana.CreatePelaksana) 
-	r.PUT("/pelaksana/:id", pelaksana.UpdatePelaksana) 
-	r.DELETE("/pelaksana/:id", pelaksana.DeletePelaksana) 
+	r.GET("/pelaksana-nama", pelaksana.GetPelaksanaByNama) // SELESAI
+	r.GET("/pelaksana-nama/:id", pelaksana.GetPelaksanaByNamaID) // SELESAI
+	r.POST("/pelaksana", pelaksana.CreatePelaksana) // SELESAI
+	r.PUT("/pelaksana/:id", pelaksana.UpdatePelaksana) // SELESAI
+	r.DELETE("/pelaksana/:id", pelaksana.DeletePelaksana) // SELESAI
 
 	r.GET("/laporan", laporan.GetLaporan) 
 	r.GET("/laporan/:id", laporan.GetLaporanID) 
