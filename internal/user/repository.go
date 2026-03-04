@@ -2,6 +2,40 @@ package user
 
 import "aplikasi-internal/config"
 
+func GetAll() ([]User, error) {
+	rows, err := config.DB.Query(
+		`SELECT id, role_id, username, full_name, is_active, created_at, updated_at FROM users`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var verifikasi []User
+
+	for rows.Next() {
+		var data User
+		err := rows.Scan(&data.ID, &data.RoleID, &data.Username, &data.FullName, &data.IsActive, &data.CreatedAt, &data.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		verifikasi = append(verifikasi, data)
+	}
+
+	return verifikasi, err
+}
+
+func GetId(id string) (User, error) {
+	var data User
+	err := config.DB.QueryRow(`SELECT id, role_id, username, full_name, is_active, created_at, updated_at FROM users WHERE id=$1`, id).
+		Scan(&data.ID, &data.RoleID, &data.Username, &data.FullName, &data.IsActive, &data.CreatedAt, &data.UpdatedAt)
+
+	if err != nil {
+		return User{}, err
+	}
+
+	return data, err
+}
+
 
 func IsUsernameExists(username string) (bool, error) {
 	var exists bool
