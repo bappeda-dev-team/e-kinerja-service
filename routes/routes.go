@@ -20,6 +20,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.Use(middleware.ErrorHandler())
 
 	r.GET("/roles", roles.GetRoles) // SELESAI
+	r.GET("/roles/:id", roles.GetRoleID) // SELESAI
 	
 	r.POST("/logout", user.Logout)
 	r.POST("/auth", user.Auth)
