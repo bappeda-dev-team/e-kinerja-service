@@ -4,6 +4,15 @@ import "time"
 
 type Distribusi struct {
 	ID           string    `json:"id"`
+	PermintaanID string    `json:"permintaan_id"`
+	AdminID 	 string    `json:"admin_id"`
+	Komentar 	 string    `json:"komentar"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type DistribusiByNama struct {
+	ID           string    `json:"id"`
 	Pemda 		 string    `json:"pemda"`
 	Aplikasi 	 string    `json:"aplikasi"`
 	Admin 	     string    `json:"admin"`
@@ -12,10 +21,8 @@ type Distribusi struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-type APIResponse struct {
-	Code    int         `json:"code"`
-    Success bool        `json:"success"`
-    Message string      `json:"message"`
-    Data    interface{} `json:"data,omitempty"`
-    Errors  interface{} `json:"errors,omitempty"`
+type DistribusiRequest struct {
+	PermintaanID 	  string 	`json:"permintaan_id" binding:"required"`
+	AdminID 		  string 	`json:"admin_id" binding:"required"`
+	Komentar 		  string 	`json:"komentar" binding:"required,min=3"`
 }

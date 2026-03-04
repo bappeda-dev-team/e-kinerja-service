@@ -46,10 +46,12 @@ func SetupRoutes(r *gin.Engine) {
 	r.DELETE("/permintaan/:id", permintaan.DeletePermintaan) // SELESAI
 
 	r.GET("/distribusi", distribusi.GetDistribusi) // SELESAI
-	r.GET("/distribusi/:id", distribusi.GetDistribusiId) // SELESAI
-	r.POST("/distribusi", distribusi.CreateDistribusi) 
-	r.PUT("/distribusi/:id", distribusi.UpdateDistribusi) 
-	r.DELETE("/distribusi/:id", distribusi.DeleteDistribusi)  
+	r.GET("/distribusi/:id", distribusi.GetDistribusiById) // SELESAI
+	r.GET("/distribusi-nama", distribusi.GetDistribusiByNama) // SELESAI
+	r.GET("/distribusi-nama/:id", distribusi.GetDistribusiByNamaId) // SELESAI
+	r.POST("/distribusi", distribusi.CreateDistribusi) // SELESAI
+	r.PUT("/distribusi/:id", distribusi.UpdateDistribusi) // SELESAI
+	r.DELETE("/distribusi/:id", distribusi.DeleteDistribusi) // SELESAI 
 
 	r.GET("/pelaksana", pelaksana.GetPelaksana) // SELESAI
 	r.GET("/pelaksana/:id", pelaksana.GetPelaksanaID) // SELESAI

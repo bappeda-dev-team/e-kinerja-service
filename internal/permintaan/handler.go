@@ -10,7 +10,7 @@ import (
 )
 
 func GetPermintaan(c *gin.Context) {
-	permintaan, err := GetPermintaanServices()
+	result, err := GetPermintaanServices()
 
 	if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{
@@ -19,36 +19,37 @@ func GetPermintaan(c *gin.Context) {
         return
     }
 
-	c.JSON(http.StatusOK, APIResponse{
-		Code   : 200,
-		Success: true,
-		Message: "Berhasil mengambil data",
-		Data: permintaan,
-	})
+	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 func GetPermintaanId(c *gin.Context) {
 	id := c.Param("id")
 
-	pemda, err := GetPermintaanServicesID(id)
+	if _, err := uuid.Parse(id); err != nil {
+		c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return
+	}
+
+	result, err := GetPermintaanServicesID(id)
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
-    }
 
-	c.JSON(http.StatusOK, APIResponse{
-		Code: 200,
-		Success: true,
-		Message: "Berhasil mengambil data",
-		Data: pemda,
-	})
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound,
+				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return
+		}
+
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 func GetPermintaanNama(c *gin.Context) {
-	permintaan, err := GetPermintaanNamaServices()
+	result, err := GetPermintaanNamaServices()
 
 	if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{
@@ -57,32 +58,33 @@ func GetPermintaanNama(c *gin.Context) {
         return
     }
 
-	c.JSON(http.StatusOK, APIResponse{
-		Code   : 200,
-		Success: true,
-		Message: "Berhasil mengambil data",
-		Data: permintaan,
-	})
+	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 func GetPermintaanNamaId(c *gin.Context) {
 	id := c.Param("id")
 
-	pemda, err := GetPermintaanNamaServicesID(id)
+	if _, err := uuid.Parse(id); err != nil {
+		c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return
+	}
+
+	result, err := GetPermintaanNamaServicesID(id)
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
-    }
 
-	c.JSON(http.StatusOK, APIResponse{
-		Code: 200,
-		Success: true,
-		Message: "Berhasil mengambil data",
-		Data: pemda,
-	})
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound,
+				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return
+		}
+
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 func CreatePermintaan(c *gin.Context) {

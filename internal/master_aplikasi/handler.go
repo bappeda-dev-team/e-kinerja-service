@@ -10,7 +10,7 @@ import (
 )
 
 func GetAplikasi(c *gin.Context) {
-	aplikasi, err := GetMasterAplikasiServices()
+	result, err := GetMasterAplikasiServices()
 
 	if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{
@@ -19,32 +19,33 @@ func GetAplikasi(c *gin.Context) {
         return
     }
 
-	c.JSON(http.StatusOK, APIResponse{
-		Code: 200,
-		Success: true,
-		Message: "Berhasil mengambil data",
-		Data: aplikasi,
-	})
+	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 func GetAplikasiID(c *gin.Context) {
 	id := c.Param("id")
 
-	aplikasi, err := GetMasterAplikasiServicesID(id)
+	if _, err := uuid.Parse(id); err != nil {
+		c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return
+	}
+
+	result, err := GetMasterAplikasiServicesID(id)
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
-    }
+		// kalau ID tidak ditemukan
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound,
+				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return
+		}
 
-	c.JSON(http.StatusOK, APIResponse{
-		Code: 200,
-		Success: true,
-		Message: "Berhasil mengambil data",
-		Data: aplikasi,
-	})
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 func CreateAplikasi(c *gin.Context) {
