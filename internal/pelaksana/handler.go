@@ -109,7 +109,7 @@ func CreatePelaksana(c *gin.Context) {
 }
 
 func UpdatePelaksana(c *gin.Context) {
-id := c.Param("id")
+	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
 		c.JSON(http.StatusBadRequest,
@@ -145,7 +145,7 @@ id := c.Param("id")
 }
 
 func DeletePelaksana(c *gin.Context) {
-id := c.Param("id")
+	id := c.Param("id")
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {

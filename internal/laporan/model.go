@@ -11,10 +11,8 @@ type Laporan struct {
 	UpdatedAt   	time.Time `json:"updated_at"`
 }
 
-type APIResponse struct {
-	Code    int         `json:"code"`
-    Success bool        `json:"success"`
-    Message string      `json:"message"`
-    Data    interface{} `json:"data,omitempty"`
-    Errors  interface{} `json:"errors,omitempty"`
+type LaporanRequest struct {
+	PermintaanID 	string `json:"permintaan_id" binding:"required"`
+	ProgrammerID 	string `json:"programmer_id" binding:"required"`
+	LaporanProgress string `json:"laporan_progress" binding:"required,min=3"`
 }

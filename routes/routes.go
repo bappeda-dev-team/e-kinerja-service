@@ -61,11 +61,11 @@ func SetupRoutes(r *gin.Engine) {
 	r.PUT("/pelaksana/:id", pelaksana.UpdatePelaksana) // SELESAI
 	r.DELETE("/pelaksana/:id", pelaksana.DeletePelaksana) // SELESAI
 
-	r.GET("/laporan", laporan.GetLaporan) 
-	r.GET("/laporan/:id", laporan.GetLaporanID) 
-	r.POST("/laporan", laporan.CreateLaporan) 
-	r.PUT("/laporan/:id", laporan.UpdateLaporan) 
-	r.DELETE("/laporan/:id", laporan.DeleteLaporan) 
+	r.GET("/laporan", laporan.GetLaporan) // SELESAI
+	r.GET("/laporan/:id", laporan.GetLaporanID) // SELESAI
+	r.POST("/laporan", laporan.CreateLaporan) // SELESAI
+	r.PUT("/laporan/:id", laporan.UpdateLaporan) // SELESAI
+	r.DELETE("/laporan/:id", laporan.DeleteLaporan) // SELESAI
 
 	r.GET("/verifikasi", verifikasi.GetVerifikasi) 
 	r.POST("/verifikasi", verifikasi.CreateVerifikasi) 
