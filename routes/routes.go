@@ -25,7 +25,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/auth", user.Auth)
 	r.GET("/user", user.GetAllUser) // SELESAI
 	r.GET("/user/:id", user.GetUserID) // SELESAI
-	r.POST("/register", user.Register) //SELESAI
+	r.POST("/create-user", user.Create) //SELESAI
 
 	r.GET("/master-aplikasi", master_aplikasi.GetAplikasi) // SELESAI
 	r.GET("/master-aplikasi/:id", master_aplikasi.GetAplikasiID) // SELESAI

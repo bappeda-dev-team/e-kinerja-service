@@ -53,7 +53,7 @@ func GetUserID(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
-func Register(c *gin.Context) {
+func Create(c *gin.Context) {
 	var req RegisterRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -63,7 +63,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	user, err := RegisterUserService(req)
+	user, err := CreateUserService(req)
 	if err != nil {
 
 		if err.Error() == "role tidak ditemukan" ||

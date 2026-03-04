@@ -14,7 +14,7 @@ func GetUserServicesID(id string) (User, error) {
 	return GetId(id)
 }
 
-func RegisterUserService(req RegisterRequest) (*User, error) {
+func CreateUserService(req RegisterRequest) (*User, error) {
 
 	// cek role valid
 	roleExists, err := IsRoleExists(req.RoleID)
