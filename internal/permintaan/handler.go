@@ -9,6 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
+// GetPermintaan godoc
+// @Summary Ambil semua permintaan
+// @Description Mendapatkan daftar permintaan
+// @Tags Permintaan
+// @Produce json
+// @Success 200 {object} helpers.APIResponse{data=[]Permintaan}
+// @Failure 500 {object} helpers.APIResponse
+// @Router /permintaan [get]
 func GetPermintaan(c *gin.Context) {
 	result, err := GetPermintaanServices()
 
@@ -22,6 +30,16 @@ func GetPermintaan(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// GetPermintaanId godoc
+// @Summary Ambil permintaan berdasarkan ID
+// @Description Mendapatkan data permintaan berdasarkan UUID
+// @Tags Permintaan
+// @Produce json
+// @Param id path string true "Permitaan ID (UUID)"
+// @Success 200 {object} helpers.APIResponse{data=[]Permintaan}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /permintaan/{id} [get]
 func GetPermintaanId(c *gin.Context) {
 	id := c.Param("id")
 
@@ -48,6 +66,14 @@ func GetPermintaanId(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// GetPermintaanNama godoc
+// @Summary Ambil semua permintaan yang sudah tertampil nama
+// @Description Mendapatkan daftar permintaan yang sudah tertampil nama
+// @Tags Permintaan
+// @Produce json
+// @Success 200 {object} helpers.APIResponse{data=[]PermintaanByNama}
+// @Failure 500 {object} helpers.APIResponse
+// @Router /permintaan-nama [get]
 func GetPermintaanNama(c *gin.Context) {
 	result, err := GetPermintaanNamaServices()
 
@@ -61,6 +87,16 @@ func GetPermintaanNama(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// GetPermintaanNamaId godoc
+// @Summary Ambil permintaan yang sudah tertampil nama berdasarkan ID
+// @Description Mendapatkan data permintaan yang sudah tertampil nama berdasarkan UUID
+// @Tags Permintaan
+// @Produce json
+// @Param id path string true "Permitaan ID (UUID)"
+// @Success 200 {object} helpers.APIResponse{data=[]PermintaanByNama}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /permintaan-nama/{id} [get]
 func GetPermintaanNamaId(c *gin.Context) {
 	id := c.Param("id")
 
@@ -87,6 +123,16 @@ func GetPermintaanNamaId(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// CreatePermintaan godoc
+// @Summary Membuat permintaan baru
+// @Description Menambahkan data permintaan
+// @Tags Permintaan
+// @Accept json
+// @Produce json
+// @Param request body PermintaanRequest true "Data permintaan"
+// @Success 201 {object} helpers.APIResponse{data=Permintaan}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Router /permintaan [post]
 func CreatePermintaan(c *gin.Context) {
 	var req PermintaanRequest
 
@@ -107,6 +153,18 @@ func CreatePermintaan(c *gin.Context) {
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
+// UpdatePermintaan godoc
+// @Summary Update permintaan
+// @Description Mengupdate data permintaan
+// @Tags Permintaan
+// @Accept json
+// @Produce json
+// @Param id path string true "ID Permintaan"
+// @Param request body PermintaanRequest true "Data permintaan"
+// @Success 200 {object} helpers.APIResponse{data=Permintaan}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /permintaan/{id} [put]
 func UpdatePermintaan(c *gin.Context) {
 	id := c.Param("id")
 
@@ -143,6 +201,16 @@ func UpdatePermintaan(c *gin.Context) {
 		helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
+// DeletePermintaan godoc
+// @Summary Hapus permintaan
+// @Description Menghapus data permintaan berdasarkan ID
+// @Tags Permintaan
+// @Produce json
+// @Param id path string true "ID Permintaan"
+// @Success 200 {object} helpers.APIResponse
+// @Failure 400 {object} helpers.APIResponse
+// @Failure 404 {object} helpers.APIResponse
+// @Router /permintaan/{id} [delete]
 func DeletePermintaan(c *gin.Context) {
 	id := c.Param("id")
 

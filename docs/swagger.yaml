@@ -30,6 +30,106 @@ definitions:
       updated_at:
         type: string
     type: object
+  master_pemda.MasterPemda:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  master_pemda.MasterPemdaRequest:
+    properties:
+      name:
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  permintaan.Permintaan:
+    properties:
+      aplikasi_id:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: string
+      kondisi_awal:
+        type: string
+      kondisi_diharapkan:
+        type: string
+      menu:
+        type: string
+      pemda_id:
+        type: string
+      tanggal_deadline:
+        type: string
+      tanggal_pesanan:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  permintaan.PermintaanByNama:
+    properties:
+      aplikasi:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      kondisi_awal:
+        type: string
+      kondisi_diharapkan:
+        type: string
+      menu:
+        type: string
+      pembuat:
+        type: string
+      pemda:
+        type: string
+      tanggal_deadline:
+        type: string
+      tanggal_pesanan:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  permintaan.PermintaanRequest:
+    properties:
+      aplikasi_id:
+        type: string
+      created_by:
+        type: string
+      kondisi_awal:
+        minLength: 3
+        type: string
+      kondisi_diharapkan:
+        minLength: 3
+        type: string
+      menu:
+        minLength: 3
+        type: string
+      pemda_id:
+        type: string
+      tanggal_deadline:
+        type: string
+      tanggal_pesanan:
+        type: string
+    required:
+    - aplikasi_id
+    - created_by
+    - kondisi_awal
+    - kondisi_diharapkan
+    - menu
+    - pemda_id
+    - tanggal_deadline
+    - tanggal_pesanan
+    type: object
   roles.Roles:
     properties:
       created_at:
@@ -79,7 +179,7 @@ paths:
       - application/json
       description: Menambahkan data master aplikasi
       parameters:
-      - description: Data aplikasi
+      - description: Data master aplikasi
         in: body
         name: request
         required: true
@@ -108,14 +208,14 @@ paths:
                     type: string
                   type: array
               type: object
-      summary: Membuat aplikasi baru
+      summary: Membuat master aplikasi baru
       tags:
       - Master Aplikasi
   /master-aplikasi/{id}:
     delete:
       description: Menghapus data master aplikasi berdasarkan ID
       parameters:
-      - description: ID Aplikasi
+      - description: ID Master Aplikasi
         in: path
         name: id
         required: true
@@ -135,7 +235,7 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/helpers.APIResponse'
-      summary: Hapus aplikasi
+      summary: Hapus master aplikasi
       tags:
       - Master Aplikasi
     get:
@@ -190,17 +290,124 @@ paths:
       - application/json
       description: Mengupdate data master aplikasi
       parameters:
-      - description: ID Aplikasi
+      - description: ID Master Aplikasi
         in: path
         name: id
         required: true
         type: string
-      - description: Data aplikasi
+      - description: Data master aplikasi
         in: body
         name: request
         required: true
         schema:
           $ref: '#/definitions/master_aplikasi.CreateMasterAplikasiRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/master_aplikasi.MasterAplikasi'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Update master aplikasi
+      tags:
+      - Master Aplikasi
+  /master-pemda:
+    get:
+      description: Mendapatkan daftar master pemda
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/master_pemda.MasterPemda'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua master pemda
+      tags:
+      - Master Pemda
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data master pemda
+      parameters:
+      - description: Data master pemda
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/master_pemda.MasterPemdaRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/master_pemda.MasterPemda'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Membuat master pemda baru
+      tags:
+      - Master Pemda
+  /master-pemda/{id}:
+    delete:
+      description: Menghapus data master pemda berdasarkan ID
+      parameters:
+      - description: ID Master Pemda
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -216,9 +423,370 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/helpers.APIResponse'
-      summary: Update aplikasi
+      summary: Hapus master pemda
       tags:
-      - Master Aplikasi
+      - Master Pemda
+    get:
+      description: Mendapatkan data master pemda berdasarkan UUID
+      parameters:
+      - description: Master Pemda ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/master_pemda.MasterPemda'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil master pemda berdasarkan ID
+      tags:
+      - Master Pemda
+    put:
+      consumes:
+      - application/json
+      description: Mengupdate data master pemda
+      parameters:
+      - description: ID Master Pemda
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data master pemda
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/master_pemda.MasterPemdaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/master_pemda.MasterPemda'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Update master pemda
+      tags:
+      - Master Pemda
+  /permintaan:
+    get:
+      description: Mendapatkan daftar permintaan
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/permintaan.Permintaan'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua permintaan
+      tags:
+      - Permintaan
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data permintaan
+      parameters:
+      - description: Data permintaan
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/permintaan.PermintaanRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/permintaan.Permintaan'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Membuat permintaan baru
+      tags:
+      - Permintaan
+  /permintaan-nama:
+    get:
+      description: Mendapatkan daftar permintaan yang sudah tertampil nama
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/permintaan.PermintaanByNama'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua permintaan yang sudah tertampil nama
+      tags:
+      - Permintaan
+  /permintaan-nama/{id}:
+    get:
+      description: Mendapatkan data permintaan yang sudah tertampil nama berdasarkan
+        UUID
+      parameters:
+      - description: Permitaan ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/permintaan.PermintaanByNama'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil permintaan yang sudah tertampil nama berdasarkan ID
+      tags:
+      - Permintaan
+  /permintaan/{id}:
+    delete:
+      description: Menghapus data permintaan berdasarkan ID
+      parameters:
+      - description: ID Permintaan
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Hapus permintaan
+      tags:
+      - Permintaan
+    get:
+      description: Mendapatkan data permintaan berdasarkan UUID
+      parameters:
+      - description: Permitaan ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/permintaan.Permintaan'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil permintaan berdasarkan ID
+      tags:
+      - Permintaan
+    put:
+      consumes:
+      - application/json
+      description: Mengupdate data permintaan
+      parameters:
+      - description: ID Permintaan
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data permintaan
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/permintaan.PermintaanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/permintaan.Permintaan'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Update permintaan
+      tags:
+      - Permintaan
   /roles:
     get:
       description: Mendapatkan daftar role
