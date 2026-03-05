@@ -95,6 +95,44 @@ definitions:
     required:
     - name
     type: object
+  pelaksana.Pelaksana:
+    properties:
+      created_at:
+        type: string
+      distribusi_id:
+        type: string
+      id:
+        type: string
+      programmer_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  pelaksana.PelaksanaNama:
+    properties:
+      aplikasi:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      pemda:
+        type: string
+      programmer:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  pelaksana.PelaksanaRequest:
+    properties:
+      distribusi_id:
+        type: string
+      programmer_id:
+        type: string
+    required:
+    - distribusi_id
+    - programmer_id
+    type: object
   permintaan.Permintaan:
     properties:
       aplikasi_id:
@@ -197,6 +235,29 @@ info:
   version: "1.0"
 paths:
   /distribusi:
+    get:
+      description: Mendapatkan daftar distribusi
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/distribusi.Distribusi'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua Distribusi
+      tags:
+      - Distribusi
     post:
       consumes:
       - application/json
@@ -810,6 +871,267 @@ paths:
       summary: Update master pemda
       tags:
       - Master Pemda
+  /pelaksana:
+    get:
+      description: Mendapatkan daftar pelaksana
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/pelaksana.Pelaksana'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua Pelaksana
+      tags:
+      - Pelaksana
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data pelaksana
+      parameters:
+      - description: Data pelaksana
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pelaksana.PelaksanaRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/pelaksana.Pelaksana'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Membuat pelaksana baru
+      tags:
+      - Pelaksana
+  /pelaksana-nama:
+    get:
+      description: Mendapatkan daftar pelaksana yang sudah tertampil nama
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/pelaksana.PelaksanaNama'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua pelaksana yang sudah tertampil nama
+      tags:
+      - Pelaksana
+  /pelaksana-nama/{id}:
+    get:
+      description: Mendapatkan data pelaksana yang sudah tertampil nama berdasarkan
+        UUID
+      parameters:
+      - description: Pelaksana ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/pelaksana.PelaksanaNama'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil pelaksana yang sudah tertampil nama berdasarkan ID
+      tags:
+      - Pelaksana
+  /pelaksana/{id}:
+    delete:
+      description: Menghapus data pelaksana berdasarkan ID
+      parameters:
+      - description: ID Pelaksana
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Hapus pelaksana
+      tags:
+      - Pelaksana
+    get:
+      description: Mendapatkan data pelaksana berdasarkan UUID
+      parameters:
+      - description: Pelaksana ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/pelaksana.Pelaksana'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil pelaksana berdasarkan ID
+      tags:
+      - Pelaksana
+    put:
+      consumes:
+      - application/json
+      description: Mengupdate data pelaksana
+      parameters:
+      - description: ID Pelaksana
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data pelaksana
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pelaksana.PelaksanaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/pelaksana.Pelaksana'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Update pelaksana
+      tags:
+      - Pelaksana
   /permintaan:
     get:
       description: Mendapatkan daftar permintaan

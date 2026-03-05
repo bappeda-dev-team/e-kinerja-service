@@ -9,6 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
+// GetPelaksana godoc
+// @Summary Ambil semua Pelaksana
+// @Description Mendapatkan daftar pelaksana
+// @Tags Pelaksana
+// @Produce json
+// @Success 200 {object} helpers.APIResponse{data=[]Pelaksana}
+// @Failure 500 {object} helpers.APIResponse
+// @Router /pelaksana [get]
 func GetPelaksana(c *gin.Context) {
 	result, err := GetPelaksanaServices()
 
@@ -22,6 +30,16 @@ func GetPelaksana(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// GetPelaksanaID godoc
+// @Summary Ambil pelaksana berdasarkan ID
+// @Description Mendapatkan data pelaksana berdasarkan UUID
+// @Tags Pelaksana
+// @Produce json
+// @Param id path string true "Pelaksana ID (UUID)"
+// @Success 200 {object} helpers.APIResponse{data=[]Pelaksana}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /pelaksana/{id} [get]
 func GetPelaksanaID(c *gin.Context) {
 	id := c.Param("id")
 
@@ -48,6 +66,15 @@ func GetPelaksanaID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
+
+// GetPelaksanaByNama godoc
+// @Summary Ambil semua pelaksana yang sudah tertampil nama
+// @Description Mendapatkan daftar pelaksana yang sudah tertampil nama
+// @Tags Pelaksana
+// @Produce json
+// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaNama}
+// @Failure 500 {object} helpers.APIResponse
+// @Router /pelaksana-nama [get]
 func GetPelaksanaByNama(c *gin.Context) {
 	result, err := GetPelaksanaNamaServices()
 
@@ -61,6 +88,16 @@ func GetPelaksanaByNama(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// GetPelaksanaByNamaID godoc
+// @Summary Ambil pelaksana yang sudah tertampil nama berdasarkan ID
+// @Description Mendapatkan data pelaksana yang sudah tertampil nama berdasarkan UUID
+// @Tags Pelaksana
+// @Produce json
+// @Param id path string true "Pelaksana ID (UUID)"
+// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaNama}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /pelaksana-nama/{id} [get]
 func GetPelaksanaByNamaID(c *gin.Context) {
 	id := c.Param("id")
 
@@ -88,6 +125,16 @@ func GetPelaksanaByNamaID(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// CreatePelaksana godoc
+// @Summary Membuat pelaksana baru
+// @Description Menambahkan data pelaksana
+// @Tags Pelaksana
+// @Accept json
+// @Produce json
+// @Param request body PelaksanaRequest true "Data pelaksana"
+// @Success 201 {object} helpers.APIResponse{data=Pelaksana}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Router /pelaksana [post]
 func CreatePelaksana(c *gin.Context) {
 	var req PelaksanaRequest
 
@@ -108,6 +155,18 @@ func CreatePelaksana(c *gin.Context) {
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
+// UpdatePelaksana godoc
+// @Summary Update pelaksana
+// @Description Mengupdate data pelaksana
+// @Tags Pelaksana
+// @Accept json
+// @Produce json
+// @Param id path string true "ID Pelaksana"
+// @Param request body PelaksanaRequest true "Data pelaksana"
+// @Success 200 {object} helpers.APIResponse{data=Pelaksana}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /pelaksana/{id} [put]
 func UpdatePelaksana(c *gin.Context) {
 	id := c.Param("id")
 
@@ -144,6 +203,16 @@ func UpdatePelaksana(c *gin.Context) {
 		helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
+// DeletePelaksana godoc
+// @Summary Hapus pelaksana
+// @Description Menghapus data pelaksana berdasarkan ID
+// @Tags Pelaksana
+// @Produce json
+// @Param id path string true "ID Pelaksana"
+// @Success 200 {object} helpers.APIResponse
+// @Failure 400 {object} helpers.APIResponse
+// @Failure 404 {object} helpers.APIResponse
+// @Router /pelaksana/{id} [delete]
 func DeletePelaksana(c *gin.Context) {
 	id := c.Param("id")
 

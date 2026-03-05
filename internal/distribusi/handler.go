@@ -11,12 +11,12 @@ import (
 
 // GetDistribusi godoc
 // @Summary Ambil semua Distribusi
-// @Description Mendapatkan daftar dsitribusi
-// @Tags Dsitribusi
+// @Description Mendapatkan daftar distribusi
+// @Tags Distribusi
 // @Produce json
 // @Success 200 {object} helpers.APIResponse{data=[]Distribusi}
 // @Failure 500 {object} helpers.APIResponse
-// @Router /permintaan [get]
+// @Router /distribusi [get]
 func GetDistribusi(c *gin.Context) {
 	result, err := GetDistribusiServices()
 
