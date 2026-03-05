@@ -57,6 +57,35 @@ definitions:
       success:
         type: boolean
     type: object
+  laporan.Laporan:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      laporan_progress:
+        type: string
+      permintaan_id:
+        type: string
+      programmer_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  laporan.LaporanRequest:
+    properties:
+      laporan_progress:
+        minLength: 3
+        type: string
+      permintaan_id:
+        type: string
+      programmer_id:
+        type: string
+    required:
+    - laporan_progress
+    - permintaan_id
+    - programmer_id
+    type: object
   master_aplikasi.CreateMasterAplikasiRequest:
     properties:
       name:
@@ -495,6 +524,194 @@ paths:
       summary: Update distribusi
       tags:
       - Distribusi
+  /laporan:
+    get:
+      description: Mendapatkan daftar laporan
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/laporan.Laporan'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua Laporan
+      tags:
+      - Laporan
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data laporan
+      parameters:
+      - description: Data Laporan
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/laporan.LaporanRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/laporan.Laporan'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Membuat laporan baru
+      tags:
+      - Laporan
+  /laporan/{id}:
+    delete:
+      description: Menghapus data laporan berdasarkan ID
+      parameters:
+      - description: ID Laporan
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Hapus laporan
+      tags:
+      - Laporan
+    get:
+      description: Mendapatkan data laporan berdasarkan UUID
+      parameters:
+      - description: Laporan ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/laporan.Laporan'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil laporan berdasarkan ID
+      tags:
+      - Laporan
+    put:
+      consumes:
+      - application/json
+      description: Mengupdate data laporan
+      parameters:
+      - description: ID Laporan
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data laporan
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/laporan.LaporanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/laporan.Laporan'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Update laporan
+      tags:
+      - Laporan
   /master-aplikasi:
     get:
       description: Mendapatkan daftar master aplikasi
