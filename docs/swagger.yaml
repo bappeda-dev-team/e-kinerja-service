@@ -256,6 +256,38 @@ definitions:
       updated_at:
         type: string
     type: object
+  verifikasi.Verifikasi:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      komentar:
+        type: string
+      laporan_id:
+        type: string
+      status_verified:
+        type: string
+      updated_at:
+        type: string
+      verifikator_id:
+        type: string
+    type: object
+  verifikasi.VerifikasiRequest:
+    properties:
+      komentar:
+        type: string
+      laporan_id:
+        type: string
+      status_verified:
+        type: string
+      verifikator_id:
+        type: string
+    required:
+    - laporan_id
+    - status_verified
+    - verifikator_id
+    type: object
 host: localhost:8082
 info:
   contact: {}
@@ -1682,4 +1714,193 @@ paths:
       summary: Ambil role berdasarkan ID
       tags:
       - Roles
+  /verifikasi:
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data verifikasi
+      parameters:
+      - description: Data Verifikasi
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/verifikasi.VerifikasiRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/verifikasi.Verifikasi'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Membuat verifikasi baru
+      tags:
+      - Verifikasi
+  /verifikasi/{id}:
+    delete:
+      description: Menghapus data verifikasi berdasarkan ID
+      parameters:
+      - description: ID Verifikasi
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Hapus verifikasi
+      tags:
+      - Verifikasi
+    get:
+      description: Mendapatkan data verifikasi berdasarkan UUID
+      parameters:
+      - description: Verifikasi ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/verifikasi.Verifikasi'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil verifkasi berdasarkan ID
+      tags:
+      - Verifikasi
+    put:
+      consumes:
+      - application/json
+      description: Mengupdate data verifikasi
+      parameters:
+      - description: ID Verifikasi
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data verifikasi
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/verifikasi.VerifikasiRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/verifikasi.Verifikasi'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Update verifikasi
+      tags:
+      - Verifikasi
+  /verifkasi:
+    get:
+      description: Mendapatkan daftar verifikasi
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/verifikasi.Verifikasi'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua Verifikasi
+      tags:
+      - Verifikasi
 swagger: "2.0"
