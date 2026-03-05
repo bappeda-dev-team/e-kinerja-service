@@ -34,6 +34,8 @@ func main() {
 
 	// Panggil semua seeder di sini
 	SeedRoles(db)
+	SeedMasterAplikasi(db)
+	SeedMasterPemda(db)
 
 	log.Println("✅ Semua seeder berhasil dijalankan")
 }
