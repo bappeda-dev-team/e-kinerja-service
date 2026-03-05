@@ -24,5 +24,5 @@ type DistribusiByNama struct {
 type DistribusiRequest struct {
 	PermintaanID 	  string 	`json:"permintaan_id" binding:"required"`
 	AdminID 		  string 	`json:"admin_id" binding:"required"`
-	Komentar 		  string 	`json:"komentar" binding:"required,min=3"`
+	Komentar 		  string 	`json:"komentar"`
 }

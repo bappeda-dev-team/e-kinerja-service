@@ -147,6 +147,13 @@ func CreatePelaksana(c *gin.Context) {
 
 	result, err := CreatePelaksanaServices(req)
 	if err != nil {
+		if err.Error() == "programmer sudah ditugaskan di distribusi ini"||
+			err.Error() == "programmer sudah ditugaskan di distribusi ini" {
+
+			c.JSON(http.StatusBadRequest,
+				helpers.ErrorResponse(400, err.Error(), nil))
+			return
+		}
 		c.Error(err)
 		return
 	}

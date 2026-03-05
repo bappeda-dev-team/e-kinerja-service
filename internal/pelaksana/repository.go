@@ -84,6 +84,20 @@ func GetByNamaId(id string) (PelaksanaNama, error){
 	return data, err
 }
 
+func IsDistribusiIdExists(distribusi_id string) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS (SELECT 1 FROM distribusi_pelaksana WHERE distribusi_id = $1)`
+	err := config.DB.QueryRow(query, distribusi_id).Scan(&exists)
+	return exists, err
+}
+
+func IsProgrammerIdExists(programmer_id string) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS (SELECT 1 FROM distribusi_pelaksana WHERE programmer_id = $1)`
+	err := config.DB.QueryRow(query, programmer_id).Scan(&exists)
+	return exists, err
+}
+
 func Create(data *Pelaksana) error {
 	query := `
 		INSERT INTO distribusi_pelaksana (distribusi_id, programmer_id)

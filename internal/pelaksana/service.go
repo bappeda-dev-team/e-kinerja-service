@@ -1,5 +1,7 @@
 package pelaksana
 
+import "errors"
+
 func GetPelaksanaServices() ([]Pelaksana, error) {
 	return GetAll()
 }
@@ -17,12 +19,28 @@ func GetPelaksanaNamaServicesID(id string) (PelaksanaNama, error) {
 
 func CreatePelaksanaServices(req PelaksanaRequest) (*Pelaksana, error) {
 
+	distribusiidExists, err := IsDistribusiIdExists(req.DistribusiID)
+	if err != nil {
+		return nil, err
+	}
+	if distribusiidExists {
+		return nil, errors.New("programmer sudah ditugaskan di distribusi ini")
+	}
+
+	programmeridExists, err := IsProgrammerIdExists(req.ProgrammerID)
+	if err != nil {
+		return nil, err
+	}
+	if programmeridExists {
+		return nil, errors.New("programmer sudah ditugaskan di distribusi ini")
+	}
+
 	data := &Pelaksana{
 		DistribusiID: req.DistribusiID,
 		ProgrammerID: req.ProgrammerID,
 	}
 
-	err := Create(data)
+	err = Create(data)
 	if err != nil {
 		return nil, err
 	}
