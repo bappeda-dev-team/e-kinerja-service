@@ -102,11 +102,11 @@ func CreateAplikasi(c *gin.Context) {
 // @Tags Master Aplikasi
 // @Accept json
 // @Produce json
-// @Param id path string true "ID Aplikasi"
+// @Param id path string true "ID Master Aplikasi"
 // @Param request body CreateMasterAplikasiRequest true "Data master aplikasi"
-// @Success 200 {object} helpers.APIResponse
-// @Failure 400 {object} helpers.APIResponse
-// @Failure 404 {object} helpers.APIResponse
+// @Success 200 {object} helpers.APIResponse{data=MasterAplikasi}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /master-aplikasi/{id} [put]
 func UpdateAplikasi(c *gin.Context) {
 	id := c.Param("id")

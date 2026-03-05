@@ -9,6 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
+// GetPemda godoc
+// @Summary Ambil semua master pemda
+// @Description Mendapatkan daftar master pemda
+// @Tags Master Pemda
+// @Produce json
+// @Success 200 {object} helpers.APIResponse{data=[]MasterPemda}
+// @Failure 500 {object} helpers.APIResponse
+// @Router /master-pemda [get]
 func GetPemda(c *gin.Context) {
 	result, err := GetMasterPemdaServices()
 
@@ -22,6 +30,16 @@ func GetPemda(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// GetPemdaID godoc
+// @Summary Ambil master pemda berdasarkan ID
+// @Description Mendapatkan data master pemda berdasarkan UUID
+// @Tags Master Pemda
+// @Produce json
+// @Param id path string true "Master Pemda ID (UUID)"
+// @Success 200 {object} helpers.APIResponse{data=[]MasterPemda}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /master-pemda/{id} [get]
 func GetPemdaID(c *gin.Context) {
 	id := c.Param("id")
 
@@ -49,6 +67,16 @@ func GetPemdaID(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))	
 }
 
+// CreatePemda godoc
+// @Summary Membuat master pemda baru
+// @Description Menambahkan data master pemda
+// @Tags Master Pemda
+// @Accept json
+// @Produce json
+// @Param request body MasterPemdaRequest true "Data master pemda"
+// @Success 201 {object} helpers.APIResponse{data=MasterPemda}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Router /master-pemda [post]
 func CreatePemda(c *gin.Context) {
 	var req MasterPemdaRequest
 
@@ -69,6 +97,18 @@ func CreatePemda(c *gin.Context) {
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
+// UpdatePemda godoc
+// @Summary Update master pemda
+// @Description Mengupdate data master pemda
+// @Tags Master Pemda
+// @Accept json
+// @Produce json
+// @Param id path string true "ID Master Pemda"
+// @Param request body MasterPemdaRequest true "Data master pemda"
+// @Success 200 {object} helpers.APIResponse{data=MasterPemda}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /master-pemda/{id} [put]
 func UpdatePemda(c *gin.Context) {
 	id := c.Param("id")
 
@@ -105,6 +145,16 @@ func UpdatePemda(c *gin.Context) {
 		helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
+// DeletePemda godoc
+// @Summary Hapus master pemda
+// @Description Menghapus data master pemda berdasarkan ID
+// @Tags Master Pemda
+// @Produce json
+// @Param id path string true "ID Master Pemda"
+// @Success 200 {object} helpers.APIResponse
+// @Failure 400 {object} helpers.APIResponse
+// @Failure 404 {object} helpers.APIResponse
+// @Router /master-pemda/{id} [delete]
 func DeletePemda(c *gin.Context) {
 	id := c.Param("id")
 
