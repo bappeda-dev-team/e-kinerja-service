@@ -1,5 +1,51 @@
 basePath: /
 definitions:
+  distribusi.Distribusi:
+    properties:
+      admin_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      komentar:
+        type: string
+      permintaan_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  distribusi.DistribusiByNama:
+    properties:
+      admin:
+        type: string
+      aplikasi:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      komentar:
+        type: string
+      pemda:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  distribusi.DistribusiRequest:
+    properties:
+      admin_id:
+        type: string
+      komentar:
+        minLength: 3
+        type: string
+      permintaan_id:
+        type: string
+    required:
+    - admin_id
+    - komentar
+    - permintaan_id
+    type: object
   helpers.APIResponse:
     properties:
       code:
@@ -150,6 +196,244 @@ info:
   title: Aplikasi Internal API
   version: "1.0"
 paths:
+  /distribusi:
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data distribusi
+      parameters:
+      - description: Data distribusi
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/distribusi.DistribusiRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/distribusi.Distribusi'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Membuat distribusi baru
+      tags:
+      - Distribusi
+  /distribusi-nama:
+    get:
+      description: Mendapatkan daftar distribusi yang sudah tertampil nama
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/distribusi.DistribusiByNama'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua distribusi yang sudah tertampil nama
+      tags:
+      - Distribusi
+  /distribusi-nama/{id}:
+    get:
+      description: Mendapatkan data distribusi yang sudah tertampil nama berdasarkan
+        UUID
+      parameters:
+      - description: Distribusi ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/distribusi.DistribusiByNama'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil distribusi yang sudah tertampil nama berdasarkan ID
+      tags:
+      - Distribusi
+  /distribusi/{id}:
+    delete:
+      description: Menghapus data distribusi berdasarkan ID
+      parameters:
+      - description: ID Distribusi
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Hapus distribusi
+      tags:
+      - Distribusi
+    get:
+      description: Mendapatkan data distribusi berdasarkan UUID
+      parameters:
+      - description: Distribusi ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/distribusi.Distribusi'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil distribusi berdasarkan ID
+      tags:
+      - Distribusi
+    put:
+      consumes:
+      - application/json
+      description: Mengupdate data distribusi
+      parameters:
+      - description: ID Distribusi
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data distribusi
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/distribusi.DistribusiRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/distribusi.Distribusi'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Update distribusi
+      tags:
+      - Distribusi
   /master-aplikasi:
     get:
       description: Mendapatkan daftar master aplikasi
