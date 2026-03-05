@@ -9,6 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
+// GetAplikasi godoc
+// @Summary Ambil semua master aplikasi
+// @Description Mendapatkan daftar master aplikasi
+// @Tags Master Aplikasi
+// @Produce json
+// @Success 200 {object} helpers.APIResponse{data=[]MasterAplikasi}
+// @Failure 500 {object} helpers.APIResponse
+// @Router /master-aplikasi [get]
 func GetAplikasi(c *gin.Context) {
 	result, err := GetMasterAplikasiServices()
 
@@ -22,6 +30,16 @@ func GetAplikasi(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// GetAplikasiID godoc
+// @Summary Ambil master aplikasi berdasarkan ID
+// @Description Mendapatkan data master aplikasi berdasarkan UUID
+// @Tags Master Aplikasi
+// @Produce json
+// @Param id path string true "Master Aplikasi ID (UUID)"
+// @Success 200 {object} helpers.APIResponse{data=[]MasterAplikasi}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /master-aplikasi/{id} [get]
 func GetAplikasiID(c *gin.Context) {
 	id := c.Param("id")
 
@@ -48,6 +66,16 @@ func GetAplikasiID(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+// CreateAplikasi godoc
+// @Summary Membuat master aplikasi baru
+// @Description Menambahkan data master aplikasi
+// @Tags Master Aplikasi
+// @Accept json
+// @Produce json
+// @Param request body CreateMasterAplikasiRequest true "Data master aplikasi"
+// @Success 201 {object} helpers.APIResponse{data=MasterAplikasi}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Router /master-aplikasi [post]
 func CreateAplikasi(c *gin.Context) {
 	var req CreateMasterAplikasiRequest
 
@@ -68,6 +96,18 @@ func CreateAplikasi(c *gin.Context) {
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
+// UpdateAplikasi godoc
+// @Summary Update master aplikasi
+// @Description Mengupdate data master aplikasi
+// @Tags Master Aplikasi
+// @Accept json
+// @Produce json
+// @Param id path string true "ID Aplikasi"
+// @Param request body CreateMasterAplikasiRequest true "Data master aplikasi"
+// @Success 200 {object} helpers.APIResponse
+// @Failure 400 {object} helpers.APIResponse
+// @Failure 404 {object} helpers.APIResponse
+// @Router /master-aplikasi/{id} [put]
 func UpdateAplikasi(c *gin.Context) {
 	id := c.Param("id")
 
@@ -104,6 +144,16 @@ func UpdateAplikasi(c *gin.Context) {
 		helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
+// DeleteAplikasi godoc
+// @Summary Hapus master aplikasi
+// @Description Menghapus data master aplikasi berdasarkan ID
+// @Tags Master Aplikasi
+// @Produce json
+// @Param id path string true "ID Master Aplikasi"
+// @Success 200 {object} helpers.APIResponse
+// @Failure 400 {object} helpers.APIResponse
+// @Failure 404 {object} helpers.APIResponse
+// @Router /master-aplikasi/{id} [delete]
 func DeleteAplikasi(c *gin.Context) {
 	id := c.Param("id")
 

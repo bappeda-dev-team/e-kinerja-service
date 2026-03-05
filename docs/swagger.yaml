@@ -1,0 +1,294 @@
+basePath: /
+definitions:
+  helpers.APIResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      errors: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  master_aplikasi.CreateMasterAplikasiRequest:
+    properties:
+      name:
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  master_aplikasi.MasterAplikasi:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  roles.Roles:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8082
+info:
+  contact: {}
+  description: API untuk aplikasi internal
+  title: Aplikasi Internal API
+  version: "1.0"
+paths:
+  /master-aplikasi:
+    get:
+      description: Mendapatkan daftar master aplikasi
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/master_aplikasi.MasterAplikasi'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua master aplikasi
+      tags:
+      - Master Aplikasi
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data master aplikasi
+      parameters:
+      - description: Data aplikasi
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/master_aplikasi.CreateMasterAplikasiRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/master_aplikasi.MasterAplikasi'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Membuat aplikasi baru
+      tags:
+      - Master Aplikasi
+  /master-aplikasi/{id}:
+    delete:
+      description: Menghapus data master aplikasi berdasarkan ID
+      parameters:
+      - description: ID Aplikasi
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Hapus aplikasi
+      tags:
+      - Master Aplikasi
+    get:
+      description: Mendapatkan data master aplikasi berdasarkan UUID
+      parameters:
+      - description: Master Aplikasi ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/master_aplikasi.MasterAplikasi'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil master aplikasi berdasarkan ID
+      tags:
+      - Master Aplikasi
+    put:
+      consumes:
+      - application/json
+      description: Mengupdate data master aplikasi
+      parameters:
+      - description: ID Aplikasi
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data aplikasi
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/master_aplikasi.CreateMasterAplikasiRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Update aplikasi
+      tags:
+      - Master Aplikasi
+  /roles:
+    get:
+      description: Mendapatkan daftar role
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/roles.Roles'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua role
+      tags:
+      - Roles
+  /roles/{id}:
+    get:
+      description: Mendapatkan data role berdasarkan UUID
+      parameters:
+      - description: Role ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/roles.Roles'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                errors:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Ambil role berdasarkan ID
+      tags:
+      - Roles
+swagger: "2.0"

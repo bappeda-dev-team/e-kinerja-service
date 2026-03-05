@@ -13,9 +13,16 @@ import (
 	"aplikasi-internal/internal/verifikasi"
 
 	"github.com/gin-gonic/gin"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "aplikasi-internal/docs"
 )
 
 func SetupRoutes(r *gin.Engine) {
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.Use(middleware.ErrorHandler())
 

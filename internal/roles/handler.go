@@ -9,6 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
+// GetRoles godoc
+// @Summary Ambil semua role
+// @Description Mendapatkan daftar role
+// @Tags Roles
+// @Produce json
+// @Success 200 {object} helpers.APIResponse{data=[]Roles}
+// @Failure 500 {object} helpers.APIResponse
+// @Router /roles [get]
 func GetRoles(c *gin.Context) {
 	result, err := GetRolesServices()
 
@@ -23,6 +31,16 @@ func GetRoles(c *gin.Context) {
 
 }
 
+// GetRoleID godoc
+// @Summary Ambil role berdasarkan ID
+// @Description Mendapatkan data role berdasarkan UUID
+// @Tags Roles
+// @Produce json
+// @Param id path string true "Role ID (UUID)"
+// @Success 200 {object} helpers.APIResponse{data=[]Roles}
+// @Failure 400 {object} helpers.APIResponse{errors=[]string}
+// @Failure 404 {object} helpers.APIResponse{errors=[]string}
+// @Router /roles/{id} [get]
 func GetRoleID(c *gin.Context) {
 	id := c.Param("id")
 
