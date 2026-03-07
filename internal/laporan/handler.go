@@ -1,6 +1,7 @@
 package laporan
 
 import (
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
 	"net/http"
@@ -17,12 +18,12 @@ import (
 // @Success 200 {object} helpers.APIResponse{data=[]Laporan}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /laporan [get]
-func GetLaporan(c echo.Context) error  {
+func GetLaporan(c echo.Context) error {
 	result, err := GetLaporanServices()
 
 	if err != nil {
-        return err
-    }
+		return err
+	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
@@ -41,8 +42,7 @@ func GetLaporanID(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	result, err := GetLaporanServicesID(id)
@@ -75,9 +75,7 @@ func CreateLaporan(c echo.Context) error {
 	var req LaporanRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest, 
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+		return exception.BadRequest("Validasi gagal")
 	}
 
 	result, err := CreateLaporanServices(req)
@@ -85,7 +83,7 @@ func CreateLaporan(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated,
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -105,25 +103,20 @@ func UpdateLaporan(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	var req LaporanRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+		return exception.BadRequest("Validasi gagal")
 	}
 
 	result, err := UpdateLaporanServices(id, req)
 	if err != nil {
-
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err
@@ -148,16 +141,13 @@ func DeleteLaporan(c echo.Context) error {
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	err := DeleteLaporanServices(id)
 	if err != nil {
-
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err

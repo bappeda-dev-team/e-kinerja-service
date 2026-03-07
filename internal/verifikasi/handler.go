@@ -1,6 +1,7 @@
 package verifikasi
 
 import (
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
 	"net/http"
@@ -21,8 +22,8 @@ func GetVerifikasi(c echo.Context) error {
 	result, err := GetVerifikasiServices()
 
 	if err != nil {
-        return err
-    }
+		return err
+	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
@@ -41,18 +42,15 @@ func GetVerifikasiID(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	result, err := GetVerifikasiServicesID(id)
 
 	if err != nil {
-
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err
@@ -75,9 +73,7 @@ func CreateVerifikasi(c echo.Context) error {
 	var req VerifikasiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest, 
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+		return exception.BadRequest("Validasi gagal")
 	}
 
 	result, err := CreateVerifikasiServices(req)
@@ -85,7 +81,7 @@ func CreateVerifikasi(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated,
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -105,25 +101,20 @@ func UpdateVerifikasi(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	var req VerifikasiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+		return exception.BadRequest("Validasi gagal")
 	}
 
 	result, err := UpdateVerifikasiServices(id, req)
 	if err != nil {
-
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err
@@ -148,16 +139,13 @@ func DeleteVerifikasi(c echo.Context) error {
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	err := DeleteVerifikasiServices(id)
 	if err != nil {
-
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err
