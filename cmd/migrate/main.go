@@ -13,10 +13,7 @@ import (
 
 func main() {
 	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Gagal load .env")
-	}
-	
+
 	if len(os.Args) < 2 {
 		log.Fatal("Gunakan: go run cmd/migrate/main.go [up|down]")
 	}
