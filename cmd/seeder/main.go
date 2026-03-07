@@ -12,9 +12,6 @@ import (
 
 func main() {
 	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Gagal load .env")
-	}
 
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
@@ -39,8 +36,3 @@ func main() {
 
 	log.Println("✅ Semua seeder berhasil dijalankan")
 }
-
-
-
-
-

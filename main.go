@@ -4,7 +4,6 @@ import (
 	"aplikasi-internal/config"
 	"aplikasi-internal/internal/helpers"
 	"aplikasi-internal/routes"
-	"log"
 	"os"
 
 	"github.com/go-playground/validator/v10"
@@ -19,13 +18,9 @@ import (
 // @host localhost:8082
 // @BasePath /
 
-
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Gagal load .env")
-	}
-	
+	godotenv.Load()
+
 	config.ConnectDB()
 
 	e := echo.New()
@@ -49,7 +44,7 @@ func main() {
 			echo.HeaderAuthorization,
 		},
 	}))
-	
+
 	routes.SetupRoutes(e)
 
 	e.Logger.Fatal(e.Start(":" + os.Getenv("APP_PORT")))
