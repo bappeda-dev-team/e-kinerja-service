@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 // GetAplikasi godoc
@@ -17,17 +17,14 @@ import (
 // @Success 200 {object} helpers.APIResponse{data=[]MasterAplikasi}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /master-aplikasi [get]
-func GetAplikasi(c *gin.Context) {
+func GetAplikasi(c echo.Context) error {
 	result, err := GetMasterAplikasiServices()
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
-    }
+        return err
+	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetAplikasiID godoc
@@ -40,13 +37,12 @@ func GetAplikasi(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /master-aplikasi/{id} [get]
-func GetAplikasiID(c *gin.Context) {
+func GetAplikasiID(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	result, err := GetMasterAplikasiServicesID(id)
@@ -54,16 +50,14 @@ func GetAplikasiID(c *gin.Context) {
 	if err != nil {
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // CreateAplikasi godoc
@@ -76,23 +70,21 @@ func GetAplikasiID(c *gin.Context) {
 // @Success 201 {object} helpers.APIResponse{data=MasterAplikasi}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /master-aplikasi [post]
-func CreateAplikasi(c *gin.Context) {
+func CreateAplikasi(c echo.Context) error {
 	var req CreateMasterAplikasiRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, 
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest, 
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := CreateMasterAplikasiServices(req)
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated, 
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -108,22 +100,20 @@ func CreateAplikasi(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /master-aplikasi/{id} [put]
-func UpdateAplikasi(c *gin.Context) {
+func UpdateAplikasi(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	var req CreateMasterAplikasiRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest,
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := UpdateMasterAplikasiServices(id, req)
@@ -131,16 +121,14 @@ func UpdateAplikasi(c *gin.Context) {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
@@ -154,29 +142,26 @@ func UpdateAplikasi(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse
 // @Failure 404 {object} helpers.APIResponse
 // @Router /master-aplikasi/{id} [delete]
-func DeleteAplikasi(c *gin.Context) {
+func DeleteAplikasi(c echo.Context) error {
 	id := c.Param("id")
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	err := DeleteMasterAplikasiServices(id)
 	if err != nil {
 
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }

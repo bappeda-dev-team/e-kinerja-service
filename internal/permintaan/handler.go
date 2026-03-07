@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 // GetPermintaan godoc
@@ -17,17 +17,14 @@ import (
 // @Success 200 {object} helpers.APIResponse{data=[]Permintaan}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /permintaan [get]
-func GetPermintaan(c *gin.Context) {
+func GetPermintaan(c echo.Context) error {
 	result, err := GetPermintaanServices()
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
+        return err
     }
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetPermintaanId godoc
@@ -40,13 +37,12 @@ func GetPermintaan(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /permintaan/{id} [get]
-func GetPermintaanId(c *gin.Context) {
+func GetPermintaanId(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	result, err := GetPermintaanServicesID(id)
@@ -54,16 +50,14 @@ func GetPermintaanId(c *gin.Context) {
 	if err != nil {
 
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetPermintaanNama godoc
@@ -74,17 +68,14 @@ func GetPermintaanId(c *gin.Context) {
 // @Success 200 {object} helpers.APIResponse{data=[]PermintaanByNama}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /permintaan-nama [get]
-func GetPermintaanNama(c *gin.Context) {
+func GetPermintaanNama(c echo.Context) error {
 	result, err := GetPermintaanNamaServices()
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
+        return err
     }
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetPermintaanNamaId godoc
@@ -97,13 +88,12 @@ func GetPermintaanNama(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /permintaan-nama/{id} [get]
-func GetPermintaanNamaId(c *gin.Context) {
+func GetPermintaanNamaId(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	result, err := GetPermintaanNamaServicesID(id)
@@ -111,16 +101,14 @@ func GetPermintaanNamaId(c *gin.Context) {
 	if err != nil {
 
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // CreatePermintaan godoc
@@ -133,23 +121,21 @@ func GetPermintaanNamaId(c *gin.Context) {
 // @Success 201 {object} helpers.APIResponse{data=Permintaan}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /permintaan [post]
-func CreatePermintaan(c *gin.Context) {
+func CreatePermintaan(c echo.Context) error {
 	var req PermintaanRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, 
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest, 
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := CreatePermintaanServices(req)
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated, 
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -165,22 +151,20 @@ func CreatePermintaan(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /permintaan/{id} [put]
-func UpdatePermintaan(c *gin.Context) {
+func UpdatePermintaan(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	var req PermintaanRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest,
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := UpdatePermintaanServices(id, req)
@@ -188,16 +172,14 @@ func UpdatePermintaan(c *gin.Context) {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
@@ -211,29 +193,26 @@ func UpdatePermintaan(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse
 // @Failure 404 {object} helpers.APIResponse
 // @Router /permintaan/{id} [delete]
-func DeletePermintaan(c *gin.Context) {
+func DeletePermintaan(c echo.Context) error {
 	id := c.Param("id")
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	err := DeletePermintaanServices(id)
 	if err != nil {
 
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }

@@ -10,5 +10,5 @@ type MasterAplikasi struct {
 }
 
 type CreateMasterAplikasiRequest struct {
-	Name string `json:"name" binding:"required,min=3"`
+	Name string `json:"name" validate:"required,min=3"`
 }

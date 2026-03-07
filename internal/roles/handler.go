@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 // GetRoles godoc
@@ -17,18 +17,15 @@ import (
 // @Success 200 {object} helpers.APIResponse{data=[]Roles}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /roles [get]
-func GetRoles(c *gin.Context) {
+func GetRoles(c echo.Context) error {
+
 	result, err := GetRolesServices()
-
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
-    }
+		return err
+	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-
+	return c.JSON(http.StatusOK,
+		helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetRoleID godoc
@@ -41,29 +38,29 @@ func GetRoles(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /roles/{id} [get]
-func GetRoleID(c *gin.Context) {
+func GetRoleID(c echo.Context) error {
+
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	result, err := GetRoleServicesID(id)
 
 	if err != nil {
 
-		// kalau ID tidak ditemukan
+		// jika ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK,
+		helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
+

@@ -2,15 +2,15 @@ package main
 
 import (
 	"aplikasi-internal/config"
+	"aplikasi-internal/internal/helpers"
 	"aplikasi-internal/routes"
 	"log"
 	"os"
-	"time"
 
-	"github.com/gin-contrib/cors"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
-
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // @title Aplikasi Internal API
@@ -28,16 +28,29 @@ func main() {
 	
 	config.ConnectDB()
 
-	r := gin.Default()
+	e := echo.New()
 
-	r.Use(cors.New(cors.Config{
+	e.Validator = &helpers.CustomValidator{
+		Validator: validator.New(),
+	}
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
-		MaxAge: 12 * time.Hour,
+		AllowMethods: []string{
+			echo.GET,
+			echo.POST,
+			echo.PUT,
+			echo.DELETE,
+			echo.OPTIONS,
+		},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAuthorization,
+		},
 	}))
 	
-	routes.SetupRoutes(r)
+	routes.SetupRoutes(e)
 
-	r.Run(":" + os.Getenv("APP_PORT"))
+	e.Logger.Fatal(e.Start(":" + os.Getenv("APP_PORT")))
 }

@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 // GetVerifikasi godoc
@@ -17,17 +17,14 @@ import (
 // @Success 200 {object} helpers.APIResponse{data=[]Verifikasi}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /verifkasi [get]
-func GetVerifikasi(c *gin.Context) {
+func GetVerifikasi(c echo.Context) error {
 	result, err := GetVerifikasiServices()
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
+        return err
     }
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetVerifikasiID godoc
@@ -40,13 +37,12 @@ func GetVerifikasi(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi/{id} [get]
-func GetVerifikasiID(c *gin.Context) {
+func GetVerifikasiID(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	result, err := GetVerifikasiServicesID(id)
@@ -55,16 +51,14 @@ func GetVerifikasiID(c *gin.Context) {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // CreateVerifikasi godoc
@@ -77,23 +71,21 @@ func GetVerifikasiID(c *gin.Context) {
 // @Success 201 {object} helpers.APIResponse{data=Verifikasi}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi [post]
-func CreateVerifikasi(c *gin.Context) {
+func CreateVerifikasi(c echo.Context) error {
 	var req VerifikasiRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, 
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest, 
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := CreateVerifikasiServices(req)
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated, 
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -109,22 +101,20 @@ func CreateVerifikasi(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi/{id} [put]
-func UpdateVerifikasi(c *gin.Context) {
+func UpdateVerifikasi(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	var req VerifikasiRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest,
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := UpdateVerifikasiServices(id, req)
@@ -132,16 +122,14 @@ func UpdateVerifikasi(c *gin.Context) {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
@@ -155,29 +143,26 @@ func UpdateVerifikasi(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse
 // @Failure 404 {object} helpers.APIResponse
 // @Router /verifikasi/{id} [delete]
-func DeleteVerifikasi(c *gin.Context) {
+func DeleteVerifikasi(c echo.Context) error {
 	id := c.Param("id")
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	err := DeleteVerifikasiServices(id)
 	if err != nil {
 
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }

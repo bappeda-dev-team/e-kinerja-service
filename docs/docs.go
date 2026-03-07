@@ -2848,7 +2848,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "admin_id",
-                "komentar",
                 "permintaan_id"
             ],
             "properties": {
@@ -2856,8 +2855,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "komentar": {
-                    "type": "string",
-                    "minLength": 3
+                    "type": "string"
                 },
                 "permintaan_id": {
                     "type": "string"

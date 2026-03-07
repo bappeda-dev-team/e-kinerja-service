@@ -12,7 +12,7 @@ type Laporan struct {
 }
 
 type LaporanRequest struct {
-	PermintaanID 	string `json:"permintaan_id" binding:"required"`
-	ProgrammerID 	string `json:"programmer_id" binding:"required"`
-	LaporanProgress string `json:"laporan_progress" binding:"required,min=3"`
+	PermintaanID 	string `json:"permintaan_id" validate:"required"`
+	ProgrammerID 	string `json:"programmer_id" validate:"required"`
+	LaporanProgress string `json:"laporan_progress" validate:"required,min=3"`
 }

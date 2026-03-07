@@ -19,6 +19,6 @@ type PelaksanaNama struct {
 }
 
 type PelaksanaRequest struct {
-	DistribusiID string `json:"distribusi_id" binding:"required"`
-	ProgrammerID string `json:"programmer_id" binding:"required"`
+	DistribusiID string `json:"distribusi_id" validate:"required"`
+	ProgrammerID string `json:"programmer_id" validate:"required"`
 }

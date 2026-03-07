@@ -5,32 +5,31 @@ import (
 	"aplikasi-internal/internal/laporan"
 	"aplikasi-internal/internal/master_aplikasi"
 	"aplikasi-internal/internal/master_pemda"
-	"aplikasi-internal/internal/middleware"
+	"aplikasi-internal/internal/middle_ware"
 	"aplikasi-internal/internal/pelaksana"
 	"aplikasi-internal/internal/permintaan"
 	"aplikasi-internal/internal/roles"
 	"aplikasi-internal/internal/user"
 	"aplikasi-internal/internal/verifikasi"
 
-	"github.com/gin-gonic/gin"
-
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	_ "aplikasi-internal/docs"
 )
 
-func SetupRoutes(r *gin.Engine) {
+func SetupRoutes(r *echo.Echo) {
 
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	r.Use(middleware.ErrorHandler())
+	// global error handler
+	r.HTTPErrorHandler = middle_ware.ErrorHandler
 
 	r.GET("/roles", roles.GetRoles) // SELESAI
 	r.GET("/roles/:id", roles.GetRoleID) // SELESAI
 	
-	r.POST("/logout", user.Logout)
-	r.POST("/auth", user.Auth)
+	// e.POST("/logout", user.Logout)
+	// e.POST("/auth", user.Auth)
 	r.GET("/user", user.GetAllUser) // SELESAI
 	r.GET("/user/:id", user.GetUserID) // SELESAI
 	r.POST("/create-user", user.Create) //SELESAI

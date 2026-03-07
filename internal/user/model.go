@@ -13,8 +13,8 @@ type User struct {
 }
 
 type RegisterRequest struct {
-	RoleID   string `json:"role_id" binding:"required"`
-	Username string `json:"username" binding:"required,min=4"`
-	FullName string `json:"full_name" binding:"required,min=3"`
-	Password string `json:"password" binding:"required,min=6"`
+	RoleID   string `json:"role_id" validate:"required"`
+	Username string `json:"username" validate:"required,min=4"`
+	FullName string `json:"full_name" validate:"required,min=3"`
+	Password string `json:"password" validate:"required,min=6"`
 }

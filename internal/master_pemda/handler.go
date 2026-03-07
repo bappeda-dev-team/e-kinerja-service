@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 // GetPemda godoc
@@ -17,17 +17,14 @@ import (
 // @Success 200 {object} helpers.APIResponse{data=[]MasterPemda}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /master-pemda [get]
-func GetPemda(c *gin.Context) {
+func GetPemda(c echo.Context) error {
 	result, err := GetMasterPemdaServices()
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
+        return err
     }
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetPemdaID godoc
@@ -40,13 +37,12 @@ func GetPemda(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /master-pemda/{id} [get]
-func GetPemdaID(c *gin.Context) {
+func GetPemdaID(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	result, err := GetMasterPemdaServicesID(id)
@@ -55,16 +51,14 @@ func GetPemdaID(c *gin.Context) {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))	
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))	
 }
 
 // CreatePemda godoc
@@ -77,23 +71,21 @@ func GetPemdaID(c *gin.Context) {
 // @Success 201 {object} helpers.APIResponse{data=MasterPemda}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /master-pemda [post]
-func CreatePemda(c *gin.Context) {
+func CreatePemda(c echo.Context) error {
 	var req MasterPemdaRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, 
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest, 
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := CreateMasterPemdaServices(req)
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated, 
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -109,22 +101,20 @@ func CreatePemda(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /master-pemda/{id} [put]
-func UpdatePemda(c *gin.Context) {
+func UpdatePemda(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	var req MasterPemdaRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest,
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := UpdateMasterPemdaServices(id, req)
@@ -132,16 +122,14 @@ func UpdatePemda(c *gin.Context) {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
@@ -155,29 +143,26 @@ func UpdatePemda(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse
 // @Failure 404 {object} helpers.APIResponse
 // @Router /master-pemda/{id} [delete]
-func DeletePemda(c *gin.Context) {
+func DeletePemda(c echo.Context) error {
 	id := c.Param("id")
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	err := DeleteMasterPemdaServices(id)
 	if err != nil {
 
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }

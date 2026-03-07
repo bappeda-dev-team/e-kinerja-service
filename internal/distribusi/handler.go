@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 // GetDistribusi godoc
@@ -17,17 +17,14 @@ import (
 // @Success 200 {object} helpers.APIResponse{data=[]Distribusi}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /distribusi [get]
-func GetDistribusi(c *gin.Context) {
+func GetDistribusi(c echo.Context) error {
 	result, err := GetDistribusiServices()
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
+        return err
     }
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetDsitribusiById godoc
@@ -40,13 +37,12 @@ func GetDistribusi(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi/{id} [get]
-func GetDistribusiById(c *gin.Context) {
+func GetDistribusiById(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	result, err := GetDistribusiServicesID(id)
@@ -54,16 +50,14 @@ func GetDistribusiById(c *gin.Context) {
 	if err != nil {
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetDistribusiByNama godoc
@@ -74,17 +68,14 @@ func GetDistribusiById(c *gin.Context) {
 // @Success 200 {object} helpers.APIResponse{data=[]DistribusiByNama}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /distribusi-nama [get]
-func GetDistribusiByNama(c *gin.Context) {
+func GetDistribusiByNama(c echo.Context) error {
 	result, err := GetDistribusiNamaServices()
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
+        return err
     }
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // GetDistribusiByNamaId godoc
@@ -97,13 +88,12 @@ func GetDistribusiByNama(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi-nama/{id} [get]
-func GetDistribusiByNamaId(c *gin.Context) {
+func GetDistribusiByNamaId(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	result, err := GetDistribusiNamaServicesID(id)
@@ -111,16 +101,14 @@ func GetDistribusiByNamaId(c *gin.Context) {
 	if err != nil {
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
 // CreateDistribusi godoc
@@ -133,23 +121,21 @@ func GetDistribusiByNamaId(c *gin.Context) {
 // @Success 201 {object} helpers.APIResponse{data=Distribusi}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi [post]
-func CreateDistribusi(c *gin.Context) {
+func CreateDistribusi(c echo.Context) error {
 	var req DistribusiRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, 
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest, 
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := CreateDistribusiServices(req)
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated, 
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -165,22 +151,20 @@ func CreateDistribusi(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi/{id} [put]
-func UpdateDistribusi(c *gin.Context) {
+func UpdateDistribusi(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	var req DistribusiRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest,
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	result, err := UpdateDistribusiServices(id, req)
@@ -188,16 +172,14 @@ func UpdateDistribusi(c *gin.Context) {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
@@ -211,29 +193,26 @@ func UpdateDistribusi(c *gin.Context) {
 // @Failure 400 {object} helpers.APIResponse
 // @Failure 404 {object} helpers.APIResponse
 // @Router /distribusi/{id} [delete]
-func DeleteDistribusi(c *gin.Context) {
+func DeleteDistribusi(c echo.Context) error {
 	id := c.Param("id")
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	err := DeleteDistribusiServices(id)
 	if err != nil {
 
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK,
+	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }

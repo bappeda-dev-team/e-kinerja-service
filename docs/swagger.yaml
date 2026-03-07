@@ -37,13 +37,11 @@ definitions:
       admin_id:
         type: string
       komentar:
-        minLength: 3
         type: string
       permintaan_id:
         type: string
     required:
     - admin_id
-    - komentar
     - permintaan_id
     type: object
   helpers.APIResponse:

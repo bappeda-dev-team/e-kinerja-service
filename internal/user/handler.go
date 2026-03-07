@@ -5,34 +5,30 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
-func Auth(c *gin.Context) {
+// func Auth(c echo.Context) error {
 
-}
+// }
 
-func GetAllUser(c *gin.Context) {
+func GetAllUser(c echo.Context) error {
 	result, err := GetUserServices()
 
 	if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-        return
+        return err
     }
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
-func GetUserID(c *gin.Context) {
+func GetUserID(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		c.JSON(http.StatusBadRequest,
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
-		return
 	}
 
 	result, err := GetUserServicesID(id)
@@ -41,26 +37,23 @@ func GetUserID(c *gin.Context) {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound,
+			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
-func Create(c *gin.Context) {
+func Create(c echo.Context) error {
 	var req RegisterRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest,
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "Validasi gagal",
 				helpers.FormatValidationError(err)))
-		return
 	}
 
 	user, err := CreateUserService(req)
@@ -69,19 +62,17 @@ func Create(c *gin.Context) {
 		if err.Error() == "role tidak ditemukan" ||
 			err.Error() == "username sudah digunakan" {
 
-			c.JSON(http.StatusBadRequest,
+			return c.JSON(http.StatusBadRequest,
 				helpers.ErrorResponse(400, err.Error(), nil))
-			return
 		}
 
-		c.Error(err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusCreated,
+	return c.JSON(http.StatusCreated,
 		helpers.SuccessResponse(201, "Registrasi berhasil", user))
 }
 
-func Logout(c *gin.Context) {
+// func Logout(c echo.Context) error {
 
-}
+// }
