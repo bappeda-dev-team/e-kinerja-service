@@ -1,6 +1,7 @@
 package user
 
 import (
+	"aplikasi-internal/internal/helpers"
 	"errors"
 
 	"golang.org/x/crypto/bcrypt"
@@ -55,4 +56,37 @@ func CreateUserService(req RegisterRequest) (*User, error) {
 	}
 
 	return user, nil
+}
+
+func LoginService(req LoginRequest) (string, error) {
+
+	user, err := GetUserByUsername(req.Username)
+	if err != nil {
+		return "", errors.New("username tidak ditemukan")
+	}
+
+	if !user.IsActive {
+		return "", errors.New("user tidak aktif")
+	}
+
+	err = bcrypt.CompareHashAndPassword(
+		[]byte(user.Password),
+		[]byte(req.Password),
+	)
+
+	if err != nil {
+		return "", errors.New("password salah")
+	}
+
+	token, err := helpers.GenerateToken(
+		user.ID,
+		user.Username,
+		user.RoleID,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }

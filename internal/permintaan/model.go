@@ -31,12 +31,9 @@ type PermintaanByNama struct {
 }
 
 type PermintaanRequest struct {
-	PemdaID 		  string 	`json:"pemda_id" validate:"required"`
-	AplikasiID 		  string 	`json:"aplikasi_id" validate:"required"`
 	Menu 			  string 	`json:"menu" validate:"required,min=3"`
 	KondisiAwal 	  string 	`json:"kondisi_awal" validate:"required,min=3"`
 	KondisiDiharapkan string 	`json:"kondisi_diharapkan" validate:"required,min=3"`
 	TanggalPesanan 	  time.Time `json:"tanggal_pesanan" validate:"required"`
 	TanggalDeadline   time.Time `json:"tanggal_deadline" validate:"required"`
-	CreatedBy 		  string 	`json:"created_by" validate:"required"`
 }

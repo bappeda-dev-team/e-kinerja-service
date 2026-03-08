@@ -15,17 +15,17 @@ func GetPermintaanNamaServicesID(id string) (PermintaanByNama, error) {
 	return GetByNamaId(id)
 }
 
-func CreatePermintaanServices(req PermintaanRequest) (*Permintaan, error) {
+func CreatePermintaanServices(pemdaID string, aplikasiID string, userID string, req PermintaanRequest) (*Permintaan, error) {
 
 	data := &Permintaan{
-		PemdaID:           req.PemdaID,
-		AplikasiID:        req.AplikasiID,
+		PemdaID:           pemdaID,
+		AplikasiID:        aplikasiID,
 		Menu:              req.Menu,
 		KondisiAwal:       req.KondisiAwal,
 		KondisiDiharapkan: req.KondisiDiharapkan,
 		TanggalPesanan:    req.TanggalPesanan,
 		TanggalDeadline:   req.TanggalDeadline,
-		CreatedBy:         req.CreatedBy,
+		CreatedBy:         userID,
 	}
 
 	err := Create(data)
@@ -36,17 +36,17 @@ func CreatePermintaanServices(req PermintaanRequest) (*Permintaan, error) {
 	return data, nil
 }
 
-func UpdatePermintaanServices(id string, req PermintaanRequest) (*Permintaan, error) {
+func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, userID string, req PermintaanRequest) (*Permintaan, error) {
 
 	data := &Permintaan{
-		PemdaID:           req.PemdaID,
-		AplikasiID:        req.AplikasiID,
+		PemdaID:           pemdaID,
+		AplikasiID:        aplikasiID,
 		Menu:              req.Menu,
 		KondisiAwal:       req.KondisiAwal,
 		KondisiDiharapkan: req.KondisiDiharapkan,
 		TanggalPesanan:    req.TanggalPesanan,
 		TanggalDeadline:   req.TanggalDeadline,
-		CreatedBy:         req.CreatedBy,
+		CreatedBy:         userID,
 	}
 
 	err := Update(id, data)

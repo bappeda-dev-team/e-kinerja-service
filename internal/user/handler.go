@@ -9,9 +9,27 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// func Auth(c echo.Context) error {
+func Login(c echo.Context) error {
 
-// }
+	var req LoginRequest
+
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "Validasi gagal",
+				helpers.FormatValidationError(err)))
+	}
+
+	token, err := LoginService(req)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized,
+			helpers.ErrorResponse(401, err.Error(), nil))
+	}
+
+	return c.JSON(http.StatusOK,
+		helpers.SuccessResponse(200, "login berhasil", map[string]string{
+			"token": token,
+		}))
+}
 
 func GetAllUser(c echo.Context) error {
 	result, err := GetUserServices()

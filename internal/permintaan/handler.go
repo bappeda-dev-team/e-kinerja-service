@@ -122,6 +122,28 @@ func GetPermintaanNamaId(c echo.Context) error {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /permintaan [post]
 func CreatePermintaan(c echo.Context) error {
+
+	pemdaID := c.Param("pemda_id")
+	aplikasiID := c.Param("aplikasi_id")
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
+
+	// validasi UUID
+	if _, err := uuid.Parse(pemdaID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "pemda_id tidak valid", nil))
+	}
+
+	if _, err := uuid.Parse(aplikasiID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "aplikasi_id tidak valid", nil))
+	}
+
 	var req PermintaanRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
@@ -130,7 +152,7 @@ func CreatePermintaan(c echo.Context) error {
 				helpers.FormatValidationError(err)))
 	}
 
-	result, err := CreatePermintaanServices(req)
+	result, err := CreatePermintaanServices(pemdaID, aplikasiID, userID, req)
 	if err != nil {
 		return err
 	}
@@ -153,10 +175,29 @@ func CreatePermintaan(c echo.Context) error {
 // @Router /permintaan/{id} [put]
 func UpdatePermintaan(c echo.Context) error {
 	id := c.Param("id")
+	pemdaID := c.Param("pemda_id")
+	aplikasiID := c.Param("aplikasi_id")
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
 
 	if _, err := uuid.Parse(id); err != nil {
 		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+	}
+
+	if _, err := uuid.Parse(pemdaID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "pemda_id tidak valid", nil))
+	}
+
+	if _, err := uuid.Parse(aplikasiID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "aplikasi_id tidak valid", nil))
 	}
 
 	var req PermintaanRequest
@@ -167,7 +208,7 @@ func UpdatePermintaan(c echo.Context) error {
 				helpers.FormatValidationError(err)))
 	}
 
-	result, err := UpdatePermintaanServices(id, req)
+	result, err := UpdatePermintaanServices(id, pemdaID, aplikasiID, userID, req)
 	if err != nil {
 
 		// kalau ID tidak ditemukan

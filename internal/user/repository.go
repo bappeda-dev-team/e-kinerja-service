@@ -71,3 +71,31 @@ func CreateUser(user *User, hashedPassword string) error {
 		&user.UpdatedAt,
 	)
 }
+
+func GetUserByUsername(username string) (*User, error) {
+
+	query := `
+	SELECT id, role_id, username, full_name, password, is_active
+	FROM users
+	WHERE username = $1
+	`
+
+	row := config.DB.QueryRow(query, username)
+
+	var user User
+
+	err := row.Scan(
+		&user.ID,
+		&user.RoleID,
+		&user.Username,
+		&user.FullName,
+		&user.Password,
+		&user.IsActive,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}

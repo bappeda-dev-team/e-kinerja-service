@@ -29,7 +29,9 @@ func SetupRoutes(r *echo.Echo) {
 	r.GET("/roles/:id", roles.GetRoleID) // SELESAI
 	
 	// e.POST("/logout", user.Logout)
-	// e.POST("/auth", user.Auth)
+	auth := r.Group("/auth")
+	auth.POST("/login", user.Login)
+
 	r.GET("/user", user.GetAllUser) // SELESAI
 	r.GET("/user/:id", user.GetUserID) // SELESAI
 	r.POST("/create-user", user.Create) //SELESAI
@@ -46,13 +48,16 @@ func SetupRoutes(r *echo.Echo) {
 	r.PUT("/master-pemda/:id", master_pemda.UpdatePemda) // SELESAI
 	r.DELETE("/master-pemda/:id", master_pemda.DeletePemda) // SELESAI
 
-	r.GET("/permintaan", permintaan.GetPermintaan) // SELESAI
-	r.GET("/permintaan/:id", permintaan.GetPermintaanId) // SELESAI
-	r.GET("/permintaan-nama", permintaan.GetPermintaanNama) // SELESAI
-	r.GET("/permintaan-nama/:id", permintaan.GetPermintaanNamaId) // SELESAI
-	r.POST("/permintaan", permintaan.CreatePermintaan) // SELESAI
-	r.PUT("/permintaan/:id", permintaan.UpdatePermintaan) // SELESAI 
-	r.DELETE("/permintaan/:id", permintaan.DeletePermintaan) // SELESAI
+	p := r.Group("/permintaan")
+	p.Use(middle_ware.JWTMiddleware)
+
+	p.GET("", permintaan.GetPermintaan) // SELESAI
+	p.GET("/:id", permintaan.GetPermintaanId) // SELESAI
+	p.GET("/nama", permintaan.GetPermintaanNama) // SELESAI
+	p.GET("/nama/:id", permintaan.GetPermintaanNamaId) // SELESAI
+	p.POST("/pemda/:pemda_id/aplikasi/:aplikasi_id", permintaan.CreatePermintaan) // SELESAI
+	p.PUT("/pemda/:pemda_id/aplikasi/:aplikasi_id/id/:id", permintaan.UpdatePermintaan) // SELESAI 
+	p.DELETE("/:id", permintaan.DeletePermintaan) // SELESAI
 
 	r.GET("/distribusi", distribusi.GetDistribusi) // SELESAI
 	r.GET("/distribusi/:id", distribusi.GetDistribusiById) // SELESAI

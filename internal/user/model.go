@@ -7,6 +7,7 @@ type User struct {
 	RoleID    string    `json:"role_id"`
 	Username  string    `json:"username"`
 	FullName  string    `json:"full_name"`
+	Password  string    `json:"-"`
 	IsActive  bool      `json:"is_active"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -17,4 +18,9 @@ type RegisterRequest struct {
 	Username string `json:"username" validate:"required,min=4"`
 	FullName string `json:"full_name" validate:"required,min=3"`
 	Password string `json:"password" validate:"required,min=6"`
+}
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
