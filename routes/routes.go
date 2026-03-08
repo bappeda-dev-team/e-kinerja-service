@@ -59,13 +59,16 @@ func SetupRoutes(r *echo.Echo) {
 	p.PUT("/pemda/:pemda_id/aplikasi/:aplikasi_id/id/:id", permintaan.UpdatePermintaan) // SELESAI 
 	p.DELETE("/:id", permintaan.DeletePermintaan) // SELESAI
 
-	r.GET("/distribusi", distribusi.GetDistribusi) // SELESAI
-	r.GET("/distribusi/:id", distribusi.GetDistribusiById) // SELESAI
-	r.GET("/distribusi-nama", distribusi.GetDistribusiByNama) // SELESAI
-	r.GET("/distribusi-nama/:id", distribusi.GetDistribusiByNamaId) // SELESAI
-	r.POST("/distribusi", distribusi.CreateDistribusi) // SELESAI
-	r.PUT("/distribusi/:id", distribusi.UpdateDistribusi) // SELESAI
-	r.DELETE("/distribusi/:id", distribusi.DeleteDistribusi) // SELESAI 
+	d := r.Group("/distribusi")
+	d.Use(middle_ware.JWTMiddleware)
+
+	d.GET("", distribusi.GetDistribusi) // SELESAI
+	d.GET("/:id", distribusi.GetDistribusiById) // SELESAI
+	d.GET("/nama", distribusi.GetDistribusiByNama) // SELESAI
+	d.GET("/nama/:id", distribusi.GetDistribusiByNamaId) // SELESAI
+	d.POST("/permintaan/:permintaan_id", distribusi.CreateDistribusi) // SELESAI
+	d.PUT("/permintaan/:permintaan_id/id/:id", distribusi.UpdateDistribusi) // SELESAI
+	d.DELETE("/:id", distribusi.DeleteDistribusi) // SELESAI 
 
 	r.GET("/pelaksana", pelaksana.GetPelaksana) // SELESAI
 	r.GET("/pelaksana/:id", pelaksana.GetPelaksanaID) // SELESAI

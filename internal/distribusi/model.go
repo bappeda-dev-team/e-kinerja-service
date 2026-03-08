@@ -22,7 +22,5 @@ type DistribusiByNama struct {
 }
 
 type DistribusiRequest struct {
-	PermintaanID 	  string 	`json:"permintaan_id" validate:"required"`
-	AdminID 		  string 	`json:"admin_id" validate:"required"`
 	Komentar 		  string 	`json:"komentar"`
 }

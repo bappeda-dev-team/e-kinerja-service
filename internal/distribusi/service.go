@@ -15,11 +15,11 @@ func GetDistribusiNamaServicesID(id string) (DistribusiByNama, error) {
 	return GetByNamaId(id)
 }
 
-func CreateDistribusiServices(req DistribusiRequest) (*Distribusi, error) {
+func CreateDistribusiServices(permintaanID string, adminID string, req DistribusiRequest) (*Distribusi, error) {
 
 	data := &Distribusi{
-		PermintaanID: req.PermintaanID,
-		AdminID:      req.AdminID,
+		PermintaanID: permintaanID,
+		AdminID:      adminID,
 		Komentar:     req.Komentar,
 	}
 
@@ -31,11 +31,11 @@ func CreateDistribusiServices(req DistribusiRequest) (*Distribusi, error) {
 	return data, nil
 }
 
-func UpdateDistribusiServices(id string, req DistribusiRequest) (*Distribusi, error) {
+func UpdateDistribusiServices(id string, permintaanID string, adminID string, req DistribusiRequest) (*Distribusi, error) {
 
 	data := &Distribusi{
-		PermintaanID: req.PermintaanID,
-		AdminID:      req.AdminID,
+		PermintaanID: permintaanID,
+		AdminID:      adminID,
 		Komentar:     req.Komentar,
 	}
 

@@ -122,6 +122,22 @@ func GetDistribusiByNamaId(c echo.Context) error {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi [post]
 func CreateDistribusi(c echo.Context) error {
+
+	permintaanID := c.Param("permintaan_id")
+
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
+
+	if _, err := uuid.Parse(permintaanID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "permintaan_id tidak valid", nil))
+	}
+
 	var req DistribusiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
@@ -130,7 +146,7 @@ func CreateDistribusi(c echo.Context) error {
 				helpers.FormatValidationError(err)))
 	}
 
-	result, err := CreateDistribusiServices(req)
+	result, err := CreateDistribusiServices(permintaanID, userID, req)
 	if err != nil {
 		return err
 	}
@@ -153,10 +169,24 @@ func CreateDistribusi(c echo.Context) error {
 // @Router /distribusi/{id} [put]
 func UpdateDistribusi(c echo.Context) error {
 	id := c.Param("id")
+	permintaanID := c.Param("permintaan_id")
+
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
 
 	if _, err := uuid.Parse(id); err != nil {
 		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+	}
+
+	if _, err := uuid.Parse(permintaanID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "permintaan_id tidak valid", nil))
 	}
 
 	var req DistribusiRequest
@@ -167,7 +197,7 @@ func UpdateDistribusi(c echo.Context) error {
 				helpers.FormatValidationError(err)))
 	}
 
-	result, err := UpdateDistribusiServices(id, req)
+	result, err := UpdateDistribusiServices(id, permintaanID, userID, req)
 	if err != nil {
 
 		// kalau ID tidak ditemukan
