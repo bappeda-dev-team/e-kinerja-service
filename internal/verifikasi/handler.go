@@ -72,6 +72,20 @@ func GetVerifikasiID(c echo.Context) error {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi [post]
 func CreateVerifikasi(c echo.Context) error {
+	laporanID := c.Param("laporan_id")
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
+
+	if _, err := uuid.Parse(laporanID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "laporan_id tidak valid", nil))
+	}
+
 	var req VerifikasiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
@@ -80,7 +94,7 @@ func CreateVerifikasi(c echo.Context) error {
 				helpers.FormatValidationError(err)))
 	}
 
-	result, err := CreateVerifikasiServices(req)
+	result, err := CreateVerifikasiServices(laporanID, userID, req)
 	if err != nil {
 		return err
 	}
@@ -103,10 +117,23 @@ func CreateVerifikasi(c echo.Context) error {
 // @Router /verifikasi/{id} [put]
 func UpdateVerifikasi(c echo.Context) error {
 	id := c.Param("id")
+	laporanID := c.Param("laporan_id")
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
 
 	if _, err := uuid.Parse(id); err != nil {
 		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+	}
+
+	if _, err := uuid.Parse(laporanID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "laporan_id tidak valid", nil))
 	}
 
 	var req VerifikasiRequest
@@ -117,7 +144,7 @@ func UpdateVerifikasi(c echo.Context) error {
 				helpers.FormatValidationError(err)))
 	}
 
-	result, err := UpdateVerifikasiServices(id, req)
+	result, err := UpdateVerifikasiServices(id, laporanID, userID, req)
 	if err != nil {
 
 		// kalau ID tidak ditemukan

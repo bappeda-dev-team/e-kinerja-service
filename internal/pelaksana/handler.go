@@ -124,18 +124,24 @@ func GetPelaksanaByNamaID(c echo.Context) error {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana [post]
 func CreatePelaksana(c echo.Context) error {
-	var req PelaksanaRequest
 
-	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest, 
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+	distribusiID := c.Param("distribusi_id")
+	programmerID := c.Param("programmer_id")
+
+	if _, err := uuid.Parse(distribusiID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "distribusi_id tidak valid", nil))
 	}
 
-	result, err := CreatePelaksanaServices(req)
+	if _, err := uuid.Parse(programmerID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "programmer_id tidak valid", nil))
+	}
+
+	result, err := CreatePelaksanaServices(distribusiID, programmerID)
 	if err != nil {
-		if err.Error() == "programmer sudah ditugaskan di distribusi ini"||
-			err.Error() == "programmer sudah ditugaskan di distribusi ini" {
+		if err.Error() == "distribusi_id sudah digunakan"||
+			err.Error() == "programmer_id sudah digunakan" {
 
 			return c.JSON(http.StatusBadRequest,
 				helpers.ErrorResponse(400, err.Error(), nil))
@@ -162,27 +168,38 @@ func CreatePelaksana(c echo.Context) error {
 // @Router /pelaksana/{id} [put]
 func UpdatePelaksana(c echo.Context) error {
 	id := c.Param("id")
+	distribusiID := c.Param("distribusi_id")
+	programmerID := c.Param("programmer_id")
 
 	if _, err := uuid.Parse(id); err != nil {
 		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
 	}
 
-	var req PelaksanaRequest
-
-	if err := helpers.BindAndValidate(c, &req); err != nil {
+	if _, err := uuid.Parse(distribusiID); err != nil {
 		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+			helpers.ErrorResponse(400, "distribusi_id tidak valid", nil))
 	}
 
-	result, err := UpdatePelaksanaServices(id, req)
+	if _, err := uuid.Parse(programmerID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "programmer_id tidak valid", nil))
+	}
+
+	result, err := UpdatePelaksanaServices(id, distribusiID, programmerID)
 	if err != nil {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+		}
+
+		if err.Error() == "distribusi_id sudah digunakan"||
+			err.Error() == "programmer_id sudah digunakan" {
+
+			return c.JSON(http.StatusBadRequest,
+				helpers.ErrorResponse(400, err.Error(), nil))
 		}
 
 		return err

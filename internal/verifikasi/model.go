@@ -13,8 +13,6 @@ type Verifikasi struct {
 }
 
 type VerifikasiRequest struct {
-	LaporanID 		string `json:"laporan_id" validate:"required"`
-	VerifikatorID	string `json:"verifikator_id" validate:"required"`
 	Komentar  	    string `json:"komentar"`
 	StatusVerified  string `json:"status_verified" validate:"required"`
 }

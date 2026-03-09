@@ -17,8 +17,3 @@ type PelaksanaNama struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
-
-type PelaksanaRequest struct {
-	DistribusiID string `json:"distribusi_id" validate:"required"`
-	ProgrammerID string `json:"programmer_id" validate:"required"`
-}

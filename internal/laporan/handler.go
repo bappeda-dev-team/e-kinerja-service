@@ -72,6 +72,20 @@ func GetLaporanID(c echo.Context) error {
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /laporan [post]
 func CreateLaporan(c echo.Context) error {
+	permintaanID := c.Param("permintaan_id")
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
+
+	if _, err := uuid.Parse(permintaanID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "pemda_id tidak valid", nil))
+	}
+
 	var req LaporanRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
@@ -80,7 +94,7 @@ func CreateLaporan(c echo.Context) error {
 				helpers.FormatValidationError(err)))
 	}
 
-	result, err := CreateLaporanServices(req)
+	result, err := CreateLaporanServices(permintaanID, userID,req)
 	if err != nil {
 		return err
 	}
@@ -103,10 +117,23 @@ func CreateLaporan(c echo.Context) error {
 // @Router /laporan/{id} [put]
 func UpdateLaporan(c echo.Context) error {
 	id := c.Param("id")
+	permintaanID := c.Param("permintaan_id")
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
 
 	if _, err := uuid.Parse(id); err != nil {
 		return c.JSON(http.StatusBadRequest,
 			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+	}
+
+	if _, err := uuid.Parse(permintaanID); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helpers.ErrorResponse(400, "permintaan_id tidak valid", nil))
 	}
 
 	var req LaporanRequest
@@ -117,7 +144,7 @@ func UpdateLaporan(c echo.Context) error {
 				helpers.FormatValidationError(err)))
 	}
 
-	result, err := UpdateLaporanServices(id, req)
+	result, err := UpdateLaporanServices(id, permintaanID, userID, req)
 	if err != nil {
 
 		// kalau ID tidak ditemukan

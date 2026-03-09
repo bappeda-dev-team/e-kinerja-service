@@ -8,11 +8,11 @@ func GetLaporanServicesID(id string) (Laporan, error) {
 	return GetId(id)
 }
 
-func CreateLaporanServices(req LaporanRequest) (*Laporan, error) {
+func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest) (*Laporan, error) {
 
 	data := &Laporan{
-		PermintaanID:    req.PermintaanID,
-		ProgrammerID:    req.ProgrammerID,
+		PermintaanID:    permintaanID,
+		ProgrammerID:    userID,
 		LaporanProgress: req.LaporanProgress,
 	}
 
@@ -24,11 +24,11 @@ func CreateLaporanServices(req LaporanRequest) (*Laporan, error) {
 	return data, nil
 }
 
-func UpdateLaporanServices(id string, req LaporanRequest) (*Laporan, error) {
+func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanRequest) (*Laporan, error) {
 
 	data := &Laporan{
-		PermintaanID:    req.PermintaanID,
-		ProgrammerID:    req.ProgrammerID,
+		PermintaanID:    permintaanID,
+		ProgrammerID:    userID,
 		LaporanProgress: req.LaporanProgress,
 	}
 

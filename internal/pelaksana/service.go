@@ -17,27 +17,27 @@ func GetPelaksanaNamaServicesID(id string) (PelaksanaNama, error) {
 	return GetByNamaId(id)
 }
 
-func CreatePelaksanaServices(req PelaksanaRequest) (*Pelaksana, error) {
+func CreatePelaksanaServices(distribusiID string, programmerID string) (*Pelaksana, error) {
 
-	distribusiidExists, err := IsDistribusiIdExists(req.DistribusiID)
+	distribusiidExists, err := IsDistribusiIdExists(distribusiID)
 	if err != nil {
 		return nil, err
 	}
 	if distribusiidExists {
-		return nil, errors.New("programmer sudah ditugaskan di distribusi ini")
+		return nil, errors.New("distribusi_id sudah digunakan")
 	}
 
-	programmeridExists, err := IsProgrammerIdExists(req.ProgrammerID)
+	programmeridExists, err := IsProgrammerIdExists(programmerID)
 	if err != nil {
 		return nil, err
 	}
 	if programmeridExists {
-		return nil, errors.New("programmer sudah ditugaskan di distribusi ini")
+		return nil, errors.New("programmer_id sudah digunakan")
 	}
 
 	data := &Pelaksana{
-		DistribusiID: req.DistribusiID,
-		ProgrammerID: req.ProgrammerID,
+		DistribusiID: distribusiID,
+		ProgrammerID: programmerID,
 	}
 
 	err = Create(data)
@@ -48,14 +48,30 @@ func CreatePelaksanaServices(req PelaksanaRequest) (*Pelaksana, error) {
 	return data, nil
 }
 
-func UpdatePelaksanaServices(id string, req PelaksanaRequest) (*Pelaksana, error) {
+func UpdatePelaksanaServices(id string, distribusiID string, programmerID string) (*Pelaksana, error) {
 
-	data := &Pelaksana{
-		DistribusiID: req.DistribusiID,
-		ProgrammerID: req.ProgrammerID,
+	distribusiidExists, err := IsDistribusiIdExists(distribusiID)
+	if err != nil {
+		return nil, err
+	}
+	if distribusiidExists {
+		return nil, errors.New("distribusi_id sudah digunakan")
 	}
 
-	err := Update(id, data)
+	programmeridExists, err := IsProgrammerIdExists(programmerID)
+	if err != nil {
+		return nil, err
+	}
+	if programmeridExists {
+		return nil, errors.New("programmer_id sudah digunakan")
+	}
+
+	data := &Pelaksana{
+		DistribusiID: distribusiID,
+		ProgrammerID: programmerID,
+	}
+
+	err = Update(id, data)
 	if err != nil {
 		return nil, err
 	}

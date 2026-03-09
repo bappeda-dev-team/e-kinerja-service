@@ -8,11 +8,11 @@ func GetVerifikasiServicesID(id string) (Verifikasi, error) {
 	return GetId(id)
 }
 
-func CreateVerifikasiServices(req VerifikasiRequest) (*Verifikasi, error) {
+func CreateVerifikasiServices(laporanID string, userID string, req VerifikasiRequest) (*Verifikasi, error) {
 
 	data := &Verifikasi{
-		LaporanID:      req.LaporanID,
-		VerifikatorID:  req.VerifikatorID,
+		LaporanID:      laporanID,
+		VerifikatorID:  userID,
 		Komentar:       req.Komentar,
 		StatusVerified: req.StatusVerified,
 	}
@@ -25,11 +25,11 @@ func CreateVerifikasiServices(req VerifikasiRequest) (*Verifikasi, error) {
 	return data, nil
 }
 
-func UpdateVerifikasiServices(id string, req VerifikasiRequest) (*Verifikasi, error) {
+func UpdateVerifikasiServices(id string, laporanID string, userID string, req VerifikasiRequest) (*Verifikasi, error) {
 
 	data := &Verifikasi{
-		LaporanID:      req.LaporanID,
-		VerifikatorID:  req.VerifikatorID,
+		LaporanID:      laporanID,
+		VerifikatorID:  userID,
 		Komentar:       req.Komentar,
 		StatusVerified: req.StatusVerified,
 	}

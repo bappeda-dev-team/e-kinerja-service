@@ -36,17 +36,23 @@ func SetupRoutes(r *echo.Echo) {
 	r.GET("/user/:id", user.GetUserID) // SELESAI
 	r.POST("/create-user", user.Create) //SELESAI
 
-	r.GET("/master-aplikasi", master_aplikasi.GetAplikasi) // SELESAI
-	r.GET("/master-aplikasi/:id", master_aplikasi.GetAplikasiID) // SELESAI
-	r.POST("/master-aplikasi", master_aplikasi.CreateAplikasi) // SELESAI
-	r.PUT("/master-aplikasi/:id", master_aplikasi.UpdateAplikasi) // SELESAI
-	r.DELETE("/master-aplikasi/:id", master_aplikasi.DeleteAplikasi) // SELESAI
+	ma := r.Group("/master-aplikasi")
+	ma.Use(middle_ware.JWTMiddleware)
 
-	r.GET("/master-pemda", master_pemda.GetPemda) // SELESAI
-	r.GET("/master-pemda/:id", master_pemda.GetPemdaID) // SELESAI
-	r.POST("/master-pemda", master_pemda.CreatePemda) // SELESAI
-	r.PUT("/master-pemda/:id", master_pemda.UpdatePemda) // SELESAI
-	r.DELETE("/master-pemda/:id", master_pemda.DeletePemda) // SELESAI
+	ma.GET("", master_aplikasi.GetAplikasi) // SELESAI
+	ma.GET("/:id", master_aplikasi.GetAplikasiID) // SELESAI
+	ma.POST("", master_aplikasi.CreateAplikasi) // SELESAI
+	ma.PUT("/:id", master_aplikasi.UpdateAplikasi) // SELESAI
+	ma.DELETE("/:id", master_aplikasi.DeleteAplikasi) // SELESAI
+
+	mp := r.Group("/master-pemda")
+	mp.Use(middle_ware.JWTMiddleware)
+
+	mp.GET("", master_pemda.GetPemda) // SELESAI
+	mp.GET("/:id", master_pemda.GetPemdaID) // SELESAI
+	mp.POST("", master_pemda.CreatePemda) // SELESAI
+	mp.PUT("/:id", master_pemda.UpdatePemda) // SELESAI
+	mp.DELETE("/:id", master_pemda.DeletePemda) // SELESAI
 
 	p := r.Group("/permintaan")
 	p.Use(middle_ware.JWTMiddleware)
@@ -70,23 +76,32 @@ func SetupRoutes(r *echo.Echo) {
 	d.PUT("/permintaan/:permintaan_id/id/:id", distribusi.UpdateDistribusi) // SELESAI
 	d.DELETE("/:id", distribusi.DeleteDistribusi) // SELESAI 
 
-	r.GET("/pelaksana", pelaksana.GetPelaksana) // SELESAI
-	r.GET("/pelaksana/:id", pelaksana.GetPelaksanaID) // SELESAI
-	r.GET("/pelaksana-nama", pelaksana.GetPelaksanaByNama) // SELESAI
-	r.GET("/pelaksana-nama/:id", pelaksana.GetPelaksanaByNamaID) // SELESAI
-	r.POST("/pelaksana", pelaksana.CreatePelaksana) // SELESAI
-	r.PUT("/pelaksana/:id", pelaksana.UpdatePelaksana) // SELESAI
-	r.DELETE("/pelaksana/:id", pelaksana.DeletePelaksana) // SELESAI
+	dp := r.Group("/pelaksana")
+	dp.Use(middle_ware.JWTMiddleware)
 
-	r.GET("/laporan", laporan.GetLaporan) // SELESAI
-	r.GET("/laporan/:id", laporan.GetLaporanID) // SELESAI
-	r.POST("/laporan", laporan.CreateLaporan) // SELESAI
-	r.PUT("/laporan/:id", laporan.UpdateLaporan) // SELESAI
-	r.DELETE("/laporan/:id", laporan.DeleteLaporan) // SELESAI
+	dp.GET("", pelaksana.GetPelaksana) // SELESAI
+	dp.GET("/:id", pelaksana.GetPelaksanaID) // SELESAI
+	dp.GET("/nama", pelaksana.GetPelaksanaByNama) // SELESAI
+	dp.GET("/nama/:id", pelaksana.GetPelaksanaByNamaID) // SELESAI
+	dp.POST("/distribusi/:distribusi_id/programmer/:programmer_id", pelaksana.CreatePelaksana) // SELESAI
+	dp.PUT("/distribusi/:distribusi_id/programmer/:programmer_id/id/:id", pelaksana.UpdatePelaksana) // SELESAI
+	dp.DELETE("/:id", pelaksana.DeletePelaksana) // SELESAI
 
-	r.GET("/verifikasi", verifikasi.GetVerifikasi) // SELESAI
-	r.GET("/verifikasi/:id", verifikasi.GetVerifikasiID) // SELESAI
-	r.POST("/verifikasi", verifikasi.CreateVerifikasi) // SELESAI
-	r.PUT("/verifikasi/:id", verifikasi.UpdateVerifikasi) // SELESAI
-	r.DELETE("/verifikasi/:id", verifikasi.DeleteVerifikasi) // SELESAI
+	l := r.Group("/laporan")
+	l.Use(middle_ware.JWTMiddleware)
+
+	l.GET("", laporan.GetLaporan) // SELESAI
+	l.GET("/:id", laporan.GetLaporanID) // SELESAI
+	l.POST("/permintaan/:permintaan_id", laporan.CreateLaporan) // SELESAI
+	l.PUT("/permintaan/:permintaan_id/id/:id", laporan.UpdateLaporan) // SELESAI
+	l.DELETE("/:id", laporan.DeleteLaporan) // SELESAI
+
+	v := r.Group("/verifikasi")
+	v.Use(middle_ware.JWTMiddleware)
+
+	v.GET("", verifikasi.GetVerifikasi) // SELESAI
+	v.GET("/:id", verifikasi.GetVerifikasiID) // SELESAI
+	v.POST("/laporan/:laporan_id", verifikasi.CreateVerifikasi) // SELESAI
+	v.PUT("/laporan/:laporan_id/id/:id", verifikasi.UpdateVerifikasi) // SELESAI
+	v.DELETE("/:id", verifikasi.DeleteVerifikasi) // SELESAI
 }
