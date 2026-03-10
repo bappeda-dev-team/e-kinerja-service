@@ -91,6 +91,7 @@ func Create(c echo.Context) error {
 		helpers.SuccessResponse(201, "Registrasi berhasil", user))
 }
 
-// func Logout(c echo.Context) error {
-
-// }
+ func Logout(c echo.Context) error {
+	return c.JSON(http.StatusOK,
+		helpers.SuccessResponse(200, "Logout berhasil", nil,))
+ }

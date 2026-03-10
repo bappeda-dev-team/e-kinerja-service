@@ -72,21 +72,23 @@ func CreateUser(user *User, hashedPassword string) error {
 	)
 }
 
-func GetUserByUsername(username string) (*User, error) {
+func GetUserByUsername(username string) (*UserRole, error) {
 
 	query := `
-	SELECT id, role_id, username, full_name, password, is_active
-	FROM users
+	SELECT u.id, u.role_id, r.name, u.username, u.full_name, u.password, u.is_active
+	FROM users u
+	LEFT JOIN roles r ON u.role_id = r.id 
 	WHERE username = $1
 	`
 
 	row := config.DB.QueryRow(query, username)
 
-	var user User
+	var user UserRole
 
 	err := row.Scan(
 		&user.ID,
 		&user.RoleID,
+		&user.RoleName,
 		&user.Username,
 		&user.FullName,
 		&user.Password,

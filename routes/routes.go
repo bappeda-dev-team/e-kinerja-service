@@ -28,9 +28,9 @@ func SetupRoutes(r *echo.Echo) {
 	r.GET("/roles", roles.GetRoles) // SELESAI
 	r.GET("/roles/:id", roles.GetRoleID) // SELESAI
 	
-	// e.POST("/logout", user.Logout)
 	auth := r.Group("/auth")
 	auth.POST("/login", user.Login)
+	auth.POST("/logout", user.Logout, middle_ware.JWTMiddleware)
 
 	r.GET("/user", user.GetAllUser) // SELESAI
 	r.GET("/user/:id", user.GetUserID) // SELESAI
@@ -38,6 +38,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	ma := r.Group("/master-aplikasi")
 	ma.Use(middle_ware.JWTMiddleware)
+	ma.Use(middle_ware.RoleMiddleware("super_admin"))
 
 	ma.GET("", master_aplikasi.GetAplikasi) // SELESAI
 	ma.GET("/:id", master_aplikasi.GetAplikasiID) // SELESAI
@@ -47,6 +48,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	mp := r.Group("/master-pemda")
 	mp.Use(middle_ware.JWTMiddleware)
+	mp.Use(middle_ware.RoleMiddleware("super_admin"))
 
 	mp.GET("", master_pemda.GetPemda) // SELESAI
 	mp.GET("/:id", master_pemda.GetPemdaID) // SELESAI
@@ -56,6 +58,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	p := r.Group("/permintaan")
 	p.Use(middle_ware.JWTMiddleware)
+	p.Use(middle_ware.RoleMiddleware("super_admin"))
 
 	p.GET("", permintaan.GetPermintaan) // SELESAI
 	p.GET("/:id", permintaan.GetPermintaanId) // SELESAI
@@ -67,6 +70,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	d := r.Group("/distribusi")
 	d.Use(middle_ware.JWTMiddleware)
+	d.Use(middle_ware.RoleMiddleware("admin"))
 
 	d.GET("", distribusi.GetDistribusi) // SELESAI
 	d.GET("/:id", distribusi.GetDistribusiById) // SELESAI
@@ -78,6 +82,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	dp := r.Group("/pelaksana")
 	dp.Use(middle_ware.JWTMiddleware)
+	dp.Use(middle_ware.RoleMiddleware("admin"))
 
 	dp.GET("", pelaksana.GetPelaksana) // SELESAI
 	dp.GET("/:id", pelaksana.GetPelaksanaID) // SELESAI
@@ -89,6 +94,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	l := r.Group("/laporan")
 	l.Use(middle_ware.JWTMiddleware)
+	l.Use(middle_ware.RoleMiddleware("programmer", "level2"))
 
 	l.GET("", laporan.GetLaporan) // SELESAI
 	l.GET("/:id", laporan.GetLaporanID) // SELESAI
@@ -98,6 +104,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	v := r.Group("/verifikasi")
 	v.Use(middle_ware.JWTMiddleware)
+	v.Use(middle_ware.RoleMiddleware("level2"))
 
 	v.GET("", verifikasi.GetVerifikasi) // SELESAI
 	v.GET("/:id", verifikasi.GetVerifikasiID) // SELESAI

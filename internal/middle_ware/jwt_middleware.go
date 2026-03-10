@@ -43,6 +43,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		c.Set("user_id", claims.UserID)
 		c.Set("username", claims.Username)
 		c.Set("role_id", claims.RoleID)
+		c.Set("name", claims.RoleName)
 
 		return next(c)
 	}

@@ -82,6 +82,7 @@ func LoginService(req LoginRequest) (string, error) {
 		user.ID,
 		user.Username,
 		user.RoleID,
+		user.RoleName,
 	)
 
 	if err != nil {
