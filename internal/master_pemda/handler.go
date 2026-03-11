@@ -1,6 +1,7 @@
 package master_pemda
 
 import (
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
 	"net/http"
@@ -21,8 +22,8 @@ func GetPemda(c echo.Context) error {
 	result, err := GetMasterPemdaServices()
 
 	if err != nil {
-        return err
-    }
+		return err
+	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
@@ -41,8 +42,7 @@ func GetPemdaID(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	result, err := GetMasterPemdaServicesID(id)
@@ -58,7 +58,7 @@ func GetPemdaID(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))	
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
 // CreatePemda godoc
@@ -75,9 +75,7 @@ func CreatePemda(c echo.Context) error {
 	var req MasterPemdaRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest, 
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+		return exception.BadRequest("Validasi gagal")
 	}
 
 	result, err := CreateMasterPemdaServices(req)
@@ -85,7 +83,7 @@ func CreatePemda(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated,
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -105,25 +103,20 @@ func UpdatePemda(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	var req MasterPemdaRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+		return exception.BadRequest("Validasi gagal")
 	}
 
 	result, err := UpdateMasterPemdaServices(id, req)
 	if err != nil {
-
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err
@@ -148,16 +141,13 @@ func DeletePemda(c echo.Context) error {
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	err := DeleteMasterPemdaServices(id)
 	if err != nil {
-
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err

@@ -1,6 +1,7 @@
 package distribusi
 
 import (
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
 	"net/http"
@@ -21,8 +22,8 @@ func GetDistribusi(c echo.Context) error {
 	result, err := GetDistribusiServices()
 
 	if err != nil {
-        return err
-    }
+		return err
+	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
@@ -41,8 +42,7 @@ func GetDistribusiById(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	result, err := GetDistribusiServicesID(id)
@@ -50,8 +50,7 @@ func GetDistribusiById(c echo.Context) error {
 	if err != nil {
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err
@@ -72,8 +71,8 @@ func GetDistribusiByNama(c echo.Context) error {
 	result, err := GetDistribusiNamaServices()
 
 	if err != nil {
-        return err
-    }
+		return err
+	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
@@ -92,8 +91,7 @@ func GetDistribusiByNamaId(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	result, err := GetDistribusiNamaServicesID(id)
@@ -101,8 +99,7 @@ func GetDistribusiByNamaId(c echo.Context) error {
 	if err != nil {
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err
@@ -141,9 +138,7 @@ func CreateDistribusi(c echo.Context) error {
 	var req DistribusiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest, 
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+		return exception.BadRequest("Validasi gagal")
 	}
 
 	result, err := CreateDistribusiServices(permintaanID, userID, req)
@@ -151,7 +146,7 @@ func CreateDistribusi(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated,
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -180,8 +175,7 @@ func UpdateDistribusi(c echo.Context) error {
 	userID := userIDInterface.(string)
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	if _, err := uuid.Parse(permintaanID); err != nil {
@@ -192,18 +186,14 @@ func UpdateDistribusi(c echo.Context) error {
 	var req DistribusiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+		return exception.BadRequest("Validasi gagal")
 	}
 
 	result, err := UpdateDistribusiServices(id, permintaanID, userID, req)
 	if err != nil {
-
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err
@@ -228,16 +218,13 @@ func DeleteDistribusi(c echo.Context) error {
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	err := DeleteDistribusiServices(id)
 	if err != nil {
-
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err

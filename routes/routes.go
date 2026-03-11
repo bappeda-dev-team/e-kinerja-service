@@ -2,10 +2,10 @@ package routes
 
 import (
 	"aplikasi-internal/internal/distribusi"
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/laporan"
 	"aplikasi-internal/internal/master_aplikasi"
 	"aplikasi-internal/internal/master_pemda"
-	"aplikasi-internal/internal/middle_ware"
 	"aplikasi-internal/internal/pelaksana"
 	"aplikasi-internal/internal/permintaan"
 	"aplikasi-internal/internal/roles"
@@ -23,92 +23,62 @@ func SetupRoutes(r *echo.Echo) {
 	r.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// global error handler
-	r.HTTPErrorHandler = middle_ware.ErrorHandler
+	r.HTTPErrorHandler = exception.GlobalExceptionHandler()
 
-	r.GET("/roles", roles.GetRoles) // SELESAI
+	r.GET("/roles", roles.GetRoles)      // SELESAI
 	r.GET("/roles/:id", roles.GetRoleID) // SELESAI
-	
-	auth := r.Group("/auth")
-	auth.POST("/login", user.Login)
-	auth.POST("/logout", user.Logout, middle_ware.JWTMiddleware)
 
-	r.GET("/user", user.GetAllUser) // SELESAI
-	r.GET("/user/:id", user.GetUserID) // SELESAI
+	// e.POST("/logout", user.Logout)
+	// e.POST("/auth", user.Auth)
+	r.GET("/user", user.GetAllUser)     // SELESAI
+	r.GET("/user/:id", user.GetUserID)  // SELESAI
 	r.POST("/create-user", user.Create) //SELESAI
 
-	ma := r.Group("/master-aplikasi")
-	ma.Use(middle_ware.JWTMiddleware)
-	ma.Use(middle_ware.RoleMiddleware("super_admin"))
+	r.GET("/master-aplikasi", master_aplikasi.GetAplikasi)           // SELESAI
+	r.GET("/master-aplikasi/:id", master_aplikasi.GetAplikasiID)     // SELESAI
+	r.POST("/master-aplikasi", master_aplikasi.CreateAplikasi)       // SELESAI
+	r.PUT("/master-aplikasi/:id", master_aplikasi.UpdateAplikasi)    // SELESAI
+	r.DELETE("/master-aplikasi/:id", master_aplikasi.DeleteAplikasi) // SELESAI
 
-	ma.GET("", master_aplikasi.GetAplikasi) // SELESAI
-	ma.GET("/:id", master_aplikasi.GetAplikasiID) // SELESAI
-	ma.POST("", master_aplikasi.CreateAplikasi) // SELESAI
-	ma.PUT("/:id", master_aplikasi.UpdateAplikasi) // SELESAI
-	ma.DELETE("/:id", master_aplikasi.DeleteAplikasi) // SELESAI
+	r.GET("/master-pemda", master_pemda.GetPemda)           // SELESAI
+	r.GET("/master-pemda/:id", master_pemda.GetPemdaID)     // SELESAI
+	r.POST("/master-pemda", master_pemda.CreatePemda)       // SELESAI
+	r.PUT("/master-pemda/:id", master_pemda.UpdatePemda)    // SELESAI
+	r.DELETE("/master-pemda/:id", master_pemda.DeletePemda) // SELESAI
 
-	mp := r.Group("/master-pemda")
-	mp.Use(middle_ware.JWTMiddleware)
-	mp.Use(middle_ware.RoleMiddleware("super_admin"))
+	r.GET("/permintaan", permintaan.GetPermintaan)                // SELESAI
+	r.GET("/permintaan/:id", permintaan.GetPermintaanId)          // SELESAI
+	r.GET("/permintaan-nama", permintaan.GetPermintaanNama)       // SELESAI
+	r.GET("/permintaan-nama/:id", permintaan.GetPermintaanNamaId) // SELESAI
+	r.POST("/permintaan", permintaan.CreatePermintaan)            // SELESAI
+	r.PUT("/permintaan/:id", permintaan.UpdatePermintaan)         // SELESAI
+	r.DELETE("/permintaan/:id", permintaan.DeletePermintaan)      // SELESAI
 
-	mp.GET("", master_pemda.GetPemda) // SELESAI
-	mp.GET("/:id", master_pemda.GetPemdaID) // SELESAI
-	mp.POST("", master_pemda.CreatePemda) // SELESAI
-	mp.PUT("/:id", master_pemda.UpdatePemda) // SELESAI
-	mp.DELETE("/:id", master_pemda.DeletePemda) // SELESAI
+	r.GET("/distribusi", distribusi.GetDistribusi)                  // SELESAI
+	r.GET("/distribusi/:id", distribusi.GetDistribusiById)          // SELESAI
+	r.GET("/distribusi-nama", distribusi.GetDistribusiByNama)       // SELESAI
+	r.GET("/distribusi-nama/:id", distribusi.GetDistribusiByNamaId) // SELESAI
+	r.POST("/distribusi", distribusi.CreateDistribusi)              // SELESAI
+	r.PUT("/distribusi/:id", distribusi.UpdateDistribusi)           // SELESAI
+	r.DELETE("/distribusi/:id", distribusi.DeleteDistribusi)        // SELESAI
 
-	p := r.Group("/permintaan")
-	p.Use(middle_ware.JWTMiddleware)
-	p.Use(middle_ware.RoleMiddleware("super_admin"))
+	r.GET("/pelaksana", pelaksana.GetPelaksana)                  // SELESAI
+	r.GET("/pelaksana/:id", pelaksana.GetPelaksanaID)            // SELESAI
+	r.GET("/pelaksana-nama", pelaksana.GetPelaksanaByNama)       // SELESAI
+	r.GET("/pelaksana-nama/:id", pelaksana.GetPelaksanaByNamaID) // SELESAI
+	r.POST("/pelaksana", pelaksana.CreatePelaksana)              // SELESAI
+	r.PUT("/pelaksana/:id", pelaksana.UpdatePelaksana)           // SELESAI
+	r.DELETE("/pelaksana/:id", pelaksana.DeletePelaksana)        // SELESAI
 
-	p.GET("", permintaan.GetPermintaan) // SELESAI
-	p.GET("/:id", permintaan.GetPermintaanId) // SELESAI
-	p.GET("/nama", permintaan.GetPermintaanNama) // SELESAI
-	p.GET("/nama/:id", permintaan.GetPermintaanNamaId) // SELESAI
-	p.POST("/pemda/:pemda_id/aplikasi/:aplikasi_id", permintaan.CreatePermintaan) // SELESAI
-	p.PUT("/pemda/:pemda_id/aplikasi/:aplikasi_id/id/:id", permintaan.UpdatePermintaan) // SELESAI 
-	p.DELETE("/:id", permintaan.DeletePermintaan) // SELESAI
+	r.GET("/laporan", laporan.GetLaporan)           // SELESAI
+	r.GET("/laporan/:id", laporan.GetLaporanID)     // SELESAI
+	r.POST("/laporan", laporan.CreateLaporan)       // SELESAI
+	r.PUT("/laporan/:id", laporan.UpdateLaporan)    // SELESAI
+	r.DELETE("/laporan/:id", laporan.DeleteLaporan) // SELESAI
 
-	d := r.Group("/distribusi")
-	d.Use(middle_ware.JWTMiddleware)
-	d.Use(middle_ware.RoleMiddleware("admin"))
-
-	d.GET("", distribusi.GetDistribusi) // SELESAI
-	d.GET("/:id", distribusi.GetDistribusiById) // SELESAI
-	d.GET("/nama", distribusi.GetDistribusiByNama) // SELESAI
-	d.GET("/nama/:id", distribusi.GetDistribusiByNamaId) // SELESAI
-	d.POST("/permintaan/:permintaan_id", distribusi.CreateDistribusi) // SELESAI
-	d.PUT("/permintaan/:permintaan_id/id/:id", distribusi.UpdateDistribusi) // SELESAI
-	d.DELETE("/:id", distribusi.DeleteDistribusi) // SELESAI 
-
-	dp := r.Group("/pelaksana")
-	dp.Use(middle_ware.JWTMiddleware)
-	dp.Use(middle_ware.RoleMiddleware("admin"))
-
-	dp.GET("", pelaksana.GetPelaksana) // SELESAI
-	dp.GET("/:id", pelaksana.GetPelaksanaID) // SELESAI
-	dp.GET("/nama", pelaksana.GetPelaksanaByNama) // SELESAI
-	dp.GET("/nama/:id", pelaksana.GetPelaksanaByNamaID) // SELESAI
-	dp.POST("/distribusi/:distribusi_id/programmer/:programmer_id", pelaksana.CreatePelaksana) // SELESAI
-	dp.PUT("/distribusi/:distribusi_id/programmer/:programmer_id/id/:id", pelaksana.UpdatePelaksana) // SELESAI
-	dp.DELETE("/:id", pelaksana.DeletePelaksana) // SELESAI
-
-	l := r.Group("/laporan")
-	l.Use(middle_ware.JWTMiddleware)
-	l.Use(middle_ware.RoleMiddleware("programmer", "level2"))
-
-	l.GET("", laporan.GetLaporan) // SELESAI
-	l.GET("/:id", laporan.GetLaporanID) // SELESAI
-	l.POST("/permintaan/:permintaan_id", laporan.CreateLaporan) // SELESAI
-	l.PUT("/permintaan/:permintaan_id/id/:id", laporan.UpdateLaporan) // SELESAI
-	l.DELETE("/:id", laporan.DeleteLaporan) // SELESAI
-
-	v := r.Group("/verifikasi")
-	v.Use(middle_ware.JWTMiddleware)
-	v.Use(middle_ware.RoleMiddleware("level2"))
-
-	v.GET("", verifikasi.GetVerifikasi) // SELESAI
-	v.GET("/:id", verifikasi.GetVerifikasiID) // SELESAI
-	v.POST("/laporan/:laporan_id", verifikasi.CreateVerifikasi) // SELESAI
-	v.PUT("/laporan/:laporan_id/id/:id", verifikasi.UpdateVerifikasi) // SELESAI
-	v.DELETE("/:id", verifikasi.DeleteVerifikasi) // SELESAI
+	r.GET("/verifikasi", verifikasi.GetVerifikasi)           // SELESAI
+	r.GET("/verifikasi/:id", verifikasi.GetVerifikasiID)     // SELESAI
+	r.POST("/verifikasi", verifikasi.CreateVerifikasi)       // SELESAI
+	r.PUT("/verifikasi/:id", verifikasi.UpdateVerifikasi)    // SELESAI
+	r.DELETE("/verifikasi/:id", verifikasi.DeleteVerifikasi) // SELESAI
 }

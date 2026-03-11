@@ -1,6 +1,7 @@
 package pelaksana
 
 import (
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
 	"net/http"
@@ -21,8 +22,8 @@ func GetPelaksana(c echo.Context) error {
 	result, err := GetPelaksanaServices()
 
 	if err != nil {
-        return err
-    }
+		return err
+	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
@@ -41,8 +42,7 @@ func GetPelaksanaID(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	result, err := GetPelaksanaServicesID(id)
@@ -73,8 +73,8 @@ func GetPelaksanaByNama(c echo.Context) error {
 	result, err := GetPelaksanaNamaServices()
 
 	if err != nil {
-        return err
-    }
+		return err
+	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
@@ -93,8 +93,7 @@ func GetPelaksanaByNamaID(c echo.Context) error {
 	id := c.Param("id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	result, err := GetPelaksanaNamaServicesID(id)
@@ -140,17 +139,17 @@ func CreatePelaksana(c echo.Context) error {
 
 	result, err := CreatePelaksanaServices(distribusiID, programmerID)
 	if err != nil {
-		if err.Error() == "distribusi_id sudah digunakan"||
+		if err.Error() == "distribusi_id sudah digunakan" ||
 			err.Error() == "programmer_id sudah digunakan" {
 
 			return c.JSON(http.StatusBadRequest,
 				helpers.ErrorResponse(400, err.Error(), nil))
 		}
-		
+
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, 
+	return c.JSON(http.StatusCreated,
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
@@ -188,14 +187,13 @@ func UpdatePelaksana(c echo.Context) error {
 
 	result, err := UpdatePelaksanaServices(id, distribusiID, programmerID)
 	if err != nil {
-
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
 		}
 
-		if err.Error() == "distribusi_id sudah digunakan"||
+		if err.Error() == "distribusi_id sudah digunakan" ||
 			err.Error() == "programmer_id sudah digunakan" {
 
 			return c.JSON(http.StatusBadRequest,
@@ -224,16 +222,13 @@ func DeletePelaksana(c echo.Context) error {
 
 	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	err := DeletePelaksanaServices(id)
 	if err != nil {
-
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err
