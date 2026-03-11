@@ -83,7 +83,7 @@ func CreateLaporan(c echo.Context) error {
 
 	if _, err := uuid.Parse(permintaanID); err != nil {
 		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "pemda_id tidak valid", nil))
+			helpers.ErrorResponse(400, "permintaan_id tidak valid", nil))
 	}
 
 	var req LaporanRequest
