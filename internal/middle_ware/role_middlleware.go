@@ -1,7 +1,7 @@
 package middle_ware
 
 import (
-	"net/http"
+	"aplikasi-internal/internal/exception"
 
 	"github.com/labstack/echo/v4"
 )
@@ -14,7 +14,8 @@ func RoleMiddleware(allowedRoles ...string) echo.MiddlewareFunc {
 			roleInterface := c.Get("name")
 
 			if roleInterface == nil {
-				return c.JSON(http.StatusUnauthorized, "role tidak ditemukan")
+				return exception.Unauthentication("role tidak ditemukan")
+				// return c.JSON(http.StatusUnauthorized, "role tidak ditemukan")
 			}
 
 			roleName := roleInterface.(string)
@@ -25,7 +26,8 @@ func RoleMiddleware(allowedRoles ...string) echo.MiddlewareFunc {
 				}
 			}
 
-			return c.JSON(http.StatusForbidden, "akses ditolak")
+			return exception.AccessDenied("akses ditolak")
+			// return c.JSON(http.StatusForbidden, "akses ditolak")
 		}
 	}
 }

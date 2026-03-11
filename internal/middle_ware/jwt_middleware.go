@@ -1,8 +1,8 @@
 package middle_ware
 
 import (
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
-	"net/http"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -15,12 +15,14 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		authHeader := c.Request().Header.Get("Authorization")
 
 		if authHeader == "" {
-			return c.JSON(http.StatusUnauthorized, "token tidak ada")
+			return exception.Unauthentication("token tidak ada")
+			// return c.JSON(http.StatusUnauthorized, "token tidak ada")
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 {
-			return c.JSON(http.StatusUnauthorized, "format token salah")
+			return exception.Unauthorized("format token salah")
+			// return c.JSON(http.StatusUnauthorized, "format token salah")
 		}
 
 		tokenString := parts[1]
@@ -34,7 +36,8 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		)
 
 		if err != nil || !token.Valid {
-			return c.JSON(http.StatusUnauthorized, "token tidak valid")
+			return exception.InvalidToken("token tidak valid")
+			// return c.JSON(http.StatusUnauthorized, "token tidak valid")
 		}
 
 		claims := token.Claims.(*helpers.JwtCustomClaims)
