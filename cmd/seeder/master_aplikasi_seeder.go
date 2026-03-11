@@ -8,10 +8,14 @@ import (
 func SeedMasterAplikasi(db *sql.DB) {
 	query := `
 	INSERT INTO master_aplikasi (name)
-	VALUES 
-	('aplikasi tracer study'),
-	('sistem sensor suhu'),
-	('website monitoring');
+	SELECT name FROM (VALUES
+		('aplikasi tracer study'),
+		('sistem sensor suhu'),
+		('website monitoring')
+	) AS v(name)
+	WHERE NOT EXISTS (
+		SELECT 1 FROM master_aplikasi WHERE master_aplikasi.name = v.name
+	);
 	`
 
 	_, err := db.Exec(query)

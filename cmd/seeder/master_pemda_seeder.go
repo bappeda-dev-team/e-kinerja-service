@@ -8,10 +8,11 @@ import (
 func SeedMasterPemda(db *sql.DB) {
 	query := `
 	INSERT INTO master_pemda (name)
-	VALUES 
+	VALUES
 	('Pemda tangerang'),
 	('Pemda Sukoharjo'),
-	('Pemda Semarang');
+	('Pemda Semarang')
+	ON CONFLICT (name) DO NOTHING;
 	`
 
 	_, err := db.Exec(query)
