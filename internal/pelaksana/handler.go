@@ -171,8 +171,7 @@ func UpdatePelaksana(c echo.Context) error {
 	programmerID := c.Param("programmer_id")
 
 	if _, err := uuid.Parse(id); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "UUID tidak valid", nil))
+		return exception.BadRequest("UUID tidak valid")
 	}
 
 	if _, err := uuid.Parse(distribusiID); err != nil {
@@ -189,8 +188,7 @@ func UpdatePelaksana(c echo.Context) error {
 	if err != nil {
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		if err.Error() == "distribusi_id sudah digunakan" ||

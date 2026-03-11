@@ -92,7 +92,7 @@ func CreateLaporan(c echo.Context) error {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := CreateLaporanServices(permintaanID, userID,req)
+	result, err := CreateLaporanServices(permintaanID, userID, req)
 	if err != nil {
 		return err
 	}
