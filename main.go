@@ -2,6 +2,7 @@ package main
 
 import (
 	"aplikasi-internal/config"
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"aplikasi-internal/routes"
 	"fmt"
@@ -31,6 +32,8 @@ func main() {
 	config.ConnectDB()
 
 	e := echo.New()
+
+	e.HTTPErrorHandler = exception.GlobalExceptionHandler()
 
 	e.Validator = &helpers.CustomValidator{
 		Validator: validator.New(),
@@ -77,5 +80,5 @@ func runMigrations() {
 		log.Fatal("Migration failed:", err)
 	}
 
-	log.Println("✅ Migration sukses")
+	log.Println("Migration sukses")
 }

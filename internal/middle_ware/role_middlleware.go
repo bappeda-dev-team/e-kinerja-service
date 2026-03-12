@@ -20,6 +20,10 @@ func RoleMiddleware(allowedRoles ...string) echo.MiddlewareFunc {
 
 			roleName := roleInterface.(string)
 
+			if roleName == "super_admin" {
+				return next(c)
+			}
+
 			for _, role := range allowedRoles {
 				if roleName == role {
 					return next(c)
