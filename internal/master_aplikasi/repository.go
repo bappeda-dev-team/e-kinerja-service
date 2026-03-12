@@ -6,7 +6,7 @@ import (
 )
 
 func GetAllMasterAplikasi() ([]MasterAplikasi, error) {
-	rows, err := config.DB.Query("SELECT id, name, created_at, updated_at FROM master_aplikasi")
+	rows, err := config.DB.Query("SELECT id, name, logo, created_at, updated_at FROM master_aplikasi")
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func GetAllMasterAplikasi() ([]MasterAplikasi, error) {
 
 	for rows.Next() {
 		var aplikasi MasterAplikasi
-		err := rows.Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
+		err := rows.Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.Logo, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -27,10 +27,10 @@ func GetAllMasterAplikasi() ([]MasterAplikasi, error) {
 
 }
 
-func GetMasterAplikasiId(id string) (MasterAplikasi, error){
+func GetMasterAplikasiId(id string) (MasterAplikasi, error) {
 	var aplikasi MasterAplikasi
-	err := config.DB.QueryRow("SELECT id, name, created_at, updated_at FROM master_aplikasi WHERE id=$1", id).
-		Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
+	err := config.DB.QueryRow("SELECT id, name, logo, created_at, updated_at FROM master_aplikasi WHERE id=$1", id).
+		Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.Logo, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
 
 	if err != nil {
 		return MasterAplikasi{}, err
@@ -41,14 +41,15 @@ func GetMasterAplikasiId(id string) (MasterAplikasi, error){
 
 func CreateMasterAplikasi(data *MasterAplikasi) error {
 	query := `
-		INSERT INTO master_aplikasi (name)
-		VALUES ($1)
+		INSERT INTO master_aplikasi (name, logo)
+		VALUES ($1, $2)
 		RETURNING id, created_at, updated_at
 	`
 
 	err := config.DB.QueryRow(
 		query,
 		data.Name,
+		data.Logo,
 	).Scan(
 		&data.ID,
 		&data.CreatedAt,
@@ -62,18 +63,35 @@ func UpdateMasterAplikasi(id string, data *MasterAplikasi) error {
 	query := `
 		UPDATE master_aplikasi
 		SET name = $1,
+		    logo = $2,
 		    updated_at = NOW()
-		WHERE id = $2
+		WHERE id = $3
 		RETURNING updated_at
 	`
 
 	err := config.DB.QueryRow(
 		query,
 		data.Name,
+		data.Logo,
 		id,
 	).Scan(&data.UpdatedAt)
 
 	return err
+}
+
+func UpdateLogoMasterAplikasi(id string, logoURL string) error {
+	result, err := config.DB.Exec(`UPDATE master_aplikasi SET logo = $1, updated_at = NOW() WHERE id = $2`, logoURL, id)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func DeleteMasterAplikasi(id string) error {

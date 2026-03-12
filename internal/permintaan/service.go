@@ -1,21 +1,22 @@
 package permintaan
 
-func GetPermintaanServices() ([]Permintaan, error) {
+func GetPermintaanServices() ([]PermintaanResponse, error) {
 	return GetAll()
 }
 
-func GetPermintaanServicesID(id string) (Permintaan, error) {
+func GetPermintaanServicesID(id string) (PermintaanResponse, error) {
 	return GetById(id)
 }
-func GetPermintaanNamaServices() ([]PermintaanByNama, error) {
+
+func GetPermintaanNamaServices() ([]PermintaanDetailResponse, error) {
 	return GetAllByNama()
 }
 
-func GetPermintaanNamaServicesID(id string) (PermintaanByNama, error) {
+func GetPermintaanNamaServicesID(id string) (PermintaanDetailResponse, error) {
 	return GetByNamaId(id)
 }
 
-func CreatePermintaanServices(pemdaID string, aplikasiID string, userID string, req PermintaanRequest) (*Permintaan, error) {
+func CreatePermintaanServices(pemdaID string, aplikasiID string, userID string, req PermintaanRequest) (*PermintaanResponse, error) {
 
 	data := &Permintaan{
 		PemdaID:           pemdaID,
@@ -33,10 +34,24 @@ func CreatePermintaanServices(pemdaID string, aplikasiID string, userID string, 
 		return nil, err
 	}
 
-	return data, nil
+	resp := &PermintaanResponse{
+		ID:                data.ID,
+		PemdaID:           data.PemdaID,
+		AplikasiID:        data.AplikasiID,
+		Menu:              data.Menu,
+		KondisiAwal:       data.KondisiAwal,
+		KondisiDiharapkan: data.KondisiDiharapkan,
+		TanggalPesanan:    data.TanggalPesanan,
+		TanggalDeadline:   data.TanggalDeadline,
+		CreatedBy:         data.CreatedBy,
+		CreatedAt:         data.CreatedAt,
+		UpdatedAt:         data.UpdatedAt,
+	}
+
+	return resp, nil
 }
 
-func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, userID string, req PermintaanRequest) (*Permintaan, error) {
+func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, userID string, req PermintaanRequest) (*PermintaanResponse, error) {
 
 	data := &Permintaan{
 		PemdaID:           pemdaID,
@@ -54,11 +69,26 @@ func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, user
 		return nil, err
 	}
 
-	data.ID = id
+	resp := &PermintaanResponse{
+		ID:                id,
+		PemdaID:           data.PemdaID,
+		AplikasiID:        data.AplikasiID,
+		Menu:              data.Menu,
+		KondisiAwal:       data.KondisiAwal,
+		KondisiDiharapkan: data.KondisiDiharapkan,
+		TanggalPesanan:    data.TanggalPesanan,
+		TanggalDeadline:   data.TanggalDeadline,
+		CreatedBy:         data.CreatedBy,
+		UpdatedAt:         data.UpdatedAt,
+	}
 
-	return data, nil
+	return resp, nil
 }
 
 func DeletePermintaanServices(id string) error {
 	return Delete(id)
+}
+
+func UpdateLampiranServices(id string, urls []string) error {
+	return UpdateLampiran(id, StringArray(urls))
 }

@@ -2,22 +2,23 @@ package pelaksana
 
 import "errors"
 
-func GetPelaksanaServices() ([]Pelaksana, error) {
+func GetPelaksanaServices() ([]PelaksanaResponse, error) {
 	return GetAll()
 }
 
-func GetPelaksanaServicesID(id string) (Pelaksana, error) {
+func GetPelaksanaServicesID(id string) (PelaksanaResponse, error) {
 	return GetId(id)
 }
-func GetPelaksanaNamaServices() ([]PelaksanaNama, error) {
+
+func GetPelaksanaNamaServices() ([]PelaksanaDetailResponse, error) {
 	return GetAllByNama()
 }
 
-func GetPelaksanaNamaServicesID(id string) (PelaksanaNama, error) {
+func GetPelaksanaNamaServicesID(id string) (PelaksanaDetailResponse, error) {
 	return GetByNamaId(id)
 }
 
-func CreatePelaksanaServices(distribusiID string, programmerID string) (*Pelaksana, error) {
+func CreatePelaksanaServices(distribusiID string, programmerID string) (*PelaksanaResponse, error) {
 
 	distribusiidExists, err := IsDistribusiIdExists(distribusiID)
 	if err != nil {
@@ -45,10 +46,16 @@ func CreatePelaksanaServices(distribusiID string, programmerID string) (*Pelaksa
 		return nil, err
 	}
 
-	return data, nil
+	return &PelaksanaResponse{
+		ID:           data.ID,
+		DistribusiID: data.DistribusiID,
+		ProgrammerID: data.ProgrammerID,
+		CreatedAt:    data.CreatedAt,
+		UpdatedAt:    data.UpdatedAt,
+	}, nil
 }
 
-func UpdatePelaksanaServices(id string, distribusiID string, programmerID string) (*Pelaksana, error) {
+func UpdatePelaksanaServices(id string, distribusiID string, programmerID string) (*PelaksanaResponse, error) {
 
 	distribusiidExists, err := IsDistribusiIdExists(distribusiID)
 	if err != nil {
@@ -76,9 +83,12 @@ func UpdatePelaksanaServices(id string, distribusiID string, programmerID string
 		return nil, err
 	}
 
-	data.ID = id
-
-	return data, nil
+	return &PelaksanaResponse{
+		ID:           id,
+		DistribusiID: data.DistribusiID,
+		ProgrammerID: data.ProgrammerID,
+		UpdatedAt:    data.UpdatedAt,
+	}, nil
 }
 
 func DeletePelaksanaServices(id string) error {

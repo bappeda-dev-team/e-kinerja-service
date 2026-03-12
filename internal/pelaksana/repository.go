@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-func GetAll() ([]Pelaksana, error) {
+func GetAll() ([]PelaksanaResponse, error) {
 	rows, err := config.DB.Query(
 		`SELECT id, distribusi_id, Programmer_id, created_at, updated_at FROM distribusi_pelaksana`)
 	if err != nil {
@@ -13,10 +13,10 @@ func GetAll() ([]Pelaksana, error) {
 	}
 	defer rows.Close()
 
-	var pelaksana []Pelaksana
+	var pelaksana []PelaksanaResponse
 
 	for rows.Next() {
-		var data Pelaksana
+		var data PelaksanaResponse
 		err := rows.Scan(&data.ID, &data.DistribusiID, &data.ProgrammerID, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
@@ -28,34 +28,35 @@ func GetAll() ([]Pelaksana, error) {
 
 }
 
-func GetId(id string) (Pelaksana, error){
-	var data Pelaksana
+func GetId(id string) (PelaksanaResponse, error) {
+	var data PelaksanaResponse
 	err := config.DB.QueryRow(`SELECT id, distribusi_id, Programmer_id, created_at, updated_at FROM distribusi_pelaksana WHERE id=$1`, id).
 		Scan(&data.ID, &data.DistribusiID, &data.ProgrammerID, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
-		return Pelaksana{}, err
+		return PelaksanaResponse{}, err
 	}
 
 	return data, err
 }
-func GetAllByNama() ([]PelaksanaNama, error) {
+
+func GetAllByNama() ([]PelaksanaDetailResponse, error) {
 	rows, err := config.DB.Query(
-		`SELECT dp.id, mp.name, ma.name, u.full_name, dp.created_at, dp.updated_at FROM distribusi_pelaksana dp 
-		LEFT JOIN distribusi d ON dp.distribusi_id = d.id 
-		LEFT JOIN permintaan p ON d.permintaan_id = p.id 
-		LEFT JOIN users u ON dp.programmer_id = u.id 
-		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id 
+		`SELECT dp.id, mp.name, ma.name, u.full_name, dp.created_at, dp.updated_at FROM distribusi_pelaksana dp
+		LEFT JOIN distribusi d ON dp.distribusi_id = d.id
+		LEFT JOIN permintaan p ON d.permintaan_id = p.id
+		LEFT JOIN users u ON dp.programmer_id = u.id
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var pelaksana []PelaksanaNama
+	var pelaksana []PelaksanaDetailResponse
 
 	for rows.Next() {
-		var data PelaksanaNama
+		var data PelaksanaDetailResponse
 		err := rows.Scan(&data.ID, &data.Pemda, &data.Aplikasi, &data.Programmer, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
@@ -67,18 +68,18 @@ func GetAllByNama() ([]PelaksanaNama, error) {
 
 }
 
-func GetByNamaId(id string) (PelaksanaNama, error){
-	var data PelaksanaNama
-	err := config.DB.QueryRow(`SELECT dp.id, mp.name, ma.name, u.full_name, dp.created_at, dp.updated_at FROM distribusi_pelaksana dp 
-	LEFT JOIN distribusi d ON dp.distribusi_id = d.id 
-	LEFT JOIN permintaan p ON d.permintaan_id = p.id 
-	LEFT JOIN users u ON dp.programmer_id = u.id 
-	LEFT JOIN master_pemda mp ON p.pemda_id = mp.id 
+func GetByNamaId(id string) (PelaksanaDetailResponse, error) {
+	var data PelaksanaDetailResponse
+	err := config.DB.QueryRow(`SELECT dp.id, mp.name, ma.name, u.full_name, dp.created_at, dp.updated_at FROM distribusi_pelaksana dp
+	LEFT JOIN distribusi d ON dp.distribusi_id = d.id
+	LEFT JOIN permintaan p ON d.permintaan_id = p.id
+	LEFT JOIN users u ON dp.programmer_id = u.id
+	LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 	LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id WHERE dp.id=$1`, id).
 		Scan(&data.ID, &data.Pemda, &data.Aplikasi, &data.Programmer, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
-		return PelaksanaNama{}, err
+		return PelaksanaDetailResponse{}, err
 	}
 
 	return data, err

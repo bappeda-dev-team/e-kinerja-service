@@ -11,6 +11,3 @@ type Laporan struct {
 	UpdatedAt   	time.Time `json:"updated_at"`
 }
 
-type LaporanRequest struct {
-	LaporanProgress string `json:"laporan_progress" validate:"required,min=3"`
-}

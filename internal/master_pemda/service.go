@@ -41,3 +41,7 @@ func UpdateMasterPemdaServices(id string, req MasterPemdaRequest) (*MasterPemda,
 func DeleteMasterPemdaServices(id string) error {
 	return DeleteMasterPemda(id)
 }
+
+func UpdateLogoServices(id string, logoURL string) error {
+	return UpdateLogoMasterPemda(id, logoURL)
+}

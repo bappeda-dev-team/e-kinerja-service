@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-func GetAll() ([]Laporan, error) {
+func GetAll() ([]LaporanResponse, error) {
 	rows, err := config.DB.Query(
 		`SELECT id, permintaan_id, Programmer_id, laporan_progress, created_at, updated_at FROM laporan_kinerja`)
 	if err != nil {
@@ -13,10 +13,10 @@ func GetAll() ([]Laporan, error) {
 	}
 	defer rows.Close()
 
-	var laporan []Laporan
+	var laporan []LaporanResponse
 
 	for rows.Next() {
-		var data Laporan
+		var data LaporanResponse
 		err := rows.Scan(&data.ID, &data.PermintaanID, &data.ProgrammerID, &data.LaporanProgress, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
@@ -28,13 +28,13 @@ func GetAll() ([]Laporan, error) {
 
 }
 
-func GetId(id string) (Laporan, error) {
-	var data Laporan
+func GetId(id string) (LaporanResponse, error) {
+	var data LaporanResponse
 	err := config.DB.QueryRow(`SELECT id, permintaan_id, Programmer_id, laporan_progress, created_at, updated_at FROM laporan_kinerja WHERE id=$1`, id).
-		Scan(&data.ID, &data.PermintaanID, &data.ProgrammerID, &data.LaporanProgress , &data.CreatedAt, &data.UpdatedAt)
+		Scan(&data.ID, &data.PermintaanID, &data.ProgrammerID, &data.LaporanProgress, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
-		return Laporan{}, err
+		return LaporanResponse{}, err
 	}
 
 	return data, err

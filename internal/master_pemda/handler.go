@@ -3,8 +3,10 @@ package master_pemda
 import (
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
+	"aplikasi-internal/internal/storage"
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -155,4 +157,72 @@ func DeletePemda(c echo.Context) error {
 
 	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
+}
+
+// PresignLogoUpload godoc
+// @Summary Buat pre-signed URL untuk upload logo pemda
+// @Description Menghasilkan pre-signed PUT URL ke S3. Client upload file langsung ke URL tersebut, lalu panggil PATCH /:id/logo dengan key yang dikembalikan.
+// @Tags Master Pemda
+// @Produce json
+// @Param id path string true "ID Master Pemda"
+// @Param ext query string false "Ekstensi file, misal .png atau .jpg (default: .png)"
+// @Success 200 {object} helpers.APIResponse{data=map[string]string}
+// @Failure 400 {object} helpers.APIResponse
+// @Router /master-pemda/{id}/logo/presign [post]
+func PresignLogoUpload(c echo.Context) error {
+	id := c.Param("id")
+	if _, err := uuid.Parse(id); err != nil {
+		return exception.BadRequest("UUID tidak valid")
+	}
+
+	ext := c.QueryParam("ext")
+	if ext == "" {
+		ext = ".png"
+	}
+
+	presignURL, key, err := storage.PresignUpload(storage.FolderPemda, ext, 15*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Presign URL berhasil dibuat", map[string]string{
+		"presign_url": presignURL,
+		"key":         key,
+	}))
+}
+
+// ConfirmLogoUpload godoc
+// @Summary Simpan key logo pemda setelah upload selesai
+// @Description Setelah client upload ke pre-signed URL, kirim key S3 yang diterima untuk disimpan ke database.
+// @Tags Master Pemda
+// @Accept json
+// @Produce json
+// @Param id path string true "ID Master Pemda"
+// @Param request body ConfirmLogoRequest true "Key S3 hasil upload"
+// @Success 200 {object} helpers.APIResponse
+// @Failure 400 {object} helpers.APIResponse
+// @Failure 404 {object} helpers.APIResponse
+// @Router /master-pemda/{id}/logo [patch]
+func ConfirmLogoUpload(c echo.Context) error {
+	id := c.Param("id")
+	if _, err := uuid.Parse(id); err != nil {
+		return exception.BadRequest("UUID tidak valid")
+	}
+
+	var req ConfirmLogoRequest
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return exception.BadRequest("Validasi gagal")
+	}
+
+	logoURL := storage.PublicURL(req.Key)
+	if err := UpdateLogoServices(id, logoURL); err != nil {
+		if err == sql.ErrNoRows {
+			return exception.ResourceNotFound("Data tidak ditemukan")
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Logo berhasil disimpan", map[string]string{
+		"logo": logoURL,
+	}))
 }

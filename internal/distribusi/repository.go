@@ -5,56 +5,56 @@ import (
 	"database/sql"
 )
 
-func GetAll() ([]Distribusi, error) {
+func GetAll() ([]DistribusiResponse, error) {
 	rows, err := config.DB.Query(`SELECT id, permintaan_id, admin_id, komentar, created_at, updated_at FROM distribusi`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var permintaan []Distribusi
+	var distribusi []DistribusiResponse
 
 	for rows.Next() {
-		var data Distribusi
+		var data DistribusiResponse
 		err := rows.Scan(&data.ID, &data.PermintaanID, &data.AdminID, &data.Komentar, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
-		permintaan = append(permintaan, data)
-	}
-
-	return permintaan, err
-
-}
-
-func GetById(id string) (Distribusi, error){
-	var distribusi Distribusi
-	err := config.DB.QueryRow(`SELECT id, permintaan_id, admin_id, komentar, created_at, updated_at FROM distribusi WHERE id=$1`, id).
-		Scan(&distribusi.ID, &distribusi.PermintaanID, &distribusi.AdminID, &distribusi.Komentar, &distribusi.CreatedAt, &distribusi.UpdatedAt)
-
-	if err != nil {
-		return Distribusi{}, err
+		distribusi = append(distribusi, data)
 	}
 
 	return distribusi, err
+
 }
 
-func GetAllByNama() ([]DistribusiByNama, error) {
+func GetById(id string) (DistribusiResponse, error) {
+	var data DistribusiResponse
+	err := config.DB.QueryRow(`SELECT id, permintaan_id, admin_id, komentar, created_at, updated_at FROM distribusi WHERE id=$1`, id).
+		Scan(&data.ID, &data.PermintaanID, &data.AdminID, &data.Komentar, &data.CreatedAt, &data.UpdatedAt)
+
+	if err != nil {
+		return DistribusiResponse{}, err
+	}
+
+	return data, err
+}
+
+func GetAllByNama() ([]DistribusiDetailResponse, error) {
 	rows, err := config.DB.Query(
-		`SELECT d.id, mp.name, ma.name, u.full_name, d.komentar, d.created_at, d.updated_at FROM distribusi d 
-		LEFT JOIN permintaan p ON d.permintaan_id = p.id 
-		LEFT JOIN users u ON d.admin_id = u.id 
-		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id 
+		`SELECT d.id, mp.name, ma.name, u.full_name, d.komentar, d.created_at, d.updated_at FROM distribusi d
+		LEFT JOIN permintaan p ON d.permintaan_id = p.id
+		LEFT JOIN users u ON d.admin_id = u.id
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var distribusi []DistribusiByNama
+	var distribusi []DistribusiDetailResponse
 
 	for rows.Next() {
-		var data DistribusiByNama
+		var data DistribusiDetailResponse
 		err := rows.Scan(&data.ID, &data.Pemda, &data.Aplikasi, &data.Admin, &data.Komentar, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
@@ -66,20 +66,20 @@ func GetAllByNama() ([]DistribusiByNama, error) {
 
 }
 
-func GetByNamaId(id string) (DistribusiByNama, error){
-	var distribusi DistribusiByNama
-	err := config.DB.QueryRow(`SELECT d.id, mp.name, ma.name, u.full_name, d.komentar, d.created_at, d.updated_at FROM distribusi d 
-	LEFT JOIN permintaan p ON d.permintaan_id = p.id 
-	LEFT JOIN users u ON d.admin_id = u.id 
-	LEFT JOIN master_pemda mp ON p.pemda_id = mp.id 
+func GetByNamaId(id string) (DistribusiDetailResponse, error) {
+	var data DistribusiDetailResponse
+	err := config.DB.QueryRow(`SELECT d.id, mp.name, ma.name, u.full_name, d.komentar, d.created_at, d.updated_at FROM distribusi d
+	LEFT JOIN permintaan p ON d.permintaan_id = p.id
+	LEFT JOIN users u ON d.admin_id = u.id
+	LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 	LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id WHERE d.id=$1`, id).
-		Scan(&distribusi.ID, &distribusi.Pemda, &distribusi.Aplikasi, &distribusi.Admin, &distribusi.Komentar, &distribusi.CreatedAt, &distribusi.UpdatedAt)
+		Scan(&data.ID, &data.Pemda, &data.Aplikasi, &data.Admin, &data.Komentar, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
-		return DistribusiByNama{}, err
+		return DistribusiDetailResponse{}, err
 	}
 
-	return distribusi, err
+	return data, err
 }
 
 func Create(data *Distribusi) error {

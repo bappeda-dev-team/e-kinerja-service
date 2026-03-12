@@ -2,35 +2,35 @@ package user
 
 import "aplikasi-internal/config"
 
-func GetAll() ([]User, error) {
+func GetAll() ([]UserResponse, error) {
 	rows, err := config.DB.Query(
-		`SELECT id, role_id, username, full_name, is_active, created_at, updated_at FROM users`)
+		`SELECT id, role_id, username, full_name, profile_picture, is_active, created_at, updated_at FROM users`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var verifikasi []User
+	var users []UserResponse
 
 	for rows.Next() {
-		var data User
-		err := rows.Scan(&data.ID, &data.RoleID, &data.Username, &data.FullName, &data.IsActive, &data.CreatedAt, &data.UpdatedAt)
+		var data UserResponse
+		err := rows.Scan(&data.ID, &data.RoleID, &data.Username, &data.FullName, &data.ProfilePicture, &data.IsActive, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
-		verifikasi = append(verifikasi, data)
+		users = append(users, data)
 	}
 
-	return verifikasi, err
+	return users, err
 }
 
-func GetId(id string) (User, error) {
-	var data User
-	err := config.DB.QueryRow(`SELECT id, role_id, username, full_name, is_active, created_at, updated_at FROM users WHERE id=$1`, id).
-		Scan(&data.ID, &data.RoleID, &data.Username, &data.FullName, &data.IsActive, &data.CreatedAt, &data.UpdatedAt)
+func GetId(id string) (UserResponse, error) {
+	var data UserResponse
+	err := config.DB.QueryRow(`SELECT id, role_id, username, full_name, profile_picture, is_active, created_at, updated_at FROM users WHERE id=$1`, id).
+		Scan(&data.ID, &data.RoleID, &data.Username, &data.FullName, &data.ProfilePicture, &data.IsActive, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
-		return User{}, err
+		return UserResponse{}, err
 	}
 
 	return data, err
@@ -53,8 +53,8 @@ func IsRoleExists(roleID string) (bool, error) {
 
 func CreateUser(user *User, hashedPassword string) error {
 	query := `
-		INSERT INTO users (role_id, username, full_name, password)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO users (role_id, username, full_name, password, profile_picture)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, is_active, created_at, updated_at
 	`
 
@@ -64,12 +64,19 @@ func CreateUser(user *User, hashedPassword string) error {
 		user.Username,
 		user.FullName,
 		hashedPassword,
+		user.ProfilePicture,
 	).Scan(
 		&user.ID,
 		&user.IsActive,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
+}
+
+func UpdateProfilePicture(id string, profilePicture string) error {
+	query := `UPDATE users SET profile_picture = $1, updated_at = NOW() WHERE id = $2`
+	_, err := config.DB.Exec(query, profilePicture, id)
+	return err
 }
 
 func GetUserByUsername(username string) (*UserRole, error) {

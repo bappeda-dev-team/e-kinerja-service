@@ -12,7 +12,3 @@ type Verifikasi struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
-type VerifikasiRequest struct {
-	Komentar  	    string `json:"komentar"`
-	StatusVerified  string `json:"status_verified" validate:"required"`
-}

@@ -1,48 +1,28 @@
 basePath: /
 definitions:
-  distribusi.Distribusi:
-    properties:
-      admin_id:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      komentar:
-        type: string
-      permintaan_id:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  distribusi.DistribusiByNama:
-    properties:
-      admin:
-        type: string
-      aplikasi:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      komentar:
-        type: string
-      pemda:
-        type: string
-      updated_at:
-        type: string
-    type: object
   distribusi.DistribusiRequest:
     properties:
-      admin_id:
-        type: string
       komentar:
         type: string
       permintaan_id:
         type: string
     required:
-    - admin_id
     - permintaan_id
+    type: object
+  distribusi.DistribusiResponse:
+    properties:
+      admin_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      komentar:
+        type: string
+      permintaan_id:
+        type: string
+      updated_at:
+        type: string
     type: object
   helpers.APIResponse:
     properties:
@@ -55,7 +35,18 @@ definitions:
       success:
         type: boolean
     type: object
-  laporan.Laporan:
+  laporan.LaporanRequest:
+    properties:
+      laporan_progress:
+        minLength: 3
+        type: string
+      permintaan_id:
+        type: string
+    required:
+    - laporan_progress
+    - permintaan_id
+    type: object
+  laporan.LaporanResponse:
     properties:
       created_at:
         type: string
@@ -69,20 +60,6 @@ definitions:
         type: string
       updated_at:
         type: string
-    type: object
-  laporan.LaporanRequest:
-    properties:
-      laporan_progress:
-        minLength: 3
-        type: string
-      permintaan_id:
-        type: string
-      programmer_id:
-        type: string
-    required:
-    - laporan_progress
-    - permintaan_id
-    - programmer_id
     type: object
   master_aplikasi.CreateMasterAplikasiRequest:
     properties:
@@ -122,34 +99,6 @@ definitions:
     required:
     - name
     type: object
-  pelaksana.Pelaksana:
-    properties:
-      created_at:
-        type: string
-      distribusi_id:
-        type: string
-      id:
-        type: string
-      programmer_id:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  pelaksana.PelaksanaNama:
-    properties:
-      aplikasi:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      pemda:
-        type: string
-      programmer:
-        type: string
-      updated_at:
-        type: string
-    type: object
   pelaksana.PelaksanaRequest:
     properties:
       distribusi_id:
@@ -160,52 +109,15 @@ definitions:
     - distribusi_id
     - programmer_id
     type: object
-  permintaan.Permintaan:
+  pelaksana.PelaksanaResponse:
     properties:
-      aplikasi_id:
-        type: string
       created_at:
         type: string
-      created_by:
+      distribusi_id:
         type: string
       id:
         type: string
-      kondisi_awal:
-        type: string
-      kondisi_diharapkan:
-        type: string
-      menu:
-        type: string
-      pemda_id:
-        type: string
-      tanggal_deadline:
-        type: string
-      tanggal_pesanan:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  permintaan.PermintaanByNama:
-    properties:
-      aplikasi:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      kondisi_awal:
-        type: string
-      kondisi_diharapkan:
-        type: string
-      menu:
-        type: string
-      pembuat:
-        type: string
-      pemda:
-        type: string
-      tanggal_deadline:
-        type: string
-      tanggal_pesanan:
+      programmer_id:
         type: string
       updated_at:
         type: string
@@ -213,8 +125,6 @@ definitions:
   permintaan.PermintaanRequest:
     properties:
       aplikasi_id:
-        type: string
-      created_by:
         type: string
       kondisi_awal:
         minLength: 3
@@ -233,13 +143,37 @@ definitions:
         type: string
     required:
     - aplikasi_id
-    - created_by
     - kondisi_awal
     - kondisi_diharapkan
     - menu
     - pemda_id
     - tanggal_deadline
     - tanggal_pesanan
+    type: object
+  permintaan.PermintaanResponse:
+    properties:
+      aplikasi_id:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: string
+      kondisi_awal:
+        type: string
+      kondisi_diharapkan:
+        type: string
+      menu:
+        type: string
+      pemda_id:
+        type: string
+      tanggal_deadline:
+        type: string
+      tanggal_pesanan:
+        type: string
+      updated_at:
+        type: string
     type: object
   roles.Roles:
     properties:
@@ -254,7 +188,19 @@ definitions:
       updated_at:
         type: string
     type: object
-  verifikasi.Verifikasi:
+  verifikasi.VerifikasiRequest:
+    properties:
+      komentar:
+        type: string
+      laporan_id:
+        type: string
+      status_verified:
+        type: string
+    required:
+    - laporan_id
+    - status_verified
+    type: object
+  verifikasi.VerifikasiResponse:
     properties:
       created_at:
         type: string
@@ -271,21 +217,6 @@ definitions:
       verifikator_id:
         type: string
     type: object
-  verifikasi.VerifikasiRequest:
-    properties:
-      komentar:
-        type: string
-      laporan_id:
-        type: string
-      status_verified:
-        type: string
-      verifikator_id:
-        type: string
-    required:
-    - laporan_id
-    - status_verified
-    - verifikator_id
-    type: object
 host: localhost:8082
 info:
   contact: {}
@@ -295,7 +226,13 @@ info:
 paths:
   /distribusi:
     get:
-      description: Mendapatkan daftar distribusi
+      description: Mendapatkan daftar distribusi. Gunakan ?expand=names untuk menampilkan
+        nama lengkap.
+      parameters:
+      - description: Gunakan 'names' untuk join nama
+        in: query
+        name: expand
+        type: string
       produces:
       - application/json
       responses:
@@ -307,7 +244,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/distribusi.Distribusi'
+                    $ref: '#/definitions/distribusi.DistribusiResponse'
                   type: array
               type: object
         "500":
@@ -338,7 +275,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/distribusi.Distribusi'
+                  $ref: '#/definitions/distribusi.DistribusiResponse'
               type: object
         "400":
           description: Bad Request
@@ -352,79 +289,6 @@ paths:
                   type: array
               type: object
       summary: Membuat distribusi baru
-      tags:
-      - Distribusi
-  /distribusi-nama:
-    get:
-      description: Mendapatkan daftar distribusi yang sudah tertampil nama
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/distribusi.DistribusiByNama'
-                  type: array
-              type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/helpers.APIResponse'
-      summary: Ambil semua distribusi yang sudah tertampil nama
-      tags:
-      - Distribusi
-  /distribusi-nama/{id}:
-    get:
-      description: Mendapatkan data distribusi yang sudah tertampil nama berdasarkan
-        UUID
-      parameters:
-      - description: Distribusi ID (UUID)
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/distribusi.DistribusiByNama'
-                  type: array
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                errors:
-                  items:
-                    type: string
-                  type: array
-              type: object
-        "404":
-          description: Not Found
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                errors:
-                  items:
-                    type: string
-                  type: array
-              type: object
-      summary: Ambil distribusi yang sudah tertampil nama berdasarkan ID
       tags:
       - Distribusi
   /distribusi/{id}:
@@ -455,12 +319,17 @@ paths:
       tags:
       - Distribusi
     get:
-      description: Mendapatkan data distribusi berdasarkan UUID
+      description: Mendapatkan data distribusi berdasarkan UUID. Gunakan ?expand=names
+        untuk menampilkan nama lengkap.
       parameters:
       - description: Distribusi ID (UUID)
         in: path
         name: id
         required: true
+        type: string
+      - description: Gunakan 'names' untuk join nama
+        in: query
+        name: expand
         type: string
       produces:
       - application/json
@@ -473,7 +342,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/distribusi.Distribusi'
+                    $ref: '#/definitions/distribusi.DistribusiResponse'
                   type: array
               type: object
         "400":
@@ -527,7 +396,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/distribusi.Distribusi'
+                  $ref: '#/definitions/distribusi.DistribusiResponse'
               type: object
         "400":
           description: Bad Request
@@ -568,7 +437,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/laporan.Laporan'
+                    $ref: '#/definitions/laporan.LaporanResponse'
                   type: array
               type: object
         "500":
@@ -599,7 +468,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/laporan.Laporan'
+                  $ref: '#/definitions/laporan.LaporanResponse'
               type: object
         "400":
           description: Bad Request
@@ -661,7 +530,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/laporan.Laporan'
+                    $ref: '#/definitions/laporan.LaporanResponse'
                   type: array
               type: object
         "400":
@@ -715,7 +584,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/laporan.Laporan'
+                  $ref: '#/definitions/laporan.LaporanResponse'
               type: object
         "400":
           description: Bad Request
@@ -1120,7 +989,13 @@ paths:
       - Master Pemda
   /pelaksana:
     get:
-      description: Mendapatkan daftar pelaksana
+      description: Mendapatkan daftar pelaksana. Gunakan ?expand=names untuk menampilkan
+        nama lengkap.
+      parameters:
+      - description: Gunakan 'names' untuk join nama
+        in: query
+        name: expand
+        type: string
       produces:
       - application/json
       responses:
@@ -1132,7 +1007,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/pelaksana.Pelaksana'
+                    $ref: '#/definitions/pelaksana.PelaksanaResponse'
                   type: array
               type: object
         "500":
@@ -1163,7 +1038,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/pelaksana.Pelaksana'
+                  $ref: '#/definitions/pelaksana.PelaksanaResponse'
               type: object
         "400":
           description: Bad Request
@@ -1177,79 +1052,6 @@ paths:
                   type: array
               type: object
       summary: Membuat pelaksana baru
-      tags:
-      - Pelaksana
-  /pelaksana-nama:
-    get:
-      description: Mendapatkan daftar pelaksana yang sudah tertampil nama
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/pelaksana.PelaksanaNama'
-                  type: array
-              type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/helpers.APIResponse'
-      summary: Ambil semua pelaksana yang sudah tertampil nama
-      tags:
-      - Pelaksana
-  /pelaksana-nama/{id}:
-    get:
-      description: Mendapatkan data pelaksana yang sudah tertampil nama berdasarkan
-        UUID
-      parameters:
-      - description: Pelaksana ID (UUID)
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/pelaksana.PelaksanaNama'
-                  type: array
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                errors:
-                  items:
-                    type: string
-                  type: array
-              type: object
-        "404":
-          description: Not Found
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                errors:
-                  items:
-                    type: string
-                  type: array
-              type: object
-      summary: Ambil pelaksana yang sudah tertampil nama berdasarkan ID
       tags:
       - Pelaksana
   /pelaksana/{id}:
@@ -1280,12 +1082,17 @@ paths:
       tags:
       - Pelaksana
     get:
-      description: Mendapatkan data pelaksana berdasarkan UUID
+      description: Mendapatkan data pelaksana berdasarkan UUID. Gunakan ?expand=names
+        untuk menampilkan nama lengkap.
       parameters:
       - description: Pelaksana ID (UUID)
         in: path
         name: id
         required: true
+        type: string
+      - description: Gunakan 'names' untuk join nama
+        in: query
+        name: expand
         type: string
       produces:
       - application/json
@@ -1298,7 +1105,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/pelaksana.Pelaksana'
+                    $ref: '#/definitions/pelaksana.PelaksanaResponse'
                   type: array
               type: object
         "400":
@@ -1352,7 +1159,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/pelaksana.Pelaksana'
+                  $ref: '#/definitions/pelaksana.PelaksanaResponse'
               type: object
         "400":
           description: Bad Request
@@ -1381,7 +1188,13 @@ paths:
       - Pelaksana
   /permintaan:
     get:
-      description: Mendapatkan daftar permintaan
+      description: Mendapatkan daftar permintaan. Gunakan ?expand=names untuk menampilkan
+        nama lengkap pemda, aplikasi, dan pembuat.
+      parameters:
+      - description: Gunakan 'names' untuk join nama
+        in: query
+        name: expand
+        type: string
       produces:
       - application/json
       responses:
@@ -1393,7 +1206,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/permintaan.Permintaan'
+                    $ref: '#/definitions/permintaan.PermintaanResponse'
                   type: array
               type: object
         "500":
@@ -1424,7 +1237,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/permintaan.Permintaan'
+                  $ref: '#/definitions/permintaan.PermintaanResponse'
               type: object
         "400":
           description: Bad Request
@@ -1438,79 +1251,6 @@ paths:
                   type: array
               type: object
       summary: Membuat permintaan baru
-      tags:
-      - Permintaan
-  /permintaan-nama:
-    get:
-      description: Mendapatkan daftar permintaan yang sudah tertampil nama
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/permintaan.PermintaanByNama'
-                  type: array
-              type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/helpers.APIResponse'
-      summary: Ambil semua permintaan yang sudah tertampil nama
-      tags:
-      - Permintaan
-  /permintaan-nama/{id}:
-    get:
-      description: Mendapatkan data permintaan yang sudah tertampil nama berdasarkan
-        UUID
-      parameters:
-      - description: Permitaan ID (UUID)
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/permintaan.PermintaanByNama'
-                  type: array
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                errors:
-                  items:
-                    type: string
-                  type: array
-              type: object
-        "404":
-          description: Not Found
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                errors:
-                  items:
-                    type: string
-                  type: array
-              type: object
-      summary: Ambil permintaan yang sudah tertampil nama berdasarkan ID
       tags:
       - Permintaan
   /permintaan/{id}:
@@ -1541,12 +1281,17 @@ paths:
       tags:
       - Permintaan
     get:
-      description: Mendapatkan data permintaan berdasarkan UUID
+      description: Mendapatkan data permintaan berdasarkan UUID. Gunakan ?expand=names
+        untuk menampilkan nama lengkap.
       parameters:
-      - description: Permitaan ID (UUID)
+      - description: Permintaan ID (UUID)
         in: path
         name: id
         required: true
+        type: string
+      - description: Gunakan 'names' untuk join nama
+        in: query
+        name: expand
         type: string
       produces:
       - application/json
@@ -1559,7 +1304,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/permintaan.Permintaan'
+                    $ref: '#/definitions/permintaan.PermintaanResponse'
                   type: array
               type: object
         "400":
@@ -1613,7 +1358,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/permintaan.Permintaan'
+                  $ref: '#/definitions/permintaan.PermintaanResponse'
               type: object
         "400":
           description: Bad Request
@@ -1713,6 +1458,29 @@ paths:
       tags:
       - Roles
   /verifikasi:
+    get:
+      description: Mendapatkan daftar verifikasi
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helpers.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/verifikasi.VerifikasiResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Ambil semua Verifikasi
+      tags:
+      - Verifikasi
     post:
       consumes:
       - application/json
@@ -1734,7 +1502,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/verifikasi.Verifikasi'
+                  $ref: '#/definitions/verifikasi.VerifikasiResponse'
               type: object
         "400":
           description: Bad Request
@@ -1796,7 +1564,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/verifikasi.Verifikasi'
+                    $ref: '#/definitions/verifikasi.VerifikasiResponse'
                   type: array
               type: object
         "400":
@@ -1821,7 +1589,7 @@ paths:
                     type: string
                   type: array
               type: object
-      summary: Ambil verifkasi berdasarkan ID
+      summary: Ambil verifikasi berdasarkan ID
       tags:
       - Verifikasi
     put:
@@ -1850,7 +1618,7 @@ paths:
             - $ref: '#/definitions/helpers.APIResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/verifikasi.Verifikasi'
+                  $ref: '#/definitions/verifikasi.VerifikasiResponse'
               type: object
         "400":
           description: Bad Request
@@ -1875,30 +1643,6 @@ paths:
                   type: array
               type: object
       summary: Update verifikasi
-      tags:
-      - Verifikasi
-  /verifkasi:
-    get:
-      description: Mendapatkan daftar verifikasi
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helpers.APIResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/verifikasi.Verifikasi'
-                  type: array
-              type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/helpers.APIResponse'
-      summary: Ambil semua Verifikasi
       tags:
       - Verifikasi
 swagger: "2.0"
