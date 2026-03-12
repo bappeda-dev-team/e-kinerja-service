@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-func GetAll() ([]Verifikasi, error) {
+func GetAll() ([]VerifikasiResponse, error) {
 	rows, err := config.DB.Query(
 		`SELECT id, laporan_id, verifikator_id, komentar, status_verified, created_at, updated_at FROM verifikasi`)
 	if err != nil {
@@ -13,10 +13,10 @@ func GetAll() ([]Verifikasi, error) {
 	}
 	defer rows.Close()
 
-	var verifikasi []Verifikasi
+	var verifikasi []VerifikasiResponse
 
 	for rows.Next() {
-		var data Verifikasi
+		var data VerifikasiResponse
 		err := rows.Scan(&data.ID, &data.LaporanID, &data.VerifikatorID, &data.Komentar, &data.StatusVerified, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
@@ -28,13 +28,13 @@ func GetAll() ([]Verifikasi, error) {
 
 }
 
-func GetId(id string) (Verifikasi, error) {
-	var data Verifikasi
+func GetId(id string) (VerifikasiResponse, error) {
+	var data VerifikasiResponse
 	err := config.DB.QueryRow(`SELECT id, laporan_id, verifikator_id, komentar, status_verified, created_at, updated_at FROM verifikasi WHERE id=$1`, id).
 		Scan(&data.ID, &data.LaporanID, &data.VerifikatorID, &data.Komentar, &data.StatusVerified, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
-		return Verifikasi{}, err
+		return VerifikasiResponse{}, err
 	}
 
 	return data, err

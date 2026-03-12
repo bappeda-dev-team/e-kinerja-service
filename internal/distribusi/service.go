@@ -1,21 +1,22 @@
 package distribusi
 
-func GetDistribusiServices() ([]Distribusi, error) {
+func GetDistribusiServices() ([]DistribusiResponse, error) {
 	return GetAll()
 }
 
-func GetDistribusiServicesID(id string) (Distribusi, error) {
+func GetDistribusiServicesID(id string) (DistribusiResponse, error) {
 	return GetById(id)
 }
-func GetDistribusiNamaServices() ([]DistribusiByNama, error) {
+
+func GetDistribusiNamaServices() ([]DistribusiDetailResponse, error) {
 	return GetAllByNama()
 }
 
-func GetDistribusiNamaServicesID(id string) (DistribusiByNama, error) {
+func GetDistribusiNamaServicesID(id string) (DistribusiDetailResponse, error) {
 	return GetByNamaId(id)
 }
 
-func CreateDistribusiServices(permintaanID string, adminID string, req DistribusiRequest) (*Distribusi, error) {
+func CreateDistribusiServices(permintaanID string, adminID string, req DistribusiRequest) (*DistribusiResponse, error) {
 
 	data := &Distribusi{
 		PermintaanID: permintaanID,
@@ -28,10 +29,17 @@ func CreateDistribusiServices(permintaanID string, adminID string, req Distribus
 		return nil, err
 	}
 
-	return data, nil
+	return &DistribusiResponse{
+		ID:           data.ID,
+		PermintaanID: data.PermintaanID,
+		AdminID:      data.AdminID,
+		Komentar:     data.Komentar,
+		CreatedAt:    data.CreatedAt,
+		UpdatedAt:    data.UpdatedAt,
+	}, nil
 }
 
-func UpdateDistribusiServices(id string, permintaanID string, adminID string, req DistribusiRequest) (*Distribusi, error) {
+func UpdateDistribusiServices(id string, permintaanID string, adminID string, req DistribusiRequest) (*DistribusiResponse, error) {
 
 	data := &Distribusi{
 		PermintaanID: permintaanID,
@@ -44,9 +52,13 @@ func UpdateDistribusiServices(id string, permintaanID string, adminID string, re
 		return nil, err
 	}
 
-	data.ID = id
-
-	return data, nil
+	return &DistribusiResponse{
+		ID:           id,
+		PermintaanID: data.PermintaanID,
+		AdminID:      data.AdminID,
+		Komentar:     data.Komentar,
+		UpdatedAt:    data.UpdatedAt,
+	}, nil
 }
 
 func DeleteDistribusiServices(id string) error {

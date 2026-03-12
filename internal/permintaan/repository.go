@@ -5,20 +5,20 @@ import (
 	"database/sql"
 )
 
-func GetAll() ([]Permintaan, error) {
-	rows, err := config.DB.Query(`SELECT id, pemda_id, aplikasi_id, menu, kondisi_awal, kondisi_diharapkan, 
-	tanggal_pesanan, tanggal_deadline, created_by, created_at, updated_at FROM permintaan`)
+func GetAll() ([]PermintaanResponse, error) {
+	rows, err := config.DB.Query(`SELECT id, pemda_id, aplikasi_id, menu, kondisi_awal, kondisi_diharapkan,
+	tanggal_pesanan, tanggal_deadline, lampiran, created_by, created_at, updated_at FROM permintaan`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var permintaan []Permintaan
+	var permintaan []PermintaanResponse
 
 	for rows.Next() {
-		var data Permintaan
-		err := rows.Scan(&data.ID, &data.PemdaID, &data.AplikasiID, &data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan, 
-			&data.TanggalPesanan, &data.TanggalDeadline, &data.CreatedBy, &data.CreatedAt, &data.UpdatedAt)
+		var data PermintaanResponse
+		err := rows.Scan(&data.ID, &data.PemdaID, &data.AplikasiID, &data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
+			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.CreatedBy, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -29,36 +29,36 @@ func GetAll() ([]Permintaan, error) {
 
 }
 
-func GetById(id string) (Permintaan, error){
-	var pemda Permintaan
-	err := config.DB.QueryRow(`SELECT id, pemda_id, aplikasi_id, menu, kondisi_awal, kondisi_diharapkan, 
-	tanggal_pesanan, tanggal_deadline, created_by, created_at, updated_at FROM permintaan WHERE id=$1`, id).
-		Scan(&pemda.ID, &pemda.PemdaID, &pemda.AplikasiID, &pemda.Menu, &pemda.KondisiAwal, &pemda.KondisiDiharapkan, 
-			&pemda.TanggalPesanan, &pemda.TanggalDeadline, &pemda.CreatedBy, &pemda.CreatedAt, &pemda.UpdatedAt)
+func GetById(id string) (PermintaanResponse, error) {
+	var data PermintaanResponse
+	err := config.DB.QueryRow(`SELECT id, pemda_id, aplikasi_id, menu, kondisi_awal, kondisi_diharapkan,
+	tanggal_pesanan, tanggal_deadline, lampiran, created_by, created_at, updated_at FROM permintaan WHERE id=$1`, id).
+		Scan(&data.ID, &data.PemdaID, &data.AplikasiID, &data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
+			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.CreatedBy, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
-		return Permintaan{}, err
+		return PermintaanResponse{}, err
 	}
 
-	return pemda, err
+	return data, err
 }
 
-func GetAllByNama() ([]PermintaanByNama, error) {
+func GetAllByNama() ([]PermintaanDetailResponse, error) {
 	rows, err := config.DB.Query(
-		`SELECT p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan, p.tanggal_pesanan, p.tanggal_deadline, u.full_name, p.created_at, p.updated_at FROM permintaan p 
-		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id 
-		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id 
+		`SELECT p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan, p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, u.full_name, p.created_at, p.updated_at FROM permintaan p
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users u ON p.created_by = u.id`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var permintaan []PermintaanByNama
+	var permintaan []PermintaanDetailResponse
 
 	for rows.Next() {
-		var data PermintaanByNama
-		err := rows.Scan(&data.ID, &data.PemdaID, &data.AplikasiID, &data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan, &data.TanggalPesanan, &data.TanggalDeadline, &data.CreatedBy, &data.CreatedAt, &data.UpdatedAt)
+		var data PermintaanDetailResponse
+		err := rows.Scan(&data.ID, &data.Pemda, &data.Aplikasi, &data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan, &data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Pembuat, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -69,25 +69,25 @@ func GetAllByNama() ([]PermintaanByNama, error) {
 
 }
 
-func GetByNamaId(id string) (PermintaanByNama, error){
-	var pemda PermintaanByNama
-	err := config.DB.QueryRow(`SELECT p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan, p.tanggal_pesanan, p.tanggal_deadline, u.full_name, p.created_at, p.updated_at FROM permintaan p 
-	LEFT JOIN master_pemda mp ON p.pemda_id = mp.id 
-	LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id 
+func GetByNamaId(id string) (PermintaanDetailResponse, error) {
+	var data PermintaanDetailResponse
+	err := config.DB.QueryRow(`SELECT p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan, p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, u.full_name, p.created_at, p.updated_at FROM permintaan p
+	LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+	LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 	LEFT JOIN users u ON p.created_by = u.id WHERE p.id=$1`, id).
-		Scan(&pemda.ID, &pemda.PemdaID, &pemda.AplikasiID, &pemda.Menu, &pemda.KondisiAwal, &pemda.KondisiDiharapkan, &pemda.TanggalPesanan, &pemda.TanggalDeadline, &pemda.CreatedBy, &pemda.CreatedAt, &pemda.UpdatedAt)
+		Scan(&data.ID, &data.Pemda, &data.Aplikasi, &data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan, &data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Pembuat, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
-		return PermintaanByNama{}, err
+		return PermintaanDetailResponse{}, err
 	}
 
-	return pemda, err
+	return data, err
 }
 
 func Create(data *Permintaan) error {
 	query := `
-		INSERT INTO permintaan (pemda_id, aplikasi_id, menu, kondisi_awal, kondisi_diharapkan, tanggal_pesanan, tanggal_deadline, created_by)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO permintaan (pemda_id, aplikasi_id, menu, kondisi_awal, kondisi_diharapkan, tanggal_pesanan, tanggal_deadline, lampiran, created_by)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, created_at, updated_at
 	`
 
@@ -100,6 +100,7 @@ func Create(data *Permintaan) error {
 		data.KondisiDiharapkan,
 		data.TanggalPesanan,
 		data.TanggalDeadline,
+		data.Lampiran,
 		data.CreatedBy,
 	).Scan(
 		&data.ID,
@@ -120,9 +121,10 @@ func Update(id string, data *Permintaan) error {
 			kondisi_diharapkan = $5,
 			tanggal_pesanan = $6,
 			tanggal_deadline = $7,
-			created_by = $8,
+			lampiran = $8,
+			created_by = $9,
 		    updated_at = NOW()
-		WHERE id = $9
+		WHERE id = $10
 		RETURNING updated_at
 	`
 
@@ -135,11 +137,27 @@ func Update(id string, data *Permintaan) error {
 		data.KondisiDiharapkan,
 		data.TanggalPesanan,
 		data.TanggalDeadline,
+		data.Lampiran,
 		data.CreatedBy,
 		id,
 	).Scan(&data.UpdatedAt)
 
 	return err
+}
+
+func UpdateLampiran(id string, lampiran StringArray) error {
+	result, err := config.DB.Exec(`UPDATE permintaan SET lampiran = $1, updated_at = NOW() WHERE id = $2`, lampiran, id)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func Delete(id string) error {
@@ -164,4 +182,3 @@ func Delete(id string) error {
 
 	return nil
 }
-

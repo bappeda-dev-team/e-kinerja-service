@@ -1,14 +1,14 @@
 package laporan
 
-func GetLaporanServices() ([]Laporan, error) {
+func GetLaporanServices() ([]LaporanResponse, error) {
 	return GetAll()
 }
 
-func GetLaporanServicesID(id string) (Laporan, error) {
+func GetLaporanServicesID(id string) (LaporanResponse, error) {
 	return GetId(id)
 }
 
-func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest) (*Laporan, error) {
+func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest) (*LaporanResponse, error) {
 
 	data := &Laporan{
 		PermintaanID:    permintaanID,
@@ -21,10 +21,17 @@ func CreateLaporanServices(permintaanID string, userID string, req LaporanReques
 		return nil, err
 	}
 
-	return data, nil
+	return &LaporanResponse{
+		ID:              data.ID,
+		PermintaanID:    data.PermintaanID,
+		ProgrammerID:    data.ProgrammerID,
+		LaporanProgress: data.LaporanProgress,
+		CreatedAt:       data.CreatedAt,
+		UpdatedAt:       data.UpdatedAt,
+	}, nil
 }
 
-func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanRequest) (*Laporan, error) {
+func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanRequest) (*LaporanResponse, error) {
 
 	data := &Laporan{
 		PermintaanID:    permintaanID,
@@ -37,9 +44,13 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 		return nil, err
 	}
 
-	data.ID = id
-
-	return data, nil
+	return &LaporanResponse{
+		ID:              id,
+		PermintaanID:    data.PermintaanID,
+		ProgrammerID:    data.ProgrammerID,
+		LaporanProgress: data.LaporanProgress,
+		UpdatedAt:       data.UpdatedAt,
+	}, nil
 }
 
 func DeleteLaporanServices(id string) error {

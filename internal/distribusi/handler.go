@@ -12,13 +12,22 @@ import (
 
 // GetDistribusi godoc
 // @Summary Ambil semua Distribusi
-// @Description Mendapatkan daftar distribusi
+// @Description Mendapatkan daftar distribusi. Gunakan ?expand=names untuk menampilkan nama lengkap.
 // @Tags Distribusi
 // @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]Distribusi}
+// @Param expand query string false "Gunakan 'names' untuk join nama"
+// @Success 200 {object} helpers.APIResponse{data=[]DistribusiResponse}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /distribusi [get]
 func GetDistribusi(c echo.Context) error {
+	if c.QueryParam("expand") == "names" {
+		result, err := GetDistribusiNamaServices()
+		if err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	}
+
 	result, err := GetDistribusiServices()
 
 	if err != nil {
@@ -28,13 +37,14 @@ func GetDistribusi(c echo.Context) error {
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
-// GetDsitribusiById godoc
+// GetDistribusiById godoc
 // @Summary Ambil distribusi berdasarkan ID
-// @Description Mendapatkan data distribusi berdasarkan UUID
+// @Description Mendapatkan data distribusi berdasarkan UUID. Gunakan ?expand=names untuk menampilkan nama lengkap.
 // @Tags Distribusi
 // @Produce json
 // @Param id path string true "Distribusi ID (UUID)"
-// @Success 200 {object} helpers.APIResponse{data=[]Distribusi}
+// @Param expand query string false "Gunakan 'names' untuk join nama"
+// @Success 200 {object} helpers.APIResponse{data=[]DistribusiResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi/{id} [get]
@@ -45,10 +55,20 @@ func GetDistribusiById(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
+	if c.QueryParam("expand") == "names" {
+		result, err := GetDistribusiNamaServicesID(id)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return exception.ResourceNotFound("Data tidak ditemukan")
+			}
+			return err
+		}
+		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	}
+
 	result, err := GetDistribusiServicesID(id)
 
 	if err != nil {
-		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
@@ -57,55 +77,6 @@ func GetDistribusiById(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-}
-
-// GetDistribusiByNama godoc
-// @Summary Ambil semua distribusi yang sudah tertampil nama
-// @Description Mendapatkan daftar distribusi yang sudah tertampil nama
-// @Tags Distribusi
-// @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]DistribusiByNama}
-// @Failure 500 {object} helpers.APIResponse
-// @Router /distribusi-nama [get]
-func GetDistribusiByNama(c echo.Context) error {
-	result, err := GetDistribusiNamaServices()
-
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-}
-
-// GetDistribusiByNamaId godoc
-// @Summary Ambil distribusi yang sudah tertampil nama berdasarkan ID
-// @Description Mendapatkan data distribusi yang sudah tertampil nama berdasarkan UUID
-// @Tags Distribusi
-// @Produce json
-// @Param id path string true "Distribusi ID (UUID)"
-// @Success 200 {object} helpers.APIResponse{data=[]DistribusiByNama}
-// @Failure 400 {object} helpers.APIResponse{errors=[]string}
-// @Failure 404 {object} helpers.APIResponse{errors=[]string}
-// @Router /distribusi-nama/{id} [get]
-func GetDistribusiByNamaId(c echo.Context) error {
-	id := c.Param("id")
-
-	if _, err := uuid.Parse(id); err != nil {
-		return exception.BadRequest("UUID tidak valid")
-	}
-
-	result, err := GetDistribusiNamaServicesID(id)
-
-	if err != nil {
-		// kalau ID tidak ditemukan
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
-	}
-
-	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
 }
 
 // CreateDistribusi godoc
@@ -115,13 +86,10 @@ func GetDistribusiByNamaId(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body DistribusiRequest true "Data distribusi"
-// @Success 201 {object} helpers.APIResponse{data=Distribusi}
+// @Success 201 {object} helpers.APIResponse{data=DistribusiResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi [post]
 func CreateDistribusi(c echo.Context) error {
-
-	permintaanID := c.Param("permintaan_id")
-
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
@@ -130,18 +98,13 @@ func CreateDistribusi(c echo.Context) error {
 
 	userID := userIDInterface.(string)
 
-	if _, err := uuid.Parse(permintaanID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "permintaan_id tidak valid", nil))
-	}
-
 	var req DistribusiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := CreateDistribusiServices(permintaanID, userID, req)
+	result, err := CreateDistribusiServices(req.PermintaanID, userID, req)
 	if err != nil {
 		return err
 	}
@@ -158,13 +121,12 @@ func CreateDistribusi(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Distribusi"
 // @Param request body DistribusiRequest true "Data distribusi"
-// @Success 200 {object} helpers.APIResponse{data=Distribusi}
+// @Success 200 {object} helpers.APIResponse{data=DistribusiResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi/{id} [put]
 func UpdateDistribusi(c echo.Context) error {
 	id := c.Param("id")
-	permintaanID := c.Param("permintaan_id")
 
 	userIDInterface := c.Get("user_id")
 
@@ -178,20 +140,14 @@ func UpdateDistribusi(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	if _, err := uuid.Parse(permintaanID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "permintaan_id tidak valid", nil))
-	}
-
 	var req DistribusiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := UpdateDistribusiServices(id, permintaanID, userID, req)
+	result, err := UpdateDistribusiServices(id, req.PermintaanID, userID, req)
 	if err != nil {
-		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
@@ -216,7 +172,6 @@ func UpdateDistribusi(c echo.Context) error {
 func DeleteDistribusi(c echo.Context) error {
 	id := c.Param("id")
 
-	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
 	}

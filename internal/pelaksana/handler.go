@@ -12,13 +12,22 @@ import (
 
 // GetPelaksana godoc
 // @Summary Ambil semua Pelaksana
-// @Description Mendapatkan daftar pelaksana
+// @Description Mendapatkan daftar pelaksana. Gunakan ?expand=names untuk menampilkan nama lengkap.
 // @Tags Pelaksana
 // @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]Pelaksana}
+// @Param expand query string false "Gunakan 'names' untuk join nama"
+// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaResponse}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /pelaksana [get]
 func GetPelaksana(c echo.Context) error {
+	if c.QueryParam("expand") == "names" {
+		result, err := GetPelaksanaNamaServices()
+		if err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	}
+
 	result, err := GetPelaksanaServices()
 
 	if err != nil {
@@ -30,11 +39,12 @@ func GetPelaksana(c echo.Context) error {
 
 // GetPelaksanaID godoc
 // @Summary Ambil pelaksana berdasarkan ID
-// @Description Mendapatkan data pelaksana berdasarkan UUID
+// @Description Mendapatkan data pelaksana berdasarkan UUID. Gunakan ?expand=names untuk menampilkan nama lengkap.
 // @Tags Pelaksana
 // @Produce json
 // @Param id path string true "Pelaksana ID (UUID)"
-// @Success 200 {object} helpers.APIResponse{data=[]Pelaksana}
+// @Param expand query string false "Gunakan 'names' untuk join nama"
+// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana/{id} [get]
@@ -45,62 +55,21 @@ func GetPelaksanaID(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
+	if c.QueryParam("expand") == "names" {
+		result, err := GetPelaksanaNamaServicesID(id)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return c.JSON(http.StatusNotFound,
+					helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			}
+			return err
+		}
+		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+	}
+
 	result, err := GetPelaksanaServicesID(id)
 
 	if err != nil {
-
-		// kalau ID tidak ditemukan
-		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-		}
-
-		return err
-	}
-
-	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-}
-
-// GetPelaksanaByNama godoc
-// @Summary Ambil semua pelaksana yang sudah tertampil nama
-// @Description Mendapatkan daftar pelaksana yang sudah tertampil nama
-// @Tags Pelaksana
-// @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaNama}
-// @Failure 500 {object} helpers.APIResponse
-// @Router /pelaksana-nama [get]
-func GetPelaksanaByNama(c echo.Context) error {
-	result, err := GetPelaksanaNamaServices()
-
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-}
-
-// GetPelaksanaByNamaID godoc
-// @Summary Ambil pelaksana yang sudah tertampil nama berdasarkan ID
-// @Description Mendapatkan data pelaksana yang sudah tertampil nama berdasarkan UUID
-// @Tags Pelaksana
-// @Produce json
-// @Param id path string true "Pelaksana ID (UUID)"
-// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaNama}
-// @Failure 400 {object} helpers.APIResponse{errors=[]string}
-// @Failure 404 {object} helpers.APIResponse{errors=[]string}
-// @Router /pelaksana-nama/{id} [get]
-func GetPelaksanaByNamaID(c echo.Context) error {
-	id := c.Param("id")
-
-	if _, err := uuid.Parse(id); err != nil {
-		return exception.BadRequest("UUID tidak valid")
-	}
-
-	result, err := GetPelaksanaNamaServicesID(id)
-
-	if err != nil {
-
-		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
@@ -119,25 +88,17 @@ func GetPelaksanaByNamaID(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body PelaksanaRequest true "Data pelaksana"
-// @Success 201 {object} helpers.APIResponse{data=Pelaksana}
+// @Success 201 {object} helpers.APIResponse{data=PelaksanaResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana [post]
 func CreatePelaksana(c echo.Context) error {
+	var req PelaksanaRequest
 
-	distribusiID := c.Param("distribusi_id")
-	programmerID := c.Param("programmer_id")
-
-	if _, err := uuid.Parse(distribusiID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "distribusi_id tidak valid", nil))
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return exception.BadRequest("Validasi gagal")
 	}
 
-	if _, err := uuid.Parse(programmerID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "programmer_id tidak valid", nil))
-	}
-
-	result, err := CreatePelaksanaServices(distribusiID, programmerID)
+	result, err := CreatePelaksanaServices(req.DistribusiID, req.ProgrammerID)
 	if err != nil {
 		if err.Error() == "distribusi_id sudah digunakan" ||
 			err.Error() == "programmer_id sudah digunakan" {
@@ -161,32 +122,25 @@ func CreatePelaksana(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Pelaksana"
 // @Param request body PelaksanaRequest true "Data pelaksana"
-// @Success 200 {object} helpers.APIResponse{data=Pelaksana}
+// @Success 200 {object} helpers.APIResponse{data=PelaksanaResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana/{id} [put]
 func UpdatePelaksana(c echo.Context) error {
 	id := c.Param("id")
-	distribusiID := c.Param("distribusi_id")
-	programmerID := c.Param("programmer_id")
 
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	if _, err := uuid.Parse(distribusiID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "distribusi_id tidak valid", nil))
+	var req PelaksanaRequest
+
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return exception.BadRequest("Validasi gagal")
 	}
 
-	if _, err := uuid.Parse(programmerID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "programmer_id tidak valid", nil))
-	}
-
-	result, err := UpdatePelaksanaServices(id, distribusiID, programmerID)
+	result, err := UpdatePelaksanaServices(id, req.DistribusiID, req.ProgrammerID)
 	if err != nil {
-		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
@@ -218,7 +172,6 @@ func UpdatePelaksana(c echo.Context) error {
 func DeletePelaksana(c echo.Context) error {
 	id := c.Param("id")
 
-	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
 	}

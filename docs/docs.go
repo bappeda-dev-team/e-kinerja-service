@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/distribusi": {
             "get": {
-                "description": "Mendapatkan daftar distribusi",
+                "description": "Mendapatkan daftar distribusi. Gunakan ?expand=names untuk menampilkan nama lengkap.",
                 "produces": [
                     "application/json"
                 ],
@@ -25,6 +25,14 @@ const docTemplate = `{
                     "Distribusi"
                 ],
                 "summary": "Ambil semua Distribusi",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Gunakan 'names' untuk join nama",
+                        "name": "expand",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -39,7 +47,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/distribusi.Distribusi"
+                                                "$ref": "#/definitions/distribusi.DistribusiResponse"
                                             }
                                         }
                                     }
@@ -90,7 +98,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/distribusi.Distribusi"
+                                            "$ref": "#/definitions/distribusi.DistribusiResponse"
                                         }
                                     }
                                 }
@@ -99,133 +107,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "errors": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/distribusi-nama": {
-            "get": {
-                "description": "Mendapatkan daftar distribusi yang sudah tertampil nama",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Distribusi"
-                ],
-                "summary": "Ambil semua distribusi yang sudah tertampil nama",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/distribusi.DistribusiByNama"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/helpers.APIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/distribusi-nama/{id}": {
-            "get": {
-                "description": "Mendapatkan data distribusi yang sudah tertampil nama berdasarkan UUID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Distribusi"
-                ],
-                "summary": "Ambil distribusi yang sudah tertampil nama berdasarkan ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Distribusi ID (UUID)",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/distribusi.DistribusiByNama"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "errors": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "allOf": [
                                 {
@@ -250,7 +131,7 @@ const docTemplate = `{
         },
         "/distribusi/{id}": {
             "get": {
-                "description": "Mendapatkan data distribusi berdasarkan UUID",
+                "description": "Mendapatkan data distribusi berdasarkan UUID. Gunakan ?expand=names untuk menampilkan nama lengkap.",
                 "produces": [
                     "application/json"
                 ],
@@ -265,6 +146,12 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Gunakan 'names' untuk join nama",
+                        "name": "expand",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -281,7 +168,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/distribusi.Distribusi"
+                                                "$ref": "#/definitions/distribusi.DistribusiResponse"
                                             }
                                         }
                                     }
@@ -375,7 +262,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/distribusi.Distribusi"
+                                            "$ref": "#/definitions/distribusi.DistribusiResponse"
                                         }
                                     }
                                 }
@@ -490,7 +377,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/laporan.Laporan"
+                                                "$ref": "#/definitions/laporan.LaporanResponse"
                                             }
                                         }
                                     }
@@ -541,7 +428,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/laporan.Laporan"
+                                            "$ref": "#/definitions/laporan.LaporanResponse"
                                         }
                                     }
                                 }
@@ -605,7 +492,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/laporan.Laporan"
+                                                "$ref": "#/definitions/laporan.LaporanResponse"
                                             }
                                         }
                                     }
@@ -699,7 +586,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/laporan.Laporan"
+                                            "$ref": "#/definitions/laporan.LaporanResponse"
                                         }
                                     }
                                 }
@@ -1440,7 +1327,7 @@ const docTemplate = `{
         },
         "/pelaksana": {
             "get": {
-                "description": "Mendapatkan daftar pelaksana",
+                "description": "Mendapatkan daftar pelaksana. Gunakan ?expand=names untuk menampilkan nama lengkap.",
                 "produces": [
                     "application/json"
                 ],
@@ -1448,6 +1335,14 @@ const docTemplate = `{
                     "Pelaksana"
                 ],
                 "summary": "Ambil semua Pelaksana",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Gunakan 'names' untuk join nama",
+                        "name": "expand",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1462,7 +1357,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/pelaksana.Pelaksana"
+                                                "$ref": "#/definitions/pelaksana.PelaksanaResponse"
                                             }
                                         }
                                     }
@@ -1513,7 +1408,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pelaksana.Pelaksana"
+                                            "$ref": "#/definitions/pelaksana.PelaksanaResponse"
                                         }
                                     }
                                 }
@@ -1522,133 +1417,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "errors": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/pelaksana-nama": {
-            "get": {
-                "description": "Mendapatkan daftar pelaksana yang sudah tertampil nama",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Pelaksana"
-                ],
-                "summary": "Ambil semua pelaksana yang sudah tertampil nama",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/pelaksana.PelaksanaNama"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/helpers.APIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/pelaksana-nama/{id}": {
-            "get": {
-                "description": "Mendapatkan data pelaksana yang sudah tertampil nama berdasarkan UUID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Pelaksana"
-                ],
-                "summary": "Ambil pelaksana yang sudah tertampil nama berdasarkan ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Pelaksana ID (UUID)",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/pelaksana.PelaksanaNama"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "errors": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "allOf": [
                                 {
@@ -1673,7 +1441,7 @@ const docTemplate = `{
         },
         "/pelaksana/{id}": {
             "get": {
-                "description": "Mendapatkan data pelaksana berdasarkan UUID",
+                "description": "Mendapatkan data pelaksana berdasarkan UUID. Gunakan ?expand=names untuk menampilkan nama lengkap.",
                 "produces": [
                     "application/json"
                 ],
@@ -1688,6 +1456,12 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Gunakan 'names' untuk join nama",
+                        "name": "expand",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1704,7 +1478,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/pelaksana.Pelaksana"
+                                                "$ref": "#/definitions/pelaksana.PelaksanaResponse"
                                             }
                                         }
                                     }
@@ -1798,7 +1572,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pelaksana.Pelaksana"
+                                            "$ref": "#/definitions/pelaksana.PelaksanaResponse"
                                         }
                                     }
                                 }
@@ -1891,7 +1665,7 @@ const docTemplate = `{
         },
         "/permintaan": {
             "get": {
-                "description": "Mendapatkan daftar permintaan",
+                "description": "Mendapatkan daftar permintaan. Gunakan ?expand=names untuk menampilkan nama lengkap pemda, aplikasi, dan pembuat.",
                 "produces": [
                     "application/json"
                 ],
@@ -1899,6 +1673,14 @@ const docTemplate = `{
                     "Permintaan"
                 ],
                 "summary": "Ambil semua permintaan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Gunakan 'names' untuk join nama",
+                        "name": "expand",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1913,7 +1695,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/permintaan.Permintaan"
+                                                "$ref": "#/definitions/permintaan.PermintaanResponse"
                                             }
                                         }
                                     }
@@ -1964,7 +1746,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/permintaan.Permintaan"
+                                            "$ref": "#/definitions/permintaan.PermintaanResponse"
                                         }
                                     }
                                 }
@@ -1973,133 +1755,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "errors": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/permintaan-nama": {
-            "get": {
-                "description": "Mendapatkan daftar permintaan yang sudah tertampil nama",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Permintaan"
-                ],
-                "summary": "Ambil semua permintaan yang sudah tertampil nama",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/permintaan.PermintaanByNama"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/helpers.APIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/permintaan-nama/{id}": {
-            "get": {
-                "description": "Mendapatkan data permintaan yang sudah tertampil nama berdasarkan UUID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Permintaan"
-                ],
-                "summary": "Ambil permintaan yang sudah tertampil nama berdasarkan ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Permitaan ID (UUID)",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/permintaan.PermintaanByNama"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "errors": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "allOf": [
                                 {
@@ -2124,7 +1779,7 @@ const docTemplate = `{
         },
         "/permintaan/{id}": {
             "get": {
-                "description": "Mendapatkan data permintaan berdasarkan UUID",
+                "description": "Mendapatkan data permintaan berdasarkan UUID. Gunakan ?expand=names untuk menampilkan nama lengkap.",
                 "produces": [
                     "application/json"
                 ],
@@ -2135,10 +1790,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Permitaan ID (UUID)",
+                        "description": "Permintaan ID (UUID)",
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Gunakan 'names' untuk join nama",
+                        "name": "expand",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2155,7 +1816,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/permintaan.Permintaan"
+                                                "$ref": "#/definitions/permintaan.PermintaanResponse"
                                             }
                                         }
                                     }
@@ -2249,7 +1910,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/permintaan.Permintaan"
+                                            "$ref": "#/definitions/permintaan.PermintaanResponse"
                                         }
                                     }
                                 }
@@ -2468,6 +2129,45 @@ const docTemplate = `{
             }
         },
         "/verifikasi": {
+            "get": {
+                "description": "Mendapatkan daftar verifikasi",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Verifikasi"
+                ],
+                "summary": "Ambil semua Verifikasi",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helpers.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/verifikasi.VerifikasiResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.APIResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Menambahkan data verifikasi",
                 "consumes": [
@@ -2503,7 +2203,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/verifikasi.Verifikasi"
+                                            "$ref": "#/definitions/verifikasi.VerifikasiResponse"
                                         }
                                     }
                                 }
@@ -2543,7 +2243,7 @@ const docTemplate = `{
                 "tags": [
                     "Verifikasi"
                 ],
-                "summary": "Ambil verifkasi berdasarkan ID",
+                "summary": "Ambil verifikasi berdasarkan ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -2567,7 +2267,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/verifikasi.Verifikasi"
+                                                "$ref": "#/definitions/verifikasi.VerifikasiResponse"
                                             }
                                         }
                                     }
@@ -2661,7 +2361,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/verifikasi.Verifikasi"
+                                            "$ref": "#/definitions/verifikasi.VerifikasiResponse"
                                         }
                                     }
                                 }
@@ -2751,113 +2451,42 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/verifkasi": {
-            "get": {
-                "description": "Mendapatkan daftar verifikasi",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Verifikasi"
-                ],
-                "summary": "Ambil semua Verifikasi",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/helpers.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/verifikasi.Verifikasi"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/helpers.APIResponse"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "distribusi.Distribusi": {
-            "type": "object",
-            "properties": {
-                "admin_id": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "komentar": {
-                    "type": "string"
-                },
-                "permintaan_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "distribusi.DistribusiByNama": {
-            "type": "object",
-            "properties": {
-                "admin": {
-                    "type": "string"
-                },
-                "aplikasi": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "komentar": {
-                    "type": "string"
-                },
-                "pemda": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
         "distribusi.DistribusiRequest": {
             "type": "object",
             "required": [
-                "admin_id",
                 "permintaan_id"
             ],
             "properties": {
+                "komentar": {
+                    "type": "string"
+                },
+                "permintaan_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "distribusi.DistribusiResponse": {
+            "type": "object",
+            "properties": {
                 "admin_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "komentar": {
                     "type": "string"
                 },
                 "permintaan_id": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -2878,7 +2507,23 @@ const docTemplate = `{
                 }
             }
         },
-        "laporan.Laporan": {
+        "laporan.LaporanRequest": {
+            "type": "object",
+            "required": [
+                "laporan_progress",
+                "permintaan_id"
+            ],
+            "properties": {
+                "laporan_progress": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "permintaan_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "laporan.LaporanResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2897,26 +2542,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "laporan.LaporanRequest": {
-            "type": "object",
-            "required": [
-                "laporan_progress",
-                "permintaan_id",
-                "programmer_id"
-            ],
-            "properties": {
-                "laporan_progress": {
-                    "type": "string",
-                    "minLength": 3
-                },
-                "permintaan_id": {
-                    "type": "string"
-                },
-                "programmer_id": {
                     "type": "string"
                 }
             }
@@ -2979,49 +2604,6 @@ const docTemplate = `{
                 }
             }
         },
-        "pelaksana.Pelaksana": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "distribusi_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "programmer_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "pelaksana.PelaksanaNama": {
-            "type": "object",
-            "properties": {
-                "aplikasi": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "pemda": {
-                    "type": "string"
-                },
-                "programmer": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
         "pelaksana.PelaksanaRequest": {
             "type": "object",
             "required": [
@@ -3037,75 +2619,19 @@ const docTemplate = `{
                 }
             }
         },
-        "permintaan.Permintaan": {
+        "pelaksana.PelaksanaResponse": {
             "type": "object",
             "properties": {
-                "aplikasi_id": {
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "string"
                 },
-                "created_by": {
+                "distribusi_id": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "kondisi_awal": {
-                    "type": "string"
-                },
-                "kondisi_diharapkan": {
-                    "type": "string"
-                },
-                "menu": {
-                    "type": "string"
-                },
-                "pemda_id": {
-                    "type": "string"
-                },
-                "tanggal_deadline": {
-                    "type": "string"
-                },
-                "tanggal_pesanan": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "permintaan.PermintaanByNama": {
-            "type": "object",
-            "properties": {
-                "aplikasi": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "kondisi_awal": {
-                    "type": "string"
-                },
-                "kondisi_diharapkan": {
-                    "type": "string"
-                },
-                "menu": {
-                    "type": "string"
-                },
-                "pembuat": {
-                    "type": "string"
-                },
-                "pemda": {
-                    "type": "string"
-                },
-                "tanggal_deadline": {
-                    "type": "string"
-                },
-                "tanggal_pesanan": {
+                "programmer_id": {
                     "type": "string"
                 },
                 "updated_at": {
@@ -3117,7 +2643,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "aplikasi_id",
-                "created_by",
                 "kondisi_awal",
                 "kondisi_diharapkan",
                 "menu",
@@ -3127,9 +2652,6 @@ const docTemplate = `{
             ],
             "properties": {
                 "aplikasi_id": {
-                    "type": "string"
-                },
-                "created_by": {
                     "type": "string"
                 },
                 "kondisi_awal": {
@@ -3151,6 +2673,44 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "tanggal_pesanan": {
+                    "type": "string"
+                }
+            }
+        },
+        "permintaan.PermintaanResponse": {
+            "type": "object",
+            "properties": {
+                "aplikasi_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "kondisi_awal": {
+                    "type": "string"
+                },
+                "kondisi_diharapkan": {
+                    "type": "string"
+                },
+                "menu": {
+                    "type": "string"
+                },
+                "pemda_id": {
+                    "type": "string"
+                },
+                "tanggal_deadline": {
+                    "type": "string"
+                },
+                "tanggal_pesanan": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -3175,7 +2735,25 @@ const docTemplate = `{
                 }
             }
         },
-        "verifikasi.Verifikasi": {
+        "verifikasi.VerifikasiRequest": {
+            "type": "object",
+            "required": [
+                "laporan_id",
+                "status_verified"
+            ],
+            "properties": {
+                "komentar": {
+                    "type": "string"
+                },
+                "laporan_id": {
+                    "type": "string"
+                },
+                "status_verified": {
+                    "type": "string"
+                }
+            }
+        },
+        "verifikasi.VerifikasiResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3194,28 +2772,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "verifikator_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "verifikasi.VerifikasiRequest": {
-            "type": "object",
-            "required": [
-                "laporan_id",
-                "status_verified",
-                "verifikator_id"
-            ],
-            "properties": {
-                "komentar": {
-                    "type": "string"
-                },
-                "laporan_id": {
-                    "type": "string"
-                },
-                "status_verified": {
                     "type": "string"
                 },
                 "verifikator_id": {

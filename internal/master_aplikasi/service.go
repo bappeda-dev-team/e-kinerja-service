@@ -41,3 +41,7 @@ func UpdateMasterAplikasiServices(id string, req CreateMasterAplikasiRequest) (*
 func DeleteMasterAplikasiServices(id string) error {
 	return DeleteMasterAplikasi(id)
 }
+
+func UpdateLogoServices(id string, logoURL string) error {
+	return UpdateLogoMasterAplikasi(id, logoURL)
+}

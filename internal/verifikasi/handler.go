@@ -15,9 +15,9 @@ import (
 // @Description Mendapatkan daftar verifikasi
 // @Tags Verifikasi
 // @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]Verifikasi}
+// @Success 200 {object} helpers.APIResponse{data=[]VerifikasiResponse}
 // @Failure 500 {object} helpers.APIResponse
-// @Router /verifkasi [get]
+// @Router /verifikasi [get]
 func GetVerifikasi(c echo.Context) error {
 	result, err := GetVerifikasiServices()
 
@@ -29,12 +29,12 @@ func GetVerifikasi(c echo.Context) error {
 }
 
 // GetVerifikasiID godoc
-// @Summary Ambil verifkasi berdasarkan ID
+// @Summary Ambil verifikasi berdasarkan ID
 // @Description Mendapatkan data verifikasi berdasarkan UUID
 // @Tags Verifikasi
 // @Produce json
 // @Param id path string true "Verifikasi ID (UUID)"
-// @Success 200 {object} helpers.APIResponse{data=[]Verifikasi}
+// @Success 200 {object} helpers.APIResponse{data=[]VerifikasiResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi/{id} [get]
@@ -48,7 +48,6 @@ func GetVerifikasiID(c echo.Context) error {
 	result, err := GetVerifikasiServicesID(id)
 
 	if err != nil {
-		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
@@ -66,11 +65,10 @@ func GetVerifikasiID(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body VerifikasiRequest true "Data Verifikasi"
-// @Success 201 {object} helpers.APIResponse{data=Verifikasi}
+// @Success 201 {object} helpers.APIResponse{data=VerifikasiResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi [post]
 func CreateVerifikasi(c echo.Context) error {
-	laporanID := c.Param("laporan_id")
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
@@ -79,18 +77,13 @@ func CreateVerifikasi(c echo.Context) error {
 
 	userID := userIDInterface.(string)
 
-	if _, err := uuid.Parse(laporanID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "laporan_id tidak valid", nil))
-	}
-
 	var req VerifikasiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := CreateVerifikasiServices(laporanID, userID, req)
+	result, err := CreateVerifikasiServices(req.LaporanID, userID, req)
 	if err != nil {
 		return err
 	}
@@ -107,13 +100,12 @@ func CreateVerifikasi(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Verifikasi"
 // @Param request body VerifikasiRequest true "Data verifikasi"
-// @Success 200 {object} helpers.APIResponse{data=Verifikasi}
+// @Success 200 {object} helpers.APIResponse{data=VerifikasiResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi/{id} [put]
 func UpdateVerifikasi(c echo.Context) error {
 	id := c.Param("id")
-	laporanID := c.Param("laporan_id")
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
@@ -126,20 +118,14 @@ func UpdateVerifikasi(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	if _, err := uuid.Parse(laporanID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "laporan_id tidak valid", nil))
-	}
-
 	var req VerifikasiRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := UpdateVerifikasiServices(id, laporanID, userID, req)
+	result, err := UpdateVerifikasiServices(id, req.LaporanID, userID, req)
 	if err != nil {
-		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
@@ -164,7 +150,6 @@ func UpdateVerifikasi(c echo.Context) error {
 func DeleteVerifikasi(c echo.Context) error {
 	id := c.Param("id")
 
-	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
 	}

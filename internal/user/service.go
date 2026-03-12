@@ -7,15 +7,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetUserServices() ([]User, error) {
+func GetUserServices() ([]UserResponse, error) {
 	return GetAll()
 }
 
-func GetUserServicesID(id string) (User, error) {
+func GetUserServicesID(id string) (UserResponse, error) {
 	return GetId(id)
 }
 
-func CreateUserService(req RegisterRequest) (*User, error) {
+func CreateUserService(req RegisterRequest) (*UserResponse, error) {
 
 	// cek role valid
 	roleExists, err := IsRoleExists(req.RoleID)
@@ -55,7 +55,19 @@ func CreateUserService(req RegisterRequest) (*User, error) {
 		return nil, err
 	}
 
-	return user, nil
+	return &UserResponse{
+		ID:        user.ID,
+		RoleID:    user.RoleID,
+		Username:  user.Username,
+		FullName:  user.FullName,
+		IsActive:  user.IsActive,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}, nil
+}
+
+func UpdateProfilePictureService(id string, pictureURL string) error {
+	return UpdateProfilePicture(id, pictureURL)
 }
 
 func LoginService(req LoginRequest) (string, error) {

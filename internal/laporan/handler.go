@@ -15,7 +15,7 @@ import (
 // @Description Mendapatkan daftar laporan
 // @Tags Laporan
 // @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]Laporan}
+// @Success 200 {object} helpers.APIResponse{data=[]LaporanResponse}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /laporan [get]
 func GetLaporan(c echo.Context) error {
@@ -34,7 +34,7 @@ func GetLaporan(c echo.Context) error {
 // @Tags Laporan
 // @Produce json
 // @Param id path string true "Laporan ID (UUID)"
-// @Success 200 {object} helpers.APIResponse{data=[]Laporan}
+// @Success 200 {object} helpers.APIResponse{data=[]LaporanResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /laporan/{id} [get]
@@ -48,8 +48,6 @@ func GetLaporanID(c echo.Context) error {
 	result, err := GetLaporanServicesID(id)
 
 	if err != nil {
-
-		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return c.JSON(http.StatusNotFound,
 				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
@@ -68,11 +66,10 @@ func GetLaporanID(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body LaporanRequest true "Data Laporan"
-// @Success 201 {object} helpers.APIResponse{data=Laporan}
+// @Success 201 {object} helpers.APIResponse{data=LaporanResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /laporan [post]
 func CreateLaporan(c echo.Context) error {
-	permintaanID := c.Param("permintaan_id")
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
@@ -81,18 +78,13 @@ func CreateLaporan(c echo.Context) error {
 
 	userID := userIDInterface.(string)
 
-	if _, err := uuid.Parse(permintaanID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "permintaan_id tidak valid", nil))
-	}
-
 	var req LaporanRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := CreateLaporanServices(permintaanID, userID, req)
+	result, err := CreateLaporanServices(req.PermintaanID, userID, req)
 	if err != nil {
 		return err
 	}
@@ -109,13 +101,12 @@ func CreateLaporan(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Laporan"
 // @Param request body LaporanRequest true "Data laporan"
-// @Success 200 {object} helpers.APIResponse{data=Laporan}
+// @Success 200 {object} helpers.APIResponse{data=LaporanResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /laporan/{id} [put]
 func UpdateLaporan(c echo.Context) error {
 	id := c.Param("id")
-	permintaanID := c.Param("permintaan_id")
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
@@ -128,20 +119,14 @@ func UpdateLaporan(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	if _, err := uuid.Parse(permintaanID); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "permintaan_id tidak valid", nil))
-	}
-
 	var req LaporanRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := UpdateLaporanServices(id, permintaanID, userID, req)
+	result, err := UpdateLaporanServices(id, req.PermintaanID, userID, req)
 	if err != nil {
-		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
 			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
@@ -166,7 +151,6 @@ func UpdateLaporan(c echo.Context) error {
 func DeleteLaporan(c echo.Context) error {
 	id := c.Param("id")
 
-	// ✅ Validasi UUID
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
 	}
