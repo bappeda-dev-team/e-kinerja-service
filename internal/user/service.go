@@ -58,7 +58,7 @@ func CreateUserService(req RegisterRequest, pictureURL string) (*UserResponse, e
 
 	return &UserResponse{
 		ID:        user.ID,
-		RoleID:    user.RoleID,
+		Role:      RoleResponse{ID: user.RoleID},
 		Username:  user.Username,
 		FullName:  user.FullName,
 		IsActive:  user.IsActive,
