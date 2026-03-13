@@ -4,32 +4,40 @@ import (
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lib/pq"
 )
+
+func handleDBError(err error) error {
+	log.Printf("[handleDBError] type=%T msg=%s\n", err, err.Error())
+	if err == sql.ErrNoRows {
+		return exception.ResourceNotFound("Data tidak ditemukan")
+	}
+	if pqErr, ok := err.(*pq.Error); ok {
+		switch pqErr.Code {
+		case "23503":
+			return exception.BadRequest("permintaan_id tidak ditemukan")
+		case "23505":
+			return exception.Conflict("Data distribusi untuk permintaan ini sudah ada")
+		}
+	}
+	return exception.InternalServer("Terjadi kesalahan pada server")
+}
 
 // GetDistribusi godoc
 // @Summary Ambil semua Distribusi
-// @Description Mendapatkan daftar distribusi. Gunakan ?expand=names untuk menampilkan nama lengkap.
+// @Description Mendapatkan daftar distribusi
 // @Tags Distribusi
 // @Produce json
-// @Param expand query string false "Gunakan 'names' untuk join nama"
-// @Success 200 {object} helpers.APIResponse{data=[]DistribusiResponse}
+// @Success 200 {object} helpers.APIResponse{data=[]DistribusiDetailResponse}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /distribusi [get]
 func GetDistribusi(c echo.Context) error {
-	if c.QueryParam("expand") == "names" {
-		result, err := GetDistribusiNamaServices()
-		if err != nil {
-			return err
-		}
-		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-	}
-
-	result, err := GetDistribusiServices()
-
+	result, err := GetDistribusiDetailServices()
 	if err != nil {
 		return err
 	}
@@ -39,12 +47,11 @@ func GetDistribusi(c echo.Context) error {
 
 // GetDistribusiById godoc
 // @Summary Ambil distribusi berdasarkan ID
-// @Description Mendapatkan data distribusi berdasarkan UUID. Gunakan ?expand=names untuk menampilkan nama lengkap.
+// @Description Mendapatkan data distribusi berdasarkan UUID
 // @Tags Distribusi
 // @Produce json
 // @Param id path string true "Distribusi ID (UUID)"
-// @Param expand query string false "Gunakan 'names' untuk join nama"
-// @Success 200 {object} helpers.APIResponse{data=[]DistribusiResponse}
+// @Success 200 {object} helpers.APIResponse{data=DistribusiDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi/{id} [get]
@@ -55,25 +62,9 @@ func GetDistribusiById(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	if c.QueryParam("expand") == "names" {
-		result, err := GetDistribusiNamaServicesID(id)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				return exception.ResourceNotFound("Data tidak ditemukan")
-			}
-			return err
-		}
-		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-	}
-
-	result, err := GetDistribusiServicesID(id)
-
+	result, err := GetDistribusiDetailServicesID(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
@@ -86,7 +77,7 @@ func GetDistribusiById(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body DistribusiRequest true "Data distribusi"
-// @Success 201 {object} helpers.APIResponse{data=DistribusiResponse}
+// @Success 201 {object} helpers.APIResponse{data=DistribusiDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi [post]
 func CreateDistribusi(c echo.Context) error {
@@ -106,7 +97,7 @@ func CreateDistribusi(c echo.Context) error {
 
 	result, err := CreateDistribusiServices(req.PermintaanID, userID, req)
 	if err != nil {
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusCreated,
@@ -121,7 +112,7 @@ func CreateDistribusi(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Distribusi"
 // @Param request body DistribusiRequest true "Data distribusi"
-// @Success 200 {object} helpers.APIResponse{data=DistribusiResponse}
+// @Success 200 {object} helpers.APIResponse{data=DistribusiDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /distribusi/{id} [put]
@@ -148,11 +139,7 @@ func UpdateDistribusi(c echo.Context) error {
 
 	result, err := UpdateDistribusiServices(id, req.PermintaanID, userID, req)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,
@@ -178,11 +165,7 @@ func DeleteDistribusi(c echo.Context) error {
 
 	err := DeleteDistribusiServices(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,

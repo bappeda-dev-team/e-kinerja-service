@@ -6,7 +6,6 @@ import (
 	"aplikasi-internal/internal/storage"
 	"database/sql"
 	"net/http"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -78,7 +77,20 @@ func CreateAplikasi(c echo.Context) error {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := CreateMasterAplikasiServices(req)
+	var logoURL string
+	if fh, err := c.FormFile("file"); err == nil {
+		f, err := fh.Open()
+		if err != nil {
+			return exception.BadRequest("Gagal membuka file")
+		}
+		defer f.Close()
+		logoURL, err = storage.UploadFile(f, fh, storage.FolderAplikasi)
+		if err != nil {
+			return err
+		}
+	}
+
+	result, err := CreateMasterAplikasiServices(req, logoURL)
 	if err != nil {
 		return err
 	}
@@ -112,7 +124,20 @@ func UpdateAplikasi(c echo.Context) error {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := UpdateMasterAplikasiServices(id, req)
+	var logoURL string
+	if fh, err := c.FormFile("file"); err == nil {
+		f, err := fh.Open()
+		if err != nil {
+			return exception.BadRequest("Gagal membuka file")
+		}
+		defer f.Close()
+		logoURL, err = storage.UploadFile(f, fh, storage.FolderAplikasi)
+		if err != nil {
+			return err
+		}
+	}
+
+	result, err := UpdateMasterAplikasiServices(id, req, logoURL)
 	if err != nil {
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
@@ -157,62 +182,40 @@ func DeleteAplikasi(c echo.Context) error {
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }
 
-// PresignLogoUpload godoc
-// @Summary Buat pre-signed URL untuk upload logo aplikasi
-// @Description Menghasilkan pre-signed PUT URL ke S3. Client upload file langsung ke URL tersebut, lalu panggil PATCH /:id/logo dengan key yang dikembalikan.
+// UploadLogo godoc
+// @Summary Upload logo aplikasi
+// @Description Upload logo langsung ke S3 via multipart form. Gunakan field "file".
 // @Tags Master Aplikasi
+// @Accept multipart/form-data
 // @Produce json
 // @Param id path string true "ID Master Aplikasi"
-// @Param ext query string false "Ekstensi file, misal .png atau .jpg (default: .png)"
+// @Param file formData file true "File logo"
 // @Success 200 {object} helpers.APIResponse{data=map[string]string}
 // @Failure 400 {object} helpers.APIResponse
-// @Router /master-aplikasi/{id}/logo/presign [post]
-func PresignLogoUpload(c echo.Context) error {
+// @Failure 404 {object} helpers.APIResponse
+// @Router /master-aplikasi/{id}/logo [patch]
+func UploadLogo(c echo.Context) error {
 	id := c.Param("id")
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	ext := c.QueryParam("ext")
-	if ext == "" {
-		ext = ".png"
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		return exception.BadRequest("File tidak ditemukan, gunakan field 'file'")
 	}
 
-	presignURL, key, err := storage.PresignUpload(storage.FolderAplikasi, ext, 15*time.Minute)
+	file, err := fileHeader.Open()
+	if err != nil {
+		return exception.BadRequest("Gagal membuka file")
+	}
+	defer file.Close()
+
+	logoURL, err := storage.UploadFile(file, fileHeader, storage.FolderAplikasi)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Presign URL berhasil dibuat", map[string]string{
-		"presign_url": presignURL,
-		"key":         key,
-	}))
-}
-
-// ConfirmLogoUpload godoc
-// @Summary Simpan key logo aplikasi setelah upload selesai
-// @Description Setelah client upload ke pre-signed URL, kirim key S3 yang diterima untuk disimpan ke database.
-// @Tags Master Aplikasi
-// @Accept json
-// @Produce json
-// @Param id path string true "ID Master Aplikasi"
-// @Param request body ConfirmLogoRequest true "Key S3 hasil upload"
-// @Success 200 {object} helpers.APIResponse
-// @Failure 400 {object} helpers.APIResponse
-// @Failure 404 {object} helpers.APIResponse
-// @Router /master-aplikasi/{id}/logo [patch]
-func ConfirmLogoUpload(c echo.Context) error {
-	id := c.Param("id")
-	if _, err := uuid.Parse(id); err != nil {
-		return exception.BadRequest("UUID tidak valid")
-	}
-
-	var req ConfirmLogoRequest
-	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return exception.BadRequest("Validasi gagal")
-	}
-
-	logoURL := storage.PublicURL(req.Key)
 	if err := UpdateLogoServices(id, logoURL); err != nil {
 		if err == sql.ErrNoRows {
 			return exception.ResourceNotFound("Data tidak ditemukan")

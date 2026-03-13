@@ -4,6 +4,7 @@ import (
 	"aplikasi-internal/config"
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
+	"aplikasi-internal/internal/storage"
 	"aplikasi-internal/routes"
 	"fmt"
 	"log"
@@ -30,6 +31,10 @@ func main() {
 	runMigrations()
 
 	config.ConnectDB()
+
+	if err := storage.Init(); err != nil {
+		log.Fatal("Storage init failed:", err)
+	}
 
 	e := echo.New()
 

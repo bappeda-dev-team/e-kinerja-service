@@ -1,22 +1,36 @@
 package permintaan
 
-func GetPermintaanServices() ([]PermintaanResponse, error) {
-	return GetAll()
+import (
+	"fmt"
+	"time"
+)
+
+func GetPermintaanDetailServices() ([]PermintaanDetailResponse, error) {
+	return GetAllDetail()
 }
 
-func GetPermintaanServicesID(id string) (PermintaanResponse, error) {
-	return GetById(id)
+func GetPermintaanDetailServicesID(id string) (PermintaanDetailResponse, error) {
+	return GetByIdDetail(id)
 }
 
-func GetPermintaanNamaServices() ([]PermintaanDetailResponse, error) {
-	return GetAllByNama()
+func parseDate(s string) (time.Time, error) {
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("format tanggal tidak valid '%s', gunakan YYYY-MM-DD", s)
+	}
+	return t, nil
 }
 
-func GetPermintaanNamaServicesID(id string) (PermintaanDetailResponse, error) {
-	return GetByNamaId(id)
-}
+func CreatePermintaanServices(pemdaID string, aplikasiID string, userID string, req PermintaanRequest, lampiran StringArray) (*PermintaanDetailResponse, error) {
 
-func CreatePermintaanServices(pemdaID string, aplikasiID string, userID string, req PermintaanRequest) (*PermintaanResponse, error) {
+	tanggalPesanan, err := parseDate(req.TanggalPesanan)
+	if err != nil {
+		return nil, err
+	}
+	tanggalDeadline, err := parseDate(req.TanggalDeadline)
+	if err != nil {
+		return nil, err
+	}
 
 	data := &Permintaan{
 		PemdaID:           pemdaID,
@@ -24,34 +38,35 @@ func CreatePermintaanServices(pemdaID string, aplikasiID string, userID string, 
 		Menu:              req.Menu,
 		KondisiAwal:       req.KondisiAwal,
 		KondisiDiharapkan: req.KondisiDiharapkan,
-		TanggalPesanan:    req.TanggalPesanan,
-		TanggalDeadline:   req.TanggalDeadline,
+		TanggalPesanan:    tanggalPesanan,
+		TanggalDeadline:   tanggalDeadline,
+		Lampiran:          lampiran,
 		CreatedBy:         userID,
 	}
 
-	err := Create(data)
+	err = Create(data)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &PermintaanResponse{
-		ID:                data.ID,
-		PemdaID:           data.PemdaID,
-		AplikasiID:        data.AplikasiID,
-		Menu:              data.Menu,
-		KondisiAwal:       data.KondisiAwal,
-		KondisiDiharapkan: data.KondisiDiharapkan,
-		TanggalPesanan:    data.TanggalPesanan,
-		TanggalDeadline:   data.TanggalDeadline,
-		CreatedBy:         data.CreatedBy,
-		CreatedAt:         data.CreatedAt,
-		UpdatedAt:         data.UpdatedAt,
+	result, err := GetByIdDetail(data.ID)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, nil
+	return &result, nil
 }
 
-func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, userID string, req PermintaanRequest) (*PermintaanResponse, error) {
+func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, userID string, req PermintaanRequest, lampiran StringArray) (*PermintaanDetailResponse, error) {
+
+	tanggalPesanan, err := parseDate(req.TanggalPesanan)
+	if err != nil {
+		return nil, err
+	}
+	tanggalDeadline, err := parseDate(req.TanggalDeadline)
+	if err != nil {
+		return nil, err
+	}
 
 	data := &Permintaan{
 		PemdaID:           pemdaID,
@@ -59,30 +74,23 @@ func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, user
 		Menu:              req.Menu,
 		KondisiAwal:       req.KondisiAwal,
 		KondisiDiharapkan: req.KondisiDiharapkan,
-		TanggalPesanan:    req.TanggalPesanan,
-		TanggalDeadline:   req.TanggalDeadline,
+		TanggalPesanan:    tanggalPesanan,
+		TanggalDeadline:   tanggalDeadline,
+		Lampiran:          lampiran,
 		CreatedBy:         userID,
 	}
 
-	err := Update(id, data)
+	err = Update(id, data)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &PermintaanResponse{
-		ID:                id,
-		PemdaID:           data.PemdaID,
-		AplikasiID:        data.AplikasiID,
-		Menu:              data.Menu,
-		KondisiAwal:       data.KondisiAwal,
-		KondisiDiharapkan: data.KondisiDiharapkan,
-		TanggalPesanan:    data.TanggalPesanan,
-		TanggalDeadline:   data.TanggalDeadline,
-		CreatedBy:         data.CreatedBy,
-		UpdatedAt:         data.UpdatedAt,
+	result, err := GetByIdDetail(id)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, nil
+	return &result, nil
 }
 
 func DeletePermintaanServices(id string) error {

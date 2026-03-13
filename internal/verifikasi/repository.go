@@ -40,6 +40,73 @@ func GetId(id string) (VerifikasiResponse, error) {
 	return data, err
 }
 
+func GetAllDetail() ([]VerifikasiDetailResponse, error) {
+	rows, err := config.DB.Query(`
+		SELECT
+			v.id,
+			l.id, l.laporan_progress, l.status,
+			up.id, up.username, up.full_name,
+			uv.id, uv.username, uv.full_name,
+			v.komentar, v.status_verified,
+			v.created_at, v.updated_at
+		FROM verifikasi v
+		LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
+		LEFT JOIN users up ON l.programmer_id = up.id
+		LEFT JOIN users uv ON v.verifikator_id = uv.id
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var verifikasi []VerifikasiDetailResponse
+	for rows.Next() {
+		var data VerifikasiDetailResponse
+		err := rows.Scan(
+			&data.ID,
+			&data.Laporan.ID, &data.Laporan.LaporanProgress, &data.Laporan.Status,
+			&data.Laporan.Programmer.ID, &data.Laporan.Programmer.Username, &data.Laporan.Programmer.FullName,
+			&data.Verifikator.ID, &data.Verifikator.Username, &data.Verifikator.FullName,
+			&data.Komentar, &data.StatusVerified,
+			&data.CreatedAt, &data.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		verifikasi = append(verifikasi, data)
+	}
+	return verifikasi, err
+}
+
+func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
+	var data VerifikasiDetailResponse
+	err := config.DB.QueryRow(`
+		SELECT
+			v.id,
+			l.id, l.laporan_progress, l.status,
+			up.id, up.username, up.full_name,
+			uv.id, uv.username, uv.full_name,
+			v.komentar, v.status_verified,
+			v.created_at, v.updated_at
+		FROM verifikasi v
+		LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
+		LEFT JOIN users up ON l.programmer_id = up.id
+		LEFT JOIN users uv ON v.verifikator_id = uv.id
+		WHERE v.id = $1
+	`, id).Scan(
+		&data.ID,
+		&data.Laporan.ID, &data.Laporan.LaporanProgress, &data.Laporan.Status,
+		&data.Laporan.Programmer.ID, &data.Laporan.Programmer.Username, &data.Laporan.Programmer.FullName,
+		&data.Verifikator.ID, &data.Verifikator.Username, &data.Verifikator.FullName,
+		&data.Komentar, &data.StatusVerified,
+		&data.CreatedAt, &data.UpdatedAt,
+	)
+	if err != nil {
+		return VerifikasiDetailResponse{}, err
+	}
+	return data, err
+}
+
 func Create(data *Verifikasi) error {
 	query := `
 		INSERT INTO verifikasi (laporan_id, verifikator_id, komentar, status_verified)

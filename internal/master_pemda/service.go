@@ -8,10 +8,11 @@ func GetMasterPemdaServicesID(id string) (MasterPemda, error) {
 	return GetMasterPemdaId(id)
 }
 
-func CreateMasterPemdaServices(req MasterPemdaRequest) (*MasterPemda, error) {
+func CreateMasterPemdaServices(req MasterPemdaRequest, logoURL string) (*MasterPemda, error) {
 
 	data := &MasterPemda{
 		Name: req.Name,
+		Logo: logoURL,
 	}
 
 	err := CreateMasterPemda(data)
@@ -22,10 +23,11 @@ func CreateMasterPemdaServices(req MasterPemdaRequest) (*MasterPemda, error) {
 	return data, nil
 }
 
-func UpdateMasterPemdaServices(id string, req MasterPemdaRequest) (*MasterPemda, error) {
+func UpdateMasterPemdaServices(id string, req MasterPemdaRequest, logoURL string) (*MasterPemda, error) {
 
 	data := &MasterPemda{
 		Name: req.Name,
+		Logo: logoURL,
 	}
 
 	err := UpdateMasterPemda(id, data)

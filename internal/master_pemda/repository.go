@@ -63,7 +63,7 @@ func UpdateMasterPemda(id string, data *MasterPemda) error {
 	query := `
 		UPDATE master_pemda
 		SET name = $1,
-		    logo = $2,
+		    logo = CASE WHEN $2 = '' THEN logo ELSE $2 END,
 		    updated_at = NOW()
 		WHERE id = $3
 		RETURNING updated_at

@@ -11,9 +11,5 @@ type MasterPemda struct {
 }
 
 type MasterPemdaRequest struct {
-	Name string `json:"name" validate:"required,min=3"`
-}
-
-type ConfirmLogoRequest struct {
-	Key string `json:"key" validate:"required"`
+	Name string `json:"name" form:"name" validate:"required,min=3"`
 }

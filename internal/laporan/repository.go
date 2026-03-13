@@ -40,6 +40,77 @@ func GetId(id string) (LaporanResponse, error) {
 	return data, err
 }
 
+func GetAllDetail() ([]LaporanDetailResponse, error) {
+	rows, err := config.DB.Query(`
+		SELECT
+			l.id,
+			p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
+			u.id, u.username, u.full_name,
+			l.laporan_progress, l.status,
+			l.created_at, l.updated_at
+		FROM laporan_kinerja l
+		LEFT JOIN permintaan p ON l.permintaan_id = p.id
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+		LEFT JOIN users u ON l.programmer_id = u.id
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var laporan []LaporanDetailResponse
+	for rows.Next() {
+		var data LaporanDetailResponse
+		err := rows.Scan(
+			&data.ID,
+			&data.Permintaan.ID, &data.Permintaan.Pemda, &data.Permintaan.Aplikasi,
+			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
+			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
+			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName,
+			&data.LaporanProgress, &data.Status,
+			&data.CreatedAt, &data.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		laporan = append(laporan, data)
+	}
+	return laporan, err
+}
+
+func GetByIdDetail(id string) (LaporanDetailResponse, error) {
+	var data LaporanDetailResponse
+	err := config.DB.QueryRow(`
+		SELECT
+			l.id,
+			p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
+			u.id, u.username, u.full_name,
+			l.laporan_progress, l.status,
+			l.created_at, l.updated_at
+		FROM laporan_kinerja l
+		LEFT JOIN permintaan p ON l.permintaan_id = p.id
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+		LEFT JOIN users u ON l.programmer_id = u.id
+		WHERE l.id = $1
+	`, id).Scan(
+		&data.ID,
+		&data.Permintaan.ID, &data.Permintaan.Pemda, &data.Permintaan.Aplikasi,
+		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
+		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
+		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName,
+		&data.LaporanProgress, &data.Status,
+		&data.CreatedAt, &data.UpdatedAt,
+	)
+	if err != nil {
+		return LaporanDetailResponse{}, err
+	}
+	return data, err
+}
+
 func Create(data *Laporan) error {
 	query := `
 		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, laporan_progress)

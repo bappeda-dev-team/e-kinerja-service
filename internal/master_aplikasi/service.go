@@ -8,10 +8,11 @@ func GetMasterAplikasiServicesID(id string) (MasterAplikasi, error) {
 	return GetMasterAplikasiId(id)
 }
 
-func CreateMasterAplikasiServices(req CreateMasterAplikasiRequest) (*MasterAplikasi, error) {
+func CreateMasterAplikasiServices(req CreateMasterAplikasiRequest, logoURL string) (*MasterAplikasi, error) {
 
 	data := &MasterAplikasi{
 		Name: req.Name,
+		Logo: logoURL,
 	}
 
 	err := CreateMasterAplikasi(data)
@@ -22,10 +23,11 @@ func CreateMasterAplikasiServices(req CreateMasterAplikasiRequest) (*MasterAplik
 	return data, nil
 }
 
-func UpdateMasterAplikasiServices(id string, req CreateMasterAplikasiRequest) (*MasterAplikasi, error) {
+func UpdateMasterAplikasiServices(id string, req CreateMasterAplikasiRequest, logoURL string) (*MasterAplikasi, error) {
 
 	data := &MasterAplikasi{
 		Name: req.Name,
+		Logo: logoURL,
 	}
 
 	err := UpdateMasterAplikasi(id, data)

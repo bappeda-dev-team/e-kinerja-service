@@ -4,32 +4,40 @@ import (
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lib/pq"
 )
+
+func handleDBError(err error) error {
+	log.Printf("[handleDBError] type=%T msg=%s\n", err, err.Error())
+	if err == sql.ErrNoRows {
+		return exception.ResourceNotFound("Data tidak ditemukan")
+	}
+	if pqErr, ok := err.(*pq.Error); ok {
+		switch pqErr.Code {
+		case "23503":
+			return exception.BadRequest("distribusi_id atau programmer_id tidak ditemukan")
+		case "23505":
+			return exception.Conflict("Kombinasi distribusi dan programmer ini sudah ada")
+		}
+	}
+	return exception.InternalServer("Terjadi kesalahan pada server")
+}
 
 // GetPelaksana godoc
 // @Summary Ambil semua Pelaksana
-// @Description Mendapatkan daftar pelaksana. Gunakan ?expand=names untuk menampilkan nama lengkap.
+// @Description Mendapatkan daftar pelaksana
 // @Tags Pelaksana
 // @Produce json
-// @Param expand query string false "Gunakan 'names' untuk join nama"
-// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaResponse}
+// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaDetailResponse}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /pelaksana [get]
 func GetPelaksana(c echo.Context) error {
-	if c.QueryParam("expand") == "names" {
-		result, err := GetPelaksanaNamaServices()
-		if err != nil {
-			return err
-		}
-		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-	}
-
-	result, err := GetPelaksanaServices()
-
+	result, err := GetPelaksanaDetailServices()
 	if err != nil {
 		return err
 	}
@@ -39,12 +47,11 @@ func GetPelaksana(c echo.Context) error {
 
 // GetPelaksanaID godoc
 // @Summary Ambil pelaksana berdasarkan ID
-// @Description Mendapatkan data pelaksana berdasarkan UUID. Gunakan ?expand=names untuk menampilkan nama lengkap.
+// @Description Mendapatkan data pelaksana berdasarkan UUID
 // @Tags Pelaksana
 // @Produce json
 // @Param id path string true "Pelaksana ID (UUID)"
-// @Param expand query string false "Gunakan 'names' untuk join nama"
-// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaResponse}
+// @Success 200 {object} helpers.APIResponse{data=PelaksanaDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana/{id} [get]
@@ -55,27 +62,9 @@ func GetPelaksanaID(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	if c.QueryParam("expand") == "names" {
-		result, err := GetPelaksanaNamaServicesID(id)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				return c.JSON(http.StatusNotFound,
-					helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-			}
-			return err
-		}
-		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-	}
-
-	result, err := GetPelaksanaServicesID(id)
-
+	result, err := GetPelaksanaDetailServicesID(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
@@ -88,7 +77,7 @@ func GetPelaksanaID(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body PelaksanaRequest true "Data pelaksana"
-// @Success 201 {object} helpers.APIResponse{data=PelaksanaResponse}
+// @Success 201 {object} helpers.APIResponse{data=PelaksanaDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana [post]
 func CreatePelaksana(c echo.Context) error {
@@ -100,14 +89,7 @@ func CreatePelaksana(c echo.Context) error {
 
 	result, err := CreatePelaksanaServices(req.DistribusiID, req.ProgrammerID)
 	if err != nil {
-		if err.Error() == "distribusi_id sudah digunakan" ||
-			err.Error() == "programmer_id sudah digunakan" {
-
-			return c.JSON(http.StatusBadRequest,
-				helpers.ErrorResponse(400, err.Error(), nil))
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusCreated,
@@ -122,7 +104,7 @@ func CreatePelaksana(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Pelaksana"
 // @Param request body PelaksanaRequest true "Data pelaksana"
-// @Success 200 {object} helpers.APIResponse{data=PelaksanaResponse}
+// @Success 200 {object} helpers.APIResponse{data=PelaksanaDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana/{id} [put]
@@ -141,18 +123,7 @@ func UpdatePelaksana(c echo.Context) error {
 
 	result, err := UpdatePelaksanaServices(id, req.DistribusiID, req.ProgrammerID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		if err.Error() == "distribusi_id sudah digunakan" ||
-			err.Error() == "programmer_id sudah digunakan" {
-
-			return c.JSON(http.StatusBadRequest,
-				helpers.ErrorResponse(400, err.Error(), nil))
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,
@@ -178,11 +149,7 @@ func DeletePelaksana(c echo.Context) error {
 
 	err := DeletePelaksanaServices(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,

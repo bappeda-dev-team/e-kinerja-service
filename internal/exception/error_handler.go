@@ -2,6 +2,7 @@ package exception
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -112,6 +113,7 @@ func GlobalExceptionHandler() func(err error, c echo.Context) {
 		}
 
 		// Fallback
+		log.Printf("[GlobalExceptionHandler] unhandled error: type=%T msg=%s\n", err, err.Error())
 		_ = c.JSON(http.StatusInternalServerError, errorResponse(
 			http.StatusInternalServerError,
 			"An unexpected error occurred. Please contact support.",

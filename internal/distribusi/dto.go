@@ -1,6 +1,9 @@
 package distribusi
 
-import "time"
+import (
+	"aplikasi-internal/internal/permintaan"
+	"time"
+)
 
 // === Request ===
 
@@ -20,12 +23,29 @@ type DistribusiResponse struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type PermintaanInfo struct {
+	ID                string                 `json:"id"`
+	Pemda             string                 `json:"pemda"`
+	Aplikasi          string                 `json:"aplikasi"`
+	Menu              string                 `json:"menu"`
+	KondisiAwal       string                 `json:"kondisi_awal"`
+	KondisiDiharapkan string                 `json:"kondisi_diharapkan"`
+	TanggalPesanan    time.Time              `json:"tanggal_pesanan"`
+	TanggalDeadline   time.Time              `json:"tanggal_deadline"`
+	Lampiran          permintaan.StringArray `json:"lampiran"`
+}
+
+type AdminInfo struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	FullName string `json:"full_name"`
+}
+
 type DistribusiDetailResponse struct {
-	ID        string    `json:"id"`
-	Pemda     string    `json:"pemda"`
-	Aplikasi  string    `json:"aplikasi"`
-	Admin     string    `json:"admin"`
-	Komentar  string    `json:"komentar"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID         string         `json:"id"`
+	Permintaan PermintaanInfo `json:"permintaan"`
+	Admin      AdminInfo      `json:"admin"`
+	Komentar   string         `json:"komentar"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
 }

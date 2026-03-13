@@ -35,8 +35,7 @@ func SetupRoutes(r *echo.Echo) {
 	r.GET("/users", user.GetAllUser)
 	r.GET("/users/:id", user.GetUserID)
 	r.POST("/users", user.Create)
-	r.POST("/users/:id/profile-picture/presign", user.PresignProfilePicUpload, middle_ware.JWTMiddleware)
-	r.PATCH("/users/:id/profile-picture", user.ConfirmProfilePicUpload, middle_ware.JWTMiddleware)
+	r.PATCH("/users/:id/profile-picture", user.UploadProfilePic, middle_ware.JWTMiddleware)
 
 	ma := r.Group("/master-aplikasi")
 	ma.Use(middle_ware.JWTMiddleware)
@@ -47,8 +46,7 @@ func SetupRoutes(r *echo.Echo) {
 	ma.POST("", master_aplikasi.CreateAplikasi)
 	ma.PUT("/:id", master_aplikasi.UpdateAplikasi)
 	ma.DELETE("/:id", master_aplikasi.DeleteAplikasi)
-	ma.POST("/:id/logo/presign", master_aplikasi.PresignLogoUpload)
-	ma.PATCH("/:id/logo", master_aplikasi.ConfirmLogoUpload)
+	ma.PATCH("/:id/logo", master_aplikasi.UploadLogo)
 
 	mp := r.Group("/master-pemda")
 	mp.Use(middle_ware.JWTMiddleware)
@@ -59,8 +57,7 @@ func SetupRoutes(r *echo.Echo) {
 	mp.POST("", master_pemda.CreatePemda)
 	mp.PUT("/:id", master_pemda.UpdatePemda)
 	mp.DELETE("/:id", master_pemda.DeletePemda)
-	mp.POST("/:id/logo/presign", master_pemda.PresignLogoUpload)
-	mp.PATCH("/:id/logo", master_pemda.ConfirmLogoUpload)
+	mp.PATCH("/:id/logo", master_pemda.UploadLogo)
 
 	p := r.Group("/permintaan")
 	p.Use(middle_ware.JWTMiddleware)
@@ -71,8 +68,7 @@ func SetupRoutes(r *echo.Echo) {
 	p.POST("", permintaan.CreatePermintaan)
 	p.PUT("/:id", permintaan.UpdatePermintaan)
 	p.DELETE("/:id", permintaan.DeletePermintaan)
-	p.POST("/:id/lampiran/presign", permintaan.PresignLampiranUpload)
-	p.PATCH("/:id/lampiran", permintaan.ConfirmLampiranUpload)
+	p.PATCH("/:id/lampiran", permintaan.UploadLampiran)
 
 	d := r.Group("/distribusi")
 	d.Use(middle_ware.JWTMiddleware)

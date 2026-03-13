@@ -6,33 +6,40 @@ import (
 	"aplikasi-internal/internal/storage"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lib/pq"
 )
+
+func handleDBError(err error) error {
+	log.Printf("[handleDBError] type=%T msg=%s\n", err, err.Error())
+	if err == sql.ErrNoRows {
+		return exception.ResourceNotFound("Data tidak ditemukan")
+	}
+	if pqErr, ok := err.(*pq.Error); ok {
+		switch pqErr.Code {
+		case "23503":
+			return exception.BadRequest("pemda_id atau aplikasi_id tidak ditemukan")
+		case "23505":
+			return exception.Conflict("Data permintaan sudah ada")
+		}
+	}
+	return exception.InternalServer("Terjadi kesalahan pada server")
+}
 
 // GetPermintaan godoc
 // @Summary Ambil semua permintaan
-// @Description Mendapatkan daftar permintaan. Gunakan ?expand=names untuk menampilkan nama lengkap pemda, aplikasi, dan pembuat.
+// @Description Mendapatkan daftar permintaan
 // @Tags Permintaan
 // @Produce json
-// @Param expand query string false "Gunakan 'names' untuk join nama"
-// @Success 200 {object} helpers.APIResponse{data=[]PermintaanResponse}
+// @Success 200 {object} helpers.APIResponse{data=[]PermintaanDetailResponse}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /permintaan [get]
 func GetPermintaan(c echo.Context) error {
-	if c.QueryParam("expand") == "names" {
-		result, err := GetPermintaanNamaServices()
-		if err != nil {
-			return err
-		}
-		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-	}
-
-	result, err := GetPermintaanServices()
-
+	result, err := GetPermintaanDetailServices()
 	if err != nil {
 		return err
 	}
@@ -42,12 +49,11 @@ func GetPermintaan(c echo.Context) error {
 
 // GetPermintaanId godoc
 // @Summary Ambil permintaan berdasarkan ID
-// @Description Mendapatkan data permintaan berdasarkan UUID. Gunakan ?expand=names untuk menampilkan nama lengkap.
+// @Description Mendapatkan data permintaan berdasarkan UUID
 // @Tags Permintaan
 // @Produce json
 // @Param id path string true "Permintaan ID (UUID)"
-// @Param expand query string false "Gunakan 'names' untuk join nama"
-// @Success 200 {object} helpers.APIResponse{data=[]PermintaanResponse}
+// @Success 200 {object} helpers.APIResponse{data=PermintaanDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /permintaan/{id} [get]
@@ -58,25 +64,9 @@ func GetPermintaanId(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	if c.QueryParam("expand") == "names" {
-		result, err := GetPermintaanNamaServicesID(id)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				return exception.ResourceNotFound("Data tidak ditemukan")
-			}
-			return err
-		}
-		return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
-	}
-
-	result, err := GetPermintaanServicesID(id)
-
+	result, err := GetPermintaanDetailServicesID(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
@@ -89,7 +79,7 @@ func GetPermintaanId(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body PermintaanRequest true "Data permintaan"
-// @Success 201 {object} helpers.APIResponse{data=PermintaanResponse}
+// @Success 201 {object} helpers.APIResponse{data=PermintaanDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /permintaan [post]
 func CreatePermintaan(c echo.Context) error {
@@ -107,9 +97,30 @@ func CreatePermintaan(c echo.Context) error {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := CreatePermintaanServices(req.PemdaID, req.AplikasiID, userID, req)
+	var lampiran StringArray
+	if form, err := c.MultipartForm(); err == nil {
+		if fhs := form.File["files"]; len(fhs) > 0 {
+			if len(fhs) > 3 {
+				return exception.BadRequest(fmt.Sprintf("maksimal 3 lampiran, dikirim %d", len(fhs)))
+			}
+			for _, fh := range fhs {
+				f, err := fh.Open()
+				if err != nil {
+					return exception.BadRequest("Gagal membuka file")
+				}
+				url, err := storage.UploadFile(f, fh, storage.FolderLampiran)
+				f.Close()
+				if err != nil {
+					return err
+				}
+				lampiran = append(lampiran, url)
+			}
+		}
+	}
+
+	result, err := CreatePermintaanServices(req.PemdaID, req.AplikasiID, userID, req, lampiran)
 	if err != nil {
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusCreated,
@@ -124,7 +135,7 @@ func CreatePermintaan(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Permintaan"
 // @Param request body PermintaanRequest true "Data permintaan"
-// @Success 200 {object} helpers.APIResponse{data=PermintaanResponse}
+// @Success 200 {object} helpers.APIResponse{data=PermintaanDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /permintaan/{id} [put]
@@ -148,14 +159,36 @@ func UpdatePermintaan(c echo.Context) error {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := UpdatePermintaanServices(id, req.PemdaID, req.AplikasiID, userID, req)
-	if err != nil {
-		// kalau ID tidak ditemukan
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
+	var lampiran StringArray
+	if form, err := c.MultipartForm(); err == nil {
+		if fhs := form.File["files"]; len(fhs) > 0 {
+			if len(fhs) > 3 {
+				return exception.BadRequest(fmt.Sprintf("maksimal 3 lampiran, dikirim %d", len(fhs)))
+			}
+			for _, fh := range fhs {
+				f, err := fh.Open()
+				if err != nil {
+					return exception.BadRequest("Gagal membuka file")
+				}
+				url, err := storage.UploadFile(f, fh, storage.FolderLampiran)
+				f.Close()
+				if err != nil {
+					return err
+				}
+				lampiran = append(lampiran, url)
+			}
 		}
+	}
+	if lampiran == nil {
+		existing, err := GetById(id)
+		if err == nil {
+			lampiran = existing.Lampiran
+		}
+	}
 
-		return err
+	result, err := UpdatePermintaanServices(id, req.PemdaID, req.AplikasiID, userID, req, lampiran)
+	if err != nil {
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,
@@ -182,79 +215,56 @@ func DeletePermintaan(c echo.Context) error {
 
 	err := DeletePermintaanServices(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }
 
-// PresignLampiranUpload godoc
-// @Summary Buat pre-signed URL untuk upload satu lampiran permintaan
-// @Description Menghasilkan pre-signed PUT URL ke S3 untuk satu file. Panggil endpoint ini per file (max 3x), lalu konfirmasi semua key via PATCH /:id/lampiran.
+// UploadLampiran godoc
+// @Summary Upload lampiran permintaan
+// @Description Upload hingga 3 file lampiran langsung ke S3 via multipart form. Gunakan field "files" untuk setiap file.
 // @Tags Permintaan
+// @Accept multipart/form-data
 // @Produce json
 // @Param id path string true "ID Permintaan"
-// @Param ext query string false "Ekstensi file, misal .pdf, .png, .jpg (default: .pdf)"
-// @Success 200 {object} helpers.APIResponse{data=map[string]string}
-// @Failure 400 {object} helpers.APIResponse
-// @Router /permintaan/{id}/lampiran/presign [post]
-func PresignLampiranUpload(c echo.Context) error {
-	id := c.Param("id")
-	if _, err := uuid.Parse(id); err != nil {
-		return exception.BadRequest("UUID tidak valid")
-	}
-
-	ext := c.QueryParam("ext")
-	if ext == "" {
-		ext = ".pdf"
-	}
-
-	presignURL, key, err := storage.PresignUpload(storage.FolderLampiran, ext, 15*time.Minute)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Presign URL berhasil dibuat", map[string]string{
-		"presign_url": presignURL,
-		"key":         key,
-	}))
-}
-
-// ConfirmLampiranUpload godoc
-// @Summary Simpan key lampiran permintaan setelah semua upload selesai
-// @Description Kirim semua key S3 (max 3) setelah client selesai upload. Key akan dikonversi ke public URL dan disimpan ke kolom lampiran.
-// @Tags Permintaan
-// @Accept json
-// @Produce json
-// @Param id path string true "ID Permintaan"
-// @Param request body ConfirmLampiranRequest true "Keys S3 hasil upload (max 3)"
+// @Param files formData file true "File lampiran (max 3)"
 // @Success 200 {object} helpers.APIResponse
 // @Failure 400 {object} helpers.APIResponse
 // @Failure 404 {object} helpers.APIResponse
 // @Router /permintaan/{id}/lampiran [patch]
-func ConfirmLampiranUpload(c echo.Context) error {
+func UploadLampiran(c echo.Context) error {
 	id := c.Param("id")
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	var req ConfirmLampiranRequest
-	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return exception.BadRequest("Validasi gagal")
+	form, err := c.MultipartForm()
+	if err != nil {
+		return exception.BadRequest("Gagal membaca multipart form")
 	}
 
-	if len(req.Keys) > 3 {
-		return exception.BadRequest(fmt.Sprintf("maksimal 3 lampiran, dikirim %d", len(req.Keys)))
+	fileHeaders := form.File["files"]
+	if len(fileHeaders) == 0 {
+		return exception.BadRequest("File tidak ditemukan, gunakan field 'files'")
+	}
+	if len(fileHeaders) > 3 {
+		return exception.BadRequest(fmt.Sprintf("maksimal 3 lampiran, dikirim %d", len(fileHeaders)))
 	}
 
-	urls := make([]string, len(req.Keys))
-	for i, key := range req.Keys {
-		urls[i] = storage.PublicURL(key)
+	urls := make([]string, 0, len(fileHeaders))
+	for _, fh := range fileHeaders {
+		file, err := fh.Open()
+		if err != nil {
+			return exception.BadRequest("Gagal membuka file")
+		}
+		url, err := storage.UploadFile(file, fh, storage.FolderLampiran)
+		file.Close()
+		if err != nil {
+			return err
+		}
+		urls = append(urls, url)
 	}
 
 	if err := UpdateLampiranServices(id, urls); err != nil {

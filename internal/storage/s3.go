@@ -13,7 +13,6 @@ import (
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	presignedS3 "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 )
@@ -71,7 +70,6 @@ func UploadFile(file multipart.File, header *multipart.FileHeader, folder string
 		Key:         aws.String(key),
 		Body:        file,
 		ContentType: aws.String(header.Header.Get("Content-Type")),
-		ACL:         types.ObjectCannedACLPublicRead,
 	})
 	if err != nil {
 		return "", fmt.Errorf("gagal upload ke S3: %w", err)

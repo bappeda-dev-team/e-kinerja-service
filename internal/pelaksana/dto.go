@@ -19,11 +19,23 @@ type PelaksanaResponse struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type DistribusiInfo struct {
+	ID       string `json:"id"`
+	Pemda    string `json:"pemda"`
+	Aplikasi string `json:"aplikasi"`
+	Komentar string `json:"komentar"`
+}
+
+type ProgrammerInfo struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	FullName string `json:"full_name"`
+}
+
 type PelaksanaDetailResponse struct {
-	ID         string    `json:"id"`
-	Pemda      string    `json:"pemda"`
-	Aplikasi   string    `json:"aplikasi"`
-	Programmer string    `json:"programmer"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID         string         `json:"id"`
+	Distribusi DistribusiInfo `json:"distribusi"`
+	Programmer ProgrammerInfo `json:"programmer"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
 }

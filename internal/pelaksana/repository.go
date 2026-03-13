@@ -40,48 +40,66 @@ func GetId(id string) (PelaksanaResponse, error) {
 	return data, err
 }
 
-func GetAllByNama() ([]PelaksanaDetailResponse, error) {
-	rows, err := config.DB.Query(
-		`SELECT dp.id, mp.name, ma.name, u.full_name, dp.created_at, dp.updated_at FROM distribusi_pelaksana dp
+func GetAllDetail() ([]PelaksanaDetailResponse, error) {
+	rows, err := config.DB.Query(`
+		SELECT
+			dp.id,
+			d.id, mp.name, ma.name, d.komentar,
+			u.id, u.username, u.full_name,
+			dp.created_at, dp.updated_at
+		FROM distribusi_pelaksana dp
 		LEFT JOIN distribusi d ON dp.distribusi_id = d.id
 		LEFT JOIN permintaan p ON d.permintaan_id = p.id
-		LEFT JOIN users u ON dp.programmer_id = u.id
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
-		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id`)
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+		LEFT JOIN users u ON dp.programmer_id = u.id
+	`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var pelaksana []PelaksanaDetailResponse
-
 	for rows.Next() {
 		var data PelaksanaDetailResponse
-		err := rows.Scan(&data.ID, &data.Pemda, &data.Aplikasi, &data.Programmer, &data.CreatedAt, &data.UpdatedAt)
+		err := rows.Scan(
+			&data.ID,
+			&data.Distribusi.ID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi, &data.Distribusi.Komentar,
+			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName,
+			&data.CreatedAt, &data.UpdatedAt,
+		)
 		if err != nil {
 			return nil, err
 		}
 		pelaksana = append(pelaksana, data)
 	}
-
 	return pelaksana, err
-
 }
 
-func GetByNamaId(id string) (PelaksanaDetailResponse, error) {
+func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 	var data PelaksanaDetailResponse
-	err := config.DB.QueryRow(`SELECT dp.id, mp.name, ma.name, u.full_name, dp.created_at, dp.updated_at FROM distribusi_pelaksana dp
-	LEFT JOIN distribusi d ON dp.distribusi_id = d.id
-	LEFT JOIN permintaan p ON d.permintaan_id = p.id
-	LEFT JOIN users u ON dp.programmer_id = u.id
-	LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
-	LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id WHERE dp.id=$1`, id).
-		Scan(&data.ID, &data.Pemda, &data.Aplikasi, &data.Programmer, &data.CreatedAt, &data.UpdatedAt)
-
+	err := config.DB.QueryRow(`
+		SELECT
+			dp.id,
+			d.id, mp.name, ma.name, d.komentar,
+			u.id, u.username, u.full_name,
+			dp.created_at, dp.updated_at
+		FROM distribusi_pelaksana dp
+		LEFT JOIN distribusi d ON dp.distribusi_id = d.id
+		LEFT JOIN permintaan p ON d.permintaan_id = p.id
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+		LEFT JOIN users u ON dp.programmer_id = u.id
+		WHERE dp.id = $1
+	`, id).Scan(
+		&data.ID,
+		&data.Distribusi.ID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi, &data.Distribusi.Komentar,
+		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName,
+		&data.CreatedAt, &data.UpdatedAt,
+	)
 	if err != nil {
 		return PelaksanaDetailResponse{}, err
 	}
-
 	return data, err
 }
 

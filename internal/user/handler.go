@@ -6,7 +6,6 @@ import (
 	"aplikasi-internal/internal/storage"
 	"database/sql"
 	"net/http"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -72,7 +71,20 @@ func Create(c echo.Context) error {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	user, err := CreateUserService(req)
+	var pictureURL string
+	if fh, err := c.FormFile("file"); err == nil {
+		f, err := fh.Open()
+		if err != nil {
+			return exception.BadRequest("Gagal membuka file")
+		}
+		defer f.Close()
+		pictureURL, err = storage.UploadFile(f, fh, storage.FolderProfilePic)
+		if err != nil {
+			return err
+		}
+	}
+
+	user, err := CreateUserService(req, pictureURL)
 	if err != nil {
 
 		if err.Error() == "role tidak ditemukan" ||
@@ -92,62 +104,40 @@ func Logout(c echo.Context) error {
 		helpers.SuccessResponse(200, "Logout berhasil", nil))
 }
 
-// PresignProfilePicUpload godoc
-// @Summary Buat pre-signed URL untuk upload foto profil user
-// @Description Menghasilkan pre-signed PUT URL ke S3. Client upload file langsung ke URL tersebut, lalu panggil PATCH /:id/profile-picture dengan key yang dikembalikan.
+// UploadProfilePic godoc
+// @Summary Upload foto profil user
+// @Description Upload foto profil langsung ke S3 via multipart form. Gunakan field "file".
 // @Tags Users
+// @Accept multipart/form-data
 // @Produce json
 // @Param id path string true "User ID (UUID)"
-// @Param ext query string false "Ekstensi file, misal .png atau .jpg (default: .jpg)"
+// @Param file formData file true "File foto profil"
 // @Success 200 {object} helpers.APIResponse{data=map[string]string}
 // @Failure 400 {object} helpers.APIResponse
-// @Router /users/{id}/profile-picture/presign [post]
-func PresignProfilePicUpload(c echo.Context) error {
+// @Failure 404 {object} helpers.APIResponse
+// @Router /users/{id}/profile-picture [patch]
+func UploadProfilePic(c echo.Context) error {
 	id := c.Param("id")
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	ext := c.QueryParam("ext")
-	if ext == "" {
-		ext = ".jpg"
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		return exception.BadRequest("File tidak ditemukan, gunakan field 'file'")
 	}
 
-	presignURL, key, err := storage.PresignUpload(storage.FolderProfilePic, ext, 15*time.Minute)
+	file, err := fileHeader.Open()
+	if err != nil {
+		return exception.BadRequest("Gagal membuka file")
+	}
+	defer file.Close()
+
+	pictureURL, err := storage.UploadFile(file, fileHeader, storage.FolderProfilePic)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Presign URL berhasil dibuat", map[string]string{
-		"presign_url": presignURL,
-		"key":         key,
-	}))
-}
-
-// ConfirmProfilePicUpload godoc
-// @Summary Simpan key foto profil user setelah upload selesai
-// @Description Setelah client upload ke pre-signed URL, kirim key S3 yang diterima untuk disimpan ke database.
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param id path string true "User ID (UUID)"
-// @Param request body ConfirmProfilePicRequest true "Key S3 hasil upload"
-// @Success 200 {object} helpers.APIResponse
-// @Failure 400 {object} helpers.APIResponse
-// @Failure 404 {object} helpers.APIResponse
-// @Router /users/{id}/profile-picture [patch]
-func ConfirmProfilePicUpload(c echo.Context) error {
-	id := c.Param("id")
-	if _, err := uuid.Parse(id); err != nil {
-		return exception.BadRequest("UUID tidak valid")
-	}
-
-	var req ConfirmProfilePicRequest
-	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return exception.BadRequest("Validasi gagal")
-	}
-
-	pictureURL := storage.PublicURL(req.Key)
 	if err := UpdateProfilePictureService(id, pictureURL); err != nil {
 		if err == sql.ErrNoRows {
 			return exception.ResourceNotFound("User tidak ditemukan")

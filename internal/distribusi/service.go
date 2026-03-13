@@ -1,22 +1,14 @@
 package distribusi
 
-func GetDistribusiServices() ([]DistribusiResponse, error) {
-	return GetAll()
+func GetDistribusiDetailServices() ([]DistribusiDetailResponse, error) {
+	return GetAllDetail()
 }
 
-func GetDistribusiServicesID(id string) (DistribusiResponse, error) {
-	return GetById(id)
+func GetDistribusiDetailServicesID(id string) (DistribusiDetailResponse, error) {
+	return GetByIdDetail(id)
 }
 
-func GetDistribusiNamaServices() ([]DistribusiDetailResponse, error) {
-	return GetAllByNama()
-}
-
-func GetDistribusiNamaServicesID(id string) (DistribusiDetailResponse, error) {
-	return GetByNamaId(id)
-}
-
-func CreateDistribusiServices(permintaanID string, adminID string, req DistribusiRequest) (*DistribusiResponse, error) {
+func CreateDistribusiServices(permintaanID string, adminID string, req DistribusiRequest) (*DistribusiDetailResponse, error) {
 
 	data := &Distribusi{
 		PermintaanID: permintaanID,
@@ -29,17 +21,15 @@ func CreateDistribusiServices(permintaanID string, adminID string, req Distribus
 		return nil, err
 	}
 
-	return &DistribusiResponse{
-		ID:           data.ID,
-		PermintaanID: data.PermintaanID,
-		AdminID:      data.AdminID,
-		Komentar:     data.Komentar,
-		CreatedAt:    data.CreatedAt,
-		UpdatedAt:    data.UpdatedAt,
-	}, nil
+	result, err := GetByIdDetail(data.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
-func UpdateDistribusiServices(id string, permintaanID string, adminID string, req DistribusiRequest) (*DistribusiResponse, error) {
+func UpdateDistribusiServices(id string, permintaanID string, adminID string, req DistribusiRequest) (*DistribusiDetailResponse, error) {
 
 	data := &Distribusi{
 		PermintaanID: permintaanID,
@@ -52,13 +42,12 @@ func UpdateDistribusiServices(id string, permintaanID string, adminID string, re
 		return nil, err
 	}
 
-	return &DistribusiResponse{
-		ID:           id,
-		PermintaanID: data.PermintaanID,
-		AdminID:      data.AdminID,
-		Komentar:     data.Komentar,
-		UpdatedAt:    data.UpdatedAt,
-	}, nil
+	result, err := GetByIdDetail(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func DeleteDistribusiServices(id string) error {

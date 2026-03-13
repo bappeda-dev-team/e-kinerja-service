@@ -1,94 +1,49 @@
 package pelaksana
 
-import "errors"
-
-func GetPelaksanaServices() ([]PelaksanaResponse, error) {
-	return GetAll()
+func GetPelaksanaDetailServices() ([]PelaksanaDetailResponse, error) {
+	return GetAllDetail()
 }
 
-func GetPelaksanaServicesID(id string) (PelaksanaResponse, error) {
-	return GetId(id)
+func GetPelaksanaDetailServicesID(id string) (PelaksanaDetailResponse, error) {
+	return GetByIdDetail(id)
 }
 
-func GetPelaksanaNamaServices() ([]PelaksanaDetailResponse, error) {
-	return GetAllByNama()
-}
-
-func GetPelaksanaNamaServicesID(id string) (PelaksanaDetailResponse, error) {
-	return GetByNamaId(id)
-}
-
-func CreatePelaksanaServices(distribusiID string, programmerID string) (*PelaksanaResponse, error) {
-
-	distribusiidExists, err := IsDistribusiIdExists(distribusiID)
-	if err != nil {
-		return nil, err
-	}
-	if distribusiidExists {
-		return nil, errors.New("distribusi_id sudah digunakan")
-	}
-
-	programmeridExists, err := IsProgrammerIdExists(programmerID)
-	if err != nil {
-		return nil, err
-	}
-	if programmeridExists {
-		return nil, errors.New("programmer_id sudah digunakan")
-	}
-
+func CreatePelaksanaServices(distribusiID string, programmerID string) (*PelaksanaDetailResponse, error) {
 	data := &Pelaksana{
 		DistribusiID: distribusiID,
 		ProgrammerID: programmerID,
 	}
 
-	err = Create(data)
+	err := Create(data)
 	if err != nil {
 		return nil, err
 	}
 
-	return &PelaksanaResponse{
-		ID:           data.ID,
-		DistribusiID: data.DistribusiID,
-		ProgrammerID: data.ProgrammerID,
-		CreatedAt:    data.CreatedAt,
-		UpdatedAt:    data.UpdatedAt,
-	}, nil
+	result, err := GetByIdDetail(data.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
-func UpdatePelaksanaServices(id string, distribusiID string, programmerID string) (*PelaksanaResponse, error) {
-
-	distribusiidExists, err := IsDistribusiIdExists(distribusiID)
-	if err != nil {
-		return nil, err
-	}
-	if distribusiidExists {
-		return nil, errors.New("distribusi_id sudah digunakan")
-	}
-
-	programmeridExists, err := IsProgrammerIdExists(programmerID)
-	if err != nil {
-		return nil, err
-	}
-	if programmeridExists {
-		return nil, errors.New("programmer_id sudah digunakan")
-	}
-
+func UpdatePelaksanaServices(id string, distribusiID string, programmerID string) (*PelaksanaDetailResponse, error) {
 	data := &Pelaksana{
 		DistribusiID: distribusiID,
 		ProgrammerID: programmerID,
 	}
 
-	err = Update(id, data)
+	err := Update(id, data)
 	if err != nil {
 		return nil, err
 	}
 
-	return &PelaksanaResponse{
-		ID:           id,
-		DistribusiID: data.DistribusiID,
-		ProgrammerID: data.ProgrammerID,
-		UpdatedAt:    data.UpdatedAt,
-	}, nil
+	result, err := GetByIdDetail(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func DeletePelaksanaServices(id string) error {

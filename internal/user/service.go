@@ -15,7 +15,7 @@ func GetUserServicesID(id string) (UserResponse, error) {
 	return GetId(id)
 }
 
-func CreateUserService(req RegisterRequest) (*UserResponse, error) {
+func CreateUserService(req RegisterRequest, pictureURL string) (*UserResponse, error) {
 
 	// cek role valid
 	roleExists, err := IsRoleExists(req.RoleID)
@@ -45,9 +45,10 @@ func CreateUserService(req RegisterRequest) (*UserResponse, error) {
 	}
 
 	user := &User{
-		RoleID:   req.RoleID,
-		Username: req.Username,
-		FullName: req.FullName,
+		RoleID:         req.RoleID,
+		Username:       req.Username,
+		FullName:       req.FullName,
+		ProfilePicture: pictureURL,
 	}
 
 	err = CreateUser(user, string(hashedPassword))

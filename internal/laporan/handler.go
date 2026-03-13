@@ -4,23 +4,40 @@ import (
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lib/pq"
 )
+
+func handleDBError(err error) error {
+	log.Printf("[handleDBError] type=%T msg=%s\n", err, err.Error())
+	if err == sql.ErrNoRows {
+		return exception.ResourceNotFound("Data tidak ditemukan")
+	}
+	if pqErr, ok := err.(*pq.Error); ok {
+		switch pqErr.Code {
+		case "23503":
+			return exception.BadRequest("permintaan_id tidak ditemukan")
+		case "23505":
+			return exception.Conflict("Data laporan untuk permintaan ini sudah ada")
+		}
+	}
+	return exception.InternalServer("Terjadi kesalahan pada server")
+}
 
 // GetLaporan godoc
 // @Summary Ambil semua Laporan
 // @Description Mendapatkan daftar laporan
 // @Tags Laporan
 // @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]LaporanResponse}
+// @Success 200 {object} helpers.APIResponse{data=[]LaporanDetailResponse}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /laporan [get]
 func GetLaporan(c echo.Context) error {
-	result, err := GetLaporanServices()
-
+	result, err := GetLaporanDetailServices()
 	if err != nil {
 		return err
 	}
@@ -34,7 +51,7 @@ func GetLaporan(c echo.Context) error {
 // @Tags Laporan
 // @Produce json
 // @Param id path string true "Laporan ID (UUID)"
-// @Success 200 {object} helpers.APIResponse{data=[]LaporanResponse}
+// @Success 200 {object} helpers.APIResponse{data=LaporanDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /laporan/{id} [get]
@@ -45,15 +62,9 @@ func GetLaporanID(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	result, err := GetLaporanServicesID(id)
-
+	result, err := GetLaporanDetailServicesID(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
@@ -66,7 +77,7 @@ func GetLaporanID(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body LaporanRequest true "Data Laporan"
-// @Success 201 {object} helpers.APIResponse{data=LaporanResponse}
+// @Success 201 {object} helpers.APIResponse{data=LaporanDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /laporan [post]
 func CreateLaporan(c echo.Context) error {
@@ -86,7 +97,7 @@ func CreateLaporan(c echo.Context) error {
 
 	result, err := CreateLaporanServices(req.PermintaanID, userID, req)
 	if err != nil {
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusCreated,
@@ -101,7 +112,7 @@ func CreateLaporan(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Laporan"
 // @Param request body LaporanRequest true "Data laporan"
-// @Success 200 {object} helpers.APIResponse{data=LaporanResponse}
+// @Success 200 {object} helpers.APIResponse{data=LaporanDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /laporan/{id} [put]
@@ -127,11 +138,7 @@ func UpdateLaporan(c echo.Context) error {
 
 	result, err := UpdateLaporanServices(id, req.PermintaanID, userID, req)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,
@@ -157,11 +164,7 @@ func DeleteLaporan(c echo.Context) error {
 
 	err := DeleteLaporanServices(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,

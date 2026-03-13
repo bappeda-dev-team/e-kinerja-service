@@ -4,23 +4,42 @@ import (
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lib/pq"
 )
+
+func handleDBError(err error) error {
+	log.Printf("[handleDBError] type=%T msg=%s\n", err, err.Error())
+	if err == sql.ErrNoRows {
+		return exception.ResourceNotFound("Data tidak ditemukan")
+	}
+	if pqErr, ok := err.(*pq.Error); ok {
+		switch pqErr.Code {
+		case "23503":
+			return exception.BadRequest("laporan_id tidak ditemukan")
+		case "23505":
+			return exception.Conflict("Data verifikasi untuk laporan ini sudah ada")
+		case "23514":
+			return exception.BadRequest("status_verified tidak valid, gunakan: pending, approved, revision")
+		}
+	}
+	return exception.InternalServer("Terjadi kesalahan pada server")
+}
 
 // GetVerifikasi godoc
 // @Summary Ambil semua Verifikasi
 // @Description Mendapatkan daftar verifikasi
 // @Tags Verifikasi
 // @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]VerifikasiResponse}
+// @Success 200 {object} helpers.APIResponse{data=[]VerifikasiDetailResponse}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /verifikasi [get]
 func GetVerifikasi(c echo.Context) error {
-	result, err := GetVerifikasiServices()
-
+	result, err := GetVerifikasiDetailServices()
 	if err != nil {
 		return err
 	}
@@ -34,7 +53,7 @@ func GetVerifikasi(c echo.Context) error {
 // @Tags Verifikasi
 // @Produce json
 // @Param id path string true "Verifikasi ID (UUID)"
-// @Success 200 {object} helpers.APIResponse{data=[]VerifikasiResponse}
+// @Success 200 {object} helpers.APIResponse{data=VerifikasiDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi/{id} [get]
@@ -45,14 +64,9 @@ func GetVerifikasiID(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	result, err := GetVerifikasiServicesID(id)
-
+	result, err := GetVerifikasiDetailServicesID(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
@@ -65,7 +79,7 @@ func GetVerifikasiID(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body VerifikasiRequest true "Data Verifikasi"
-// @Success 201 {object} helpers.APIResponse{data=VerifikasiResponse}
+// @Success 201 {object} helpers.APIResponse{data=VerifikasiDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi [post]
 func CreateVerifikasi(c echo.Context) error {
@@ -76,6 +90,9 @@ func CreateVerifikasi(c echo.Context) error {
 	}
 
 	userID := userIDInterface.(string)
+	if userID == "" {
+		return c.JSON(401, "user_id kosong di token")
+	}
 
 	var req VerifikasiRequest
 
@@ -85,7 +102,7 @@ func CreateVerifikasi(c echo.Context) error {
 
 	result, err := CreateVerifikasiServices(req.LaporanID, userID, req)
 	if err != nil {
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusCreated,
@@ -100,7 +117,7 @@ func CreateVerifikasi(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Verifikasi"
 // @Param request body VerifikasiRequest true "Data verifikasi"
-// @Success 200 {object} helpers.APIResponse{data=VerifikasiResponse}
+// @Success 200 {object} helpers.APIResponse{data=VerifikasiDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /verifikasi/{id} [put]
@@ -113,6 +130,9 @@ func UpdateVerifikasi(c echo.Context) error {
 	}
 
 	userID := userIDInterface.(string)
+	if userID == "" {
+		return c.JSON(401, "user_id kosong di token")
+	}
 
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
@@ -126,11 +146,7 @@ func UpdateVerifikasi(c echo.Context) error {
 
 	result, err := UpdateVerifikasiServices(id, req.LaporanID, userID, req)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,
@@ -156,11 +172,7 @@ func DeleteVerifikasi(c echo.Context) error {
 
 	err := DeleteVerifikasiServices(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Data tidak ditemukan")
-		}
-
-		return err
+		return handleDBError(err)
 	}
 
 	return c.JSON(http.StatusOK,
