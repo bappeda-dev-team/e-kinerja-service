@@ -5,11 +5,20 @@ import (
 	"aplikasi-internal/internal/helpers"
 	"aplikasi-internal/internal/storage"
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
+
+func handleDBError(err error) error {
+	log.Printf("[handleDBError] type=%T msg=%s\n", err, err.Error())
+	if err == sql.ErrNoRows {
+		return exception.ResourceNotFound("Data tidak ditemukan")
+	}
+	return exception.InternalServer("Terjadi kesalahan pada server")
+}
 
 func Login(c echo.Context) error {
 
@@ -149,3 +158,24 @@ func UploadProfilePic(c echo.Context) error {
 		"profile_picture": pictureURL,
 	}))
 }
+
+func DeleteUser(c echo.Context) error {
+
+	id := c.Param("id")
+
+	if _, err := uuid.Parse(id); err != nil {
+		return exception.BadRequest("UUID tidak valid")
+	}
+
+	err := DeactivateUserService(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return exception.ResourceNotFound("Data tidak ditemukan")
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK,
+		helpers.SuccessResponse(200, "Akun berhasil dinonaktifkan", nil))
+}
+

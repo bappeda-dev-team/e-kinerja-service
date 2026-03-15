@@ -35,6 +35,7 @@ func SetupRoutes(r *echo.Echo) {
 	r.GET("/users", user.GetAllUser)
 	r.GET("/users/:id", user.GetUserID)
 	r.POST("/users", user.Create)
+	r.DELETE("/users/:id", user.DeleteUser)
 	r.PATCH("/users/:id/profile-picture", user.UploadProfilePic, middle_ware.JWTMiddleware)
 
 	ma := r.Group("/master-aplikasi")

@@ -28,3 +28,20 @@ type UserResponse struct {
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
+
+type RoleInfo struct {
+	ID 				string  `json:"id"`
+	Name 			string  `json:"name"`
+	Description 	string  `json:"description"`
+}
+
+type UserResponseDetail struct {
+	ID             string    `json:"id"`
+	Role           RoleInfo  `json:"role"`
+	Username       string    `json:"username"`
+	FullName       string    `json:"full_name"`
+	ProfilePicture string    `json:"profile_picture"`
+	IsActive       bool      `json:"is_active"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
