@@ -97,6 +97,14 @@ func DeletePermintaanServices(id string) error {
 	return Delete(id)
 }
 
+func UpdateStatusPermintaanServices(id string, status string) error {
+	validStatus := map[string]bool{"proses": true, "selesai": true, "revisi": true}
+	if !validStatus[status] {
+		return fmt.Errorf("status tidak valid, harus: proses, selesai, atau revisi")
+	}
+	return UpdateStatus(id, status)
+}
+
 func UpdateLampiranServices(id string, urls []string) error {
 	return UpdateLampiran(id, StringArray(urls))
 }

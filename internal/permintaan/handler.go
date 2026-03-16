@@ -222,6 +222,39 @@ func DeletePermintaan(c echo.Context) error {
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }
 
+// UpdateStatusPermintaan godoc
+// @Summary Update status permintaan
+// @Description Mengubah status permintaan: proses, selesai, atau revisi
+// @Tags Permintaan
+// @Accept json
+// @Produce json
+// @Param id path string true "ID Permintaan"
+// @Param request body UpdateStatusRequest true "Status baru"
+// @Success 200 {object} helpers.APIResponse
+// @Failure 400 {object} helpers.APIResponse
+// @Failure 404 {object} helpers.APIResponse
+// @Router /permintaan/{id}/status [patch]
+func UpdateStatusPermintaan(c echo.Context) error {
+	id := c.Param("id")
+	if _, err := uuid.Parse(id); err != nil {
+		return exception.BadRequest("UUID tidak valid")
+	}
+
+	var req UpdateStatusRequest
+	if err := c.Bind(&req); err != nil || req.Status == "" {
+		return exception.BadRequest("Field 'status' harus diisi")
+	}
+
+	if err := UpdateStatusPermintaanServices(id, req.Status); err != nil {
+		if err == sql.ErrNoRows {
+			return exception.ResourceNotFound("Data tidak ditemukan")
+		}
+		return exception.BadRequest(err.Error())
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Status berhasil diupdate", nil))
+}
+
 // UploadLampiran godoc
 // @Summary Upload lampiran permintaan
 // @Description Upload hingga 3 file lampiran langsung ke S3 via multipart form. Gunakan field "files" untuk setiap file.

@@ -70,6 +70,7 @@ func SetupRoutes(r *echo.Echo) {
 	p.PUT("/:id", permintaan.UpdatePermintaan)
 	p.DELETE("/:id", permintaan.DeletePermintaan)
 	p.PATCH("/:id/lampiran", permintaan.UploadLampiran)
+	p.PATCH("/:id/status", permintaan.UpdateStatusPermintaan)
 
 	d := r.Group("/distribusi")
 	d.Use(middle_ware.JWTMiddleware)
