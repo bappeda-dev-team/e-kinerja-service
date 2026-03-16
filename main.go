@@ -50,6 +50,7 @@ func main() {
 			echo.GET,
 			echo.POST,
 			echo.PUT,
+			echo.PATCH,
 			echo.DELETE,
 			echo.OPTIONS,
 		},
