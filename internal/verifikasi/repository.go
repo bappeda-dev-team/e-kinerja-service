@@ -45,8 +45,8 @@ func GetAllDetail() ([]VerifikasiDetailResponse, error) {
 		SELECT
 			v.id,
 			l.id, l.laporan_progress, l.status,
-			up.id, up.username, up.full_name,
-			uv.id, uv.username, uv.full_name,
+			up.id, up.username, up.full_name, up.profile_picture,
+			uv.id, uv.username, uv.full_name, uv.profile_picture,
 			v.komentar, v.status_verified,
 			v.created_at, v.updated_at
 		FROM verifikasi v
@@ -65,8 +65,8 @@ func GetAllDetail() ([]VerifikasiDetailResponse, error) {
 		err := rows.Scan(
 			&data.ID,
 			&data.Laporan.ID, &data.Laporan.LaporanProgress, &data.Laporan.Status,
-			&data.Laporan.Programmer.ID, &data.Laporan.Programmer.Username, &data.Laporan.Programmer.FullName,
-			&data.Verifikator.ID, &data.Verifikator.Username, &data.Verifikator.FullName,
+			&data.Laporan.Programmer.ID, &data.Laporan.Programmer.Username, &data.Laporan.Programmer.FullName, &data.Laporan.Programmer.ProfilePicture,
+			&data.Verifikator.ID, &data.Verifikator.Username, &data.Verifikator.FullName, &data.Verifikator.ProfilePicture,
 			&data.Komentar, &data.StatusVerified,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
@@ -84,8 +84,8 @@ func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
 		SELECT
 			v.id,
 			l.id, l.laporan_progress, l.status,
-			up.id, up.username, up.full_name,
-			uv.id, uv.username, uv.full_name,
+			up.id, up.username, up.full_name, up.profile_picture,
+			uv.id, uv.username, uv.full_name, uv.profile_picture,
 			v.komentar, v.status_verified,
 			v.created_at, v.updated_at
 		FROM verifikasi v
@@ -96,8 +96,8 @@ func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
 	`, id).Scan(
 		&data.ID,
 		&data.Laporan.ID, &data.Laporan.LaporanProgress, &data.Laporan.Status,
-		&data.Laporan.Programmer.ID, &data.Laporan.Programmer.Username, &data.Laporan.Programmer.FullName,
-		&data.Verifikator.ID, &data.Verifikator.Username, &data.Verifikator.FullName,
+		&data.Laporan.Programmer.ID, &data.Laporan.Programmer.Username, &data.Laporan.Programmer.FullName, &data.Laporan.Programmer.ProfilePicture,
+		&data.Verifikator.ID, &data.Verifikator.Username, &data.Verifikator.FullName, &data.Verifikator.ProfilePicture,
 		&data.Komentar, &data.StatusVerified,
 		&data.CreatedAt, &data.UpdatedAt,
 	)

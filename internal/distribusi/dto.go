@@ -23,10 +23,22 @@ type DistribusiResponse struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type PemdaInfo struct {
+	ID			string     `json:"id"`
+	Name		string	   `json:"name"`
+	Logo		string 	   `json:"logo"`
+}
+
+type AplikasiInfo struct {
+	ID			string     `json:"id"`
+	Name		string	   `json:"name"`
+	Logo		string 	   `json:"logo"`
+}
+
 type PermintaanInfo struct {
 	ID                string                 `json:"id"`
-	Pemda             string                 `json:"pemda"`
-	Aplikasi          string                 `json:"aplikasi"`
+	Pemda             PemdaInfo              `json:"pemda"`
+	Aplikasi          AplikasiInfo           `json:"aplikasi"`
 	Menu              string                 `json:"menu"`
 	KondisiAwal       string                 `json:"kondisi_awal"`
 	KondisiDiharapkan string                 `json:"kondisi_diharapkan"`
@@ -36,15 +48,17 @@ type PermintaanInfo struct {
 }
 
 type AdminInfo struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	FullName string `json:"full_name"`
+	ID       	   string `json:"id"`
+	Username 	   string `json:"username"`
+	FullName 	   string `json:"full_name"`
+	ProfilePicture string `json:"profile_picture"`
 }
 
 type PelaksanaInfo struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	FullName string `json:"full_name"`
+	ID       		string `json:"id"`
+	Username 		string `json:"username"`
+	FullName 		string `json:"full_name"`
+	ProfilePicture  string `json:"profile_picture"`
 }
 
 type DistribusiDetailResponse struct {

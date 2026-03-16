@@ -41,17 +41,20 @@ type PermintaanResponse struct {
 type PemdaInfo struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+	Logo string `json:"logo"`
 }
 
 type AplikasiInfo struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+	Logo string `json:"logo"`
 }
 
 type PembuatInfo struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	FullName string `json:"full_name"`
+	ID       	   string `json:"id"`
+	Username 	   string `json:"username"`
+	FullName       string `json:"full_name"`
+	ProfilePicture string `json:"profile_picture"`
 }
 
 type PermintaanDetailResponse struct {

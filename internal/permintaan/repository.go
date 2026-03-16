@@ -47,11 +47,11 @@ func GetAllDetail() ([]PermintaanDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			p.id,
-			mp.id, mp.name,
-			ma.id, ma.name,
+			mp.id, mp.name, mp.logo,
+			ma.id, ma.name, ma.logo,
 			p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status,
-			u.id, u.username, u.full_name,
+			u.id, u.username, u.full_name, u.profile_picture,
 			p.created_at, p.updated_at
 		FROM permintaan p
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
@@ -68,11 +68,11 @@ func GetAllDetail() ([]PermintaanDetailResponse, error) {
 		var data PermintaanDetailResponse
 		err := rows.Scan(
 			&data.ID,
-			&data.Pemda.ID, &data.Pemda.Name,
-			&data.Aplikasi.ID, &data.Aplikasi.Name,
+			&data.Pemda.ID, &data.Pemda.Name, &data.Pemda.Logo,
+			&data.Aplikasi.ID, &data.Aplikasi.Name, &data.Aplikasi.Logo,
 			&data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
 			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status,
-			&data.Pembuat.ID, &data.Pembuat.Username, &data.Pembuat.FullName,
+			&data.Pembuat.ID, &data.Pembuat.Username, &data.Pembuat.FullName, &data.Pembuat.ProfilePicture,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
@@ -88,11 +88,11 @@ func GetByIdDetail(id string) (PermintaanDetailResponse, error) {
 	err := config.DB.QueryRow(`
 		SELECT
 			p.id,
-			mp.id, mp.name,
-			ma.id, ma.name,
+			mp.id, mp.name, mp.logo,
+			ma.id, ma.name, ma.logo,
 			p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status,
-			u.id, u.username, u.full_name,
+			u.id, u.username, u.full_name, u.profile_picture,
 			p.created_at, p.updated_at
 		FROM permintaan p
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
@@ -101,11 +101,11 @@ func GetByIdDetail(id string) (PermintaanDetailResponse, error) {
 		WHERE p.id = $1
 	`, id).Scan(
 		&data.ID,
-		&data.Pemda.ID, &data.Pemda.Name,
-		&data.Aplikasi.ID, &data.Aplikasi.Name,
+		&data.Pemda.ID, &data.Pemda.Name, &data.Pemda.Logo,
+		&data.Aplikasi.ID, &data.Aplikasi.Name, &data.Aplikasi.Logo,
 		&data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
 		&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status,
-		&data.Pembuat.ID, &data.Pembuat.Username, &data.Pembuat.FullName,
+		&data.Pembuat.ID, &data.Pembuat.Username, &data.Pembuat.FullName, &data.Pembuat.ProfilePicture,
 		&data.CreatedAt, &data.UpdatedAt,
 	)
 	if err != nil {

@@ -45,7 +45,7 @@ func GetAllDetail() ([]PelaksanaDetailResponse, error) {
 		SELECT
 			dp.id,
 			d.id, mp.name, ma.name, d.komentar,
-			u.id, u.username, u.full_name,
+			u.id, u.username, u.full_name, u.profile_picture,
 			dp.created_at, dp.updated_at
 		FROM distribusi_pelaksana dp
 		LEFT JOIN distribusi d ON dp.distribusi_id = d.id
@@ -65,7 +65,7 @@ func GetAllDetail() ([]PelaksanaDetailResponse, error) {
 		err := rows.Scan(
 			&data.ID,
 			&data.Distribusi.ID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi, &data.Distribusi.Komentar,
-			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName,
+			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
@@ -82,7 +82,7 @@ func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 		SELECT
 			dp.id,
 			d.id, mp.name, ma.name, d.komentar,
-			u.id, u.username, u.full_name,
+			u.id, u.username, u.full_name, u.profile_picture,
 			dp.created_at, dp.updated_at
 		FROM distribusi_pelaksana dp
 		LEFT JOIN distribusi d ON dp.distribusi_id = d.id
@@ -94,7 +94,7 @@ func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 	`, id).Scan(
 		&data.ID,
 		&data.Distribusi.ID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi, &data.Distribusi.Komentar,
-		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName,
+		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 		&data.CreatedAt, &data.UpdatedAt,
 	)
 	if err != nil {

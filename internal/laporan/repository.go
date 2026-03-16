@@ -44,9 +44,9 @@ func GetAllDetail() ([]LaporanDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			l.id,
-			p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
-			u.id, u.username, u.full_name,
+			u.id, u.username, u.full_name, u.profile_picture,
 			l.laporan_progress, l.status,
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
@@ -65,10 +65,12 @@ func GetAllDetail() ([]LaporanDetailResponse, error) {
 		var data LaporanDetailResponse
 		err := rows.Scan(
 			&data.ID,
-			&data.Permintaan.ID, &data.Permintaan.Pemda, &data.Permintaan.Aplikasi,
+			&data.Permintaan.ID, 
+			&data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo, 
+			&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
-			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName,
+			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 			&data.LaporanProgress, &data.Status,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
@@ -85,9 +87,9 @@ func GetByIdDetail(id string) (LaporanDetailResponse, error) {
 	err := config.DB.QueryRow(`
 		SELECT
 			l.id,
-			p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
-			u.id, u.username, u.full_name,
+			u.id, u.username, u.full_name, u.profile_picture,
 			l.laporan_progress, l.status,
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
@@ -98,10 +100,12 @@ func GetByIdDetail(id string) (LaporanDetailResponse, error) {
 		WHERE l.id = $1
 	`, id).Scan(
 		&data.ID,
-		&data.Permintaan.ID, &data.Permintaan.Pemda, &data.Permintaan.Aplikasi,
+		&data.Permintaan.ID, 
+		&data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo,
+		&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
-		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName,
+		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 		&data.LaporanProgress, &data.Status,
 		&data.CreatedAt, &data.UpdatedAt,
 	)

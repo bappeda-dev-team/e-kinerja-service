@@ -84,9 +84,9 @@ func GetAllDetail() ([]DistribusiDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			d.id,
-			p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
-			u.id, u.username, u.full_name,
+			u.id, u.username, u.full_name, u.profile_picture,
 			d.komentar, d.created_at, d.updated_at
 		FROM distribusi d
 		LEFT JOIN permintaan p ON d.permintaan_id = p.id
@@ -104,10 +104,11 @@ func GetAllDetail() ([]DistribusiDetailResponse, error) {
 		var data DistribusiDetailResponse
 		err := rows.Scan(
 			&data.ID,
-			&data.Permintaan.ID, &data.Permintaan.Pemda, &data.Permintaan.Aplikasi,
+			&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo, 
+			&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
-			&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName,
+			&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
 			&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
@@ -140,9 +141,9 @@ func GetByIdDetail(id string) (DistribusiDetailResponse, error) {
 	err := config.DB.QueryRow(`
 		SELECT
 			d.id,
-			p.id, mp.name, ma.name, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
-			u.id, u.username, u.full_name,
+			u.id, u.username, u.full_name, u.profile_picture,
 			d.komentar, d.created_at, d.updated_at
 		FROM distribusi d
 		LEFT JOIN permintaan p ON d.permintaan_id = p.id
@@ -152,10 +153,11 @@ func GetByIdDetail(id string) (DistribusiDetailResponse, error) {
 		WHERE d.id = $1
 	`, id).Scan(
 		&data.ID,
-		&data.Permintaan.ID, &data.Permintaan.Pemda, &data.Permintaan.Aplikasi,
+		&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo, 
+		&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
-		&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName,
+		&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
 		&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
 	)
 	if err != nil {
