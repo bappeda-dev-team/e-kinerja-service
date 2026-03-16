@@ -41,11 +41,18 @@ type AdminInfo struct {
 	FullName string `json:"full_name"`
 }
 
+type PelaksanaInfo struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	FullName string `json:"full_name"`
+}
+
 type DistribusiDetailResponse struct {
-	ID         string         `json:"id"`
-	Permintaan PermintaanInfo `json:"permintaan"`
-	Admin      AdminInfo      `json:"admin"`
-	Komentar   string         `json:"komentar"`
-	CreatedAt  time.Time      `json:"created_at"`
-	UpdatedAt  time.Time      `json:"updated_at"`
+	ID         string          `json:"id"`
+	Permintaan PermintaanInfo  `json:"permintaan"`
+	Admin      AdminInfo       `json:"admin"`
+	Komentar   string          `json:"komentar"`
+	Pelaksana  []PelaksanaInfo `json:"pelaksana"`
+	CreatedAt  time.Time       `json:"created_at"`
+	UpdatedAt  time.Time       `json:"updated_at"`
 }

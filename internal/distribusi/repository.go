@@ -3,6 +3,8 @@ package distribusi
 import (
 	"aplikasi-internal/config"
 	"database/sql"
+	"fmt"
+	"strings"
 )
 
 func GetAll() ([]DistribusiResponse, error) {
@@ -39,6 +41,45 @@ func GetById(id string) (DistribusiResponse, error) {
 	return data, err
 }
 
+// getPelaksanaByDistribusiIDs mengambil pelaksana untuk beberapa distribusi_id sekaligus.
+// Mengembalikan map[distribusi_id][]PelaksanaInfo
+func getPelaksanaByDistribusiIDs(ids []string) (map[string][]PelaksanaInfo, error) {
+	result := make(map[string][]PelaksanaInfo)
+	if len(ids) == 0 {
+		return result, nil
+	}
+
+	placeholders := make([]string, len(ids))
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+		args[i] = id
+	}
+
+	query := fmt.Sprintf(`
+		SELECT dp.distribusi_id, u.id, u.username, u.full_name
+		FROM distribusi_pelaksana dp
+		LEFT JOIN users u ON dp.programmer_id = u.id
+		WHERE dp.distribusi_id IN (%s)
+	`, strings.Join(placeholders, ","))
+
+	rows, err := config.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var distribusiID string
+		var p PelaksanaInfo
+		if err := rows.Scan(&distribusiID, &p.ID, &p.Username, &p.FullName); err != nil {
+			return nil, err
+		}
+		result[distribusiID] = append(result[distribusiID], p)
+	}
+	return result, nil
+}
+
 func GetAllDetail() ([]DistribusiDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
@@ -72,9 +113,26 @@ func GetAllDetail() ([]DistribusiDetailResponse, error) {
 		if err != nil {
 			return nil, err
 		}
+		data.Pelaksana = []PelaksanaInfo{}
 		distribusi = append(distribusi, data)
 	}
-	return distribusi, err
+
+	// batch fetch pelaksana
+	ids := make([]string, len(distribusi))
+	for i, d := range distribusi {
+		ids[i] = d.ID
+	}
+	pelaksanaMap, err := getPelaksanaByDistribusiIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	for i, d := range distribusi {
+		if p, ok := pelaksanaMap[d.ID]; ok {
+			distribusi[i].Pelaksana = p
+		}
+	}
+
+	return distribusi, nil
 }
 
 func GetByIdDetail(id string) (DistribusiDetailResponse, error) {
@@ -103,7 +161,18 @@ func GetByIdDetail(id string) (DistribusiDetailResponse, error) {
 	if err != nil {
 		return DistribusiDetailResponse{}, err
 	}
-	return data, err
+
+	pelaksanaMap, err := getPelaksanaByDistribusiIDs([]string{data.ID})
+	if err != nil {
+		return DistribusiDetailResponse{}, err
+	}
+	if p, ok := pelaksanaMap[data.ID]; ok {
+		data.Pelaksana = p
+	} else {
+		data.Pelaksana = []PelaksanaInfo{}
+	}
+
+	return data, nil
 }
 
 func Create(data *Distribusi) error {

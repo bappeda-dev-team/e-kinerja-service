@@ -7,7 +7,7 @@ import (
 
 func GetAll() ([]PermintaanResponse, error) {
 	rows, err := config.DB.Query(`SELECT id, pemda_id, aplikasi_id, menu, kondisi_awal, kondisi_diharapkan,
-	tanggal_pesanan, tanggal_deadline, lampiran, created_by, created_at, updated_at FROM permintaan`)
+	tanggal_pesanan, tanggal_deadline, lampiran, status, created_by, created_at, updated_at FROM permintaan`)
 	if err != nil {
 		return nil, err
 	}
@@ -18,7 +18,7 @@ func GetAll() ([]PermintaanResponse, error) {
 	for rows.Next() {
 		var data PermintaanResponse
 		err := rows.Scan(&data.ID, &data.PemdaID, &data.AplikasiID, &data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
-			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.CreatedBy, &data.CreatedAt, &data.UpdatedAt)
+			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status, &data.CreatedBy, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -32,9 +32,9 @@ func GetAll() ([]PermintaanResponse, error) {
 func GetById(id string) (PermintaanResponse, error) {
 	var data PermintaanResponse
 	err := config.DB.QueryRow(`SELECT id, pemda_id, aplikasi_id, menu, kondisi_awal, kondisi_diharapkan,
-	tanggal_pesanan, tanggal_deadline, lampiran, created_by, created_at, updated_at FROM permintaan WHERE id=$1`, id).
+	tanggal_pesanan, tanggal_deadline, lampiran, status, created_by, created_at, updated_at FROM permintaan WHERE id=$1`, id).
 		Scan(&data.ID, &data.PemdaID, &data.AplikasiID, &data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
-			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.CreatedBy, &data.CreatedAt, &data.UpdatedAt)
+			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status, &data.CreatedBy, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
 		return PermintaanResponse{}, err
@@ -50,7 +50,7 @@ func GetAllDetail() ([]PermintaanDetailResponse, error) {
 			mp.id, mp.name,
 			ma.id, ma.name,
 			p.menu, p.kondisi_awal, p.kondisi_diharapkan,
-			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status,
 			u.id, u.username, u.full_name,
 			p.created_at, p.updated_at
 		FROM permintaan p
@@ -71,7 +71,7 @@ func GetAllDetail() ([]PermintaanDetailResponse, error) {
 			&data.Pemda.ID, &data.Pemda.Name,
 			&data.Aplikasi.ID, &data.Aplikasi.Name,
 			&data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
-			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran,
+			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status,
 			&data.Pembuat.ID, &data.Pembuat.Username, &data.Pembuat.FullName,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
@@ -91,7 +91,7 @@ func GetByIdDetail(id string) (PermintaanDetailResponse, error) {
 			mp.id, mp.name,
 			ma.id, ma.name,
 			p.menu, p.kondisi_awal, p.kondisi_diharapkan,
-			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status,
 			u.id, u.username, u.full_name,
 			p.created_at, p.updated_at
 		FROM permintaan p
@@ -104,7 +104,7 @@ func GetByIdDetail(id string) (PermintaanDetailResponse, error) {
 		&data.Pemda.ID, &data.Pemda.Name,
 		&data.Aplikasi.ID, &data.Aplikasi.Name,
 		&data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
-		&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran,
+		&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status,
 		&data.Pembuat.ID, &data.Pembuat.Username, &data.Pembuat.FullName,
 		&data.CreatedAt, &data.UpdatedAt,
 	)
@@ -177,6 +177,21 @@ func Update(id string, data *Permintaan) error {
 
 func UpdateLampiran(id string, lampiran StringArray) error {
 	result, err := config.DB.Exec(`UPDATE permintaan SET lampiran = $1, updated_at = NOW() WHERE id = $2`, lampiran, id)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
+
+func UpdateStatus(id string, status string) error {
+	result, err := config.DB.Exec(`UPDATE permintaan SET status = $1, updated_at = NOW() WHERE id = $2`, status, id)
 	if err != nil {
 		return err
 	}
