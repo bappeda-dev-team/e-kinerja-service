@@ -77,6 +77,44 @@ func GetAllDetail() ([]VerifikasiDetailResponse, error) {
 	}
 	return verifikasi, err
 }
+func GetAllBylaporan() ([]VerifikasiDetailResponse, error) {
+	rows, err := config.DB.Query(`
+		SELECT DISTINCT ON (l.id)
+			v.id,
+			l.id, l.laporan_progress, l.status,
+			up.id, up.username, up.full_name, up.profile_picture,
+			uv.id, uv.username, uv.full_name, uv.profile_picture,
+			v.komentar, v.status_verified,
+			v.created_at, v.updated_at
+		FROM verifikasi v
+		LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
+		LEFT JOIN users up ON l.programmer_id = up.id
+		LEFT JOIN users uv ON v.verifikator_id = uv.id
+		ORDER BY l.id, v.created_at DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var verifikasi []VerifikasiDetailResponse
+	for rows.Next() {
+		var data VerifikasiDetailResponse
+		err := rows.Scan(
+			&data.ID,
+			&data.Laporan.ID, &data.Laporan.LaporanProgress, &data.Laporan.Status,
+			&data.Laporan.Programmer.ID, &data.Laporan.Programmer.Username, &data.Laporan.Programmer.FullName, &data.Laporan.Programmer.ProfilePicture,
+			&data.Verifikator.ID, &data.Verifikator.Username, &data.Verifikator.FullName, &data.Verifikator.ProfilePicture,
+			&data.Komentar, &data.StatusVerified,
+			&data.CreatedAt, &data.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		verifikasi = append(verifikasi, data)
+	}
+	return verifikasi, err
+}
 
 func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
 	var data VerifikasiDetailResponse

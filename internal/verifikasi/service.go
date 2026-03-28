@@ -1,7 +1,7 @@
 package verifikasi
 
 func GetVerifikasiDetailServices() ([]VerifikasiDetailResponse, error) {
-	return GetAllDetail()
+	return GetAllBylaporan()
 }
 
 func GetVerifikasiDetailServicesID(id string) (VerifikasiDetailResponse, error) {
