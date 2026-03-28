@@ -145,6 +145,28 @@ func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
 	return data, err
 }
 
+func CreateBackup(data *Verifikasi) error {
+	query := `
+		INSERT INTO verifikasi (laporan_id, verifikator_id, komentar, status_verified)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, created_at, updated_at
+	`
+
+	err := config.DB.QueryRow(
+		query,
+		data.LaporanID,
+		data.VerifikatorID,
+		data.Komentar,
+		data.StatusVerified,
+	).Scan(
+		&data.ID,
+		&data.CreatedAt,
+		&data.UpdatedAt,
+	)
+
+	return err
+}
+
 func Create(data *Verifikasi) error {
 	query := `
 		INSERT INTO verifikasi (laporan_id, verifikator_id, komentar, status_verified)
@@ -163,6 +185,30 @@ func Create(data *Verifikasi) error {
 		&data.CreatedAt,
 		&data.UpdatedAt,
 	)
+
+	if err != nil {
+		return err
+	}
+
+	var statusLaporan string
+	switch data.StatusVerified {
+	case "pending":
+		statusLaporan = "putih"
+	case "approved":
+		statusLaporan = "hijau"
+	case "revision":
+		statusLaporan = "kuning"
+	default:
+		statusLaporan = "putih"
+	}
+
+	updateQuery := `
+		UPDATE laporan_kinerja
+		SET status = $1, updated_at = NOW()
+		WHERE id = $2
+	`
+
+	_, err = config.DB.Exec(updateQuery, statusLaporan, data.LaporanID)
 
 	return err
 }
@@ -187,6 +233,30 @@ func Update(id string, data *Verifikasi) error {
 		data.StatusVerified,
 		id,
 	).Scan(&data.UpdatedAt)
+
+	if err != nil {
+		return err
+	}
+
+	var statusLaporan string
+	switch data.StatusVerified {
+	case "pending":
+		statusLaporan = "putih"
+	case "approved":
+		statusLaporan = "hijau"
+	case "revision":
+		statusLaporan = "kuning"
+	default:
+		statusLaporan = "putih"
+	}
+
+	updateQuery := `
+		UPDATE laporan_kinerja
+		SET status = $1, updated_at = NOW()
+		WHERE id = $2
+	`
+
+	_, err = config.DB.Exec(updateQuery, statusLaporan, data.LaporanID)
 
 	return err
 }
