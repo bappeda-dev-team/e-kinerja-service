@@ -10,6 +10,7 @@ import (
 	"aplikasi-internal/internal/pelaksana"
 	"aplikasi-internal/internal/permintaan"
 	"aplikasi-internal/internal/roles"
+	"aplikasi-internal/internal/superadmin_dashboard"
 	"aplikasi-internal/internal/user"
 	"aplikasi-internal/internal/verifikasi"
 
@@ -27,6 +28,8 @@ func SetupRoutes(r *echo.Echo) {
 
 	r.GET("/roles", roles.GetRoles)
 	r.GET("/roles/:id", roles.GetRoleID)
+	r.PATCH("/roles/:id", roles.UpdateRole)
+	r.DELETE("/roles/:id", roles.DeleteRole)
 
 	auth := r.Group("/auth")
 	auth.POST("/login", user.Login)
@@ -101,6 +104,11 @@ func SetupRoutes(r *echo.Echo) {
 	l.POST("", laporan.CreateLaporan)
 	l.PUT("/:id", laporan.UpdateLaporan)
 	l.DELETE("/:id", laporan.DeleteLaporan)
+
+	sd := r.Group("/superadmin-dashboard")
+	sd.Use(middle_ware.JWTMiddleware)
+	sd.Use(middle_ware.RoleMiddleware("super_admin"))
+	sd.GET("", superadmin_dashboard.GetSuperadminDashboard)
 
 	v := r.Group("/verifikasi")
 	v.Use(middle_ware.JWTMiddleware)

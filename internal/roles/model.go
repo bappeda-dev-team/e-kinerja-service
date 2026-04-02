@@ -2,6 +2,11 @@ package roles
 
 import "time"
 
+type RoleRequest struct {
+	Name        string `json:"name" validate:"required,min=2"`
+	Description string `json:"description"`
+}
+
 type Roles struct {
 	ID        	 string    `json:"id"`
 	Name    	 string    `json:"name"`
