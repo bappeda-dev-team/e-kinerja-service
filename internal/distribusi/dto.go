@@ -63,6 +63,7 @@ type PelaksanaInfo struct {
 
 type VerifikasiInfo struct {
 	ID       		string  `json:"id"`
+	Komentar        string  `json:"komentar"`
 	StatusVerified  string  `json:"status_verified"`
 }
 

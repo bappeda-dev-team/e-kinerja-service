@@ -14,7 +14,7 @@ func GetAll() ([]DistribusiFullResponse, error) {
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
-			v.id, v.status_verified,
+			v.id, v.status_verified, v.komentar,
 			d.komentar, d.created_at, d.updated_at
 		FROM distribusi d
 		LEFT JOIN permintaan p ON d.permintaan_id = p.id
@@ -39,7 +39,7 @@ func GetAll() ([]DistribusiFullResponse, error) {
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 			&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
-			&data.Verifikasi.ID, &data.Verifikasi.StatusVerified,
+			&data.Verifikasi.ID, &data.Verifikasi.StatusVerified, &data.Verifikasi.Komentar,
 			&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
@@ -76,7 +76,7 @@ func GetById(id string) (DistribusiFullResponse, error) {
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
-			v.id, v.status_verified,
+			v.id, v.status_verified, v.komentar,
 			d.komentar, d.created_at, d.updated_at
 		FROM distribusi d
 		LEFT JOIN permintaan p ON d.permintaan_id = p.id
@@ -93,7 +93,7 @@ func GetById(id string) (DistribusiFullResponse, error) {
 		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 		&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
-		&data.Verifikasi.ID, &data.Verifikasi.StatusVerified,
+		&data.Verifikasi.ID, &data.Verifikasi.StatusVerified, &data.Verifikasi.Komentar,
 		&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
 	)
 	if err != nil {
