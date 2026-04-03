@@ -7,38 +7,110 @@ import (
 	"strings"
 )
 
-func GetAll() ([]DistribusiResponse, error) {
-	rows, err := config.DB.Query(`SELECT id, permintaan_id, admin_id, komentar, created_at, updated_at FROM distribusi`)
+func GetAll() ([]DistribusiFullResponse, error) {
+	rows, err := config.DB.Query(`
+		SELECT
+			d.id,
+			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
+			u.id, u.username, u.full_name, u.profile_picture,
+			v.id, v.status_verified,
+			d.komentar, d.created_at, d.updated_at
+		FROM distribusi d
+		LEFT JOIN permintaan p ON d.permintaan_id = p.id
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+		LEFT JOIN users u ON d.admin_id = u.id
+		LEFT JOIN laporan_kinerja l ON p.id = l.permintaan_id
+		LEFT JOIN verifikasi v ON l.id = v.laporan_id
+	`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var distribusi []DistribusiResponse
-
+	var distribusi []DistribusiFullResponse
 	for rows.Next() {
-		var data DistribusiResponse
-		err := rows.Scan(&data.ID, &data.PermintaanID, &data.AdminID, &data.Komentar, &data.CreatedAt, &data.UpdatedAt)
+		var data DistribusiFullResponse
+		err := rows.Scan(
+			&data.ID,
+			&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo, 
+			&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
+			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
+			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
+			&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
+			&data.Verifikasi.ID, &data.Verifikasi.StatusVerified,
+			&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
+		)
 		if err != nil {
 			return nil, err
 		}
+		data.Pelaksana = []PelaksanaInfo{}
 		distribusi = append(distribusi, data)
 	}
 
-	return distribusi, err
+	// batch fetch pelaksana
+	ids := make([]string, len(distribusi))
+	for i, d := range distribusi {
+		ids[i] = d.ID
+	}
+	pelaksanaMap, err := getPelaksanaByDistribusiIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	for i, d := range distribusi {
+		if p, ok := pelaksanaMap[d.ID]; ok {
+			distribusi[i].Pelaksana = p
+		}
+	}
+
+	return distribusi, nil
 
 }
 
-func GetById(id string) (DistribusiResponse, error) {
-	var data DistribusiResponse
-	err := config.DB.QueryRow(`SELECT id, permintaan_id, admin_id, komentar, created_at, updated_at FROM distribusi WHERE id=$1`, id).
-		Scan(&data.ID, &data.PermintaanID, &data.AdminID, &data.Komentar, &data.CreatedAt, &data.UpdatedAt)
-
+func GetById(id string) (DistribusiFullResponse, error) {
+	var data DistribusiFullResponse
+	err := config.DB.QueryRow(`
+		SELECT
+			d.id,
+			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
+			u.id, u.username, u.full_name, u.profile_picture,
+			v.id, v.status_verified,
+			d.komentar, d.created_at, d.updated_at
+		FROM distribusi d
+		LEFT JOIN permintaan p ON d.permintaan_id = p.id
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+		LEFT JOIN users u ON d.admin_id = u.id
+		LEFT JOIN laporan_kinerja l ON p.id = l.permintaan_id
+		LEFT JOIN verifikasi v ON l.id = v.laporan_id
+		WHERE d.id = $1
+	`, id).Scan(
+		&data.ID,
+		&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo, 
+		&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
+		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
+		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
+		&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
+		&data.Verifikasi.ID, &data.Verifikasi.StatusVerified,
+		&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
+	)
 	if err != nil {
-		return DistribusiResponse{}, err
+		return DistribusiFullResponse{}, err
 	}
 
-	return data, err
+	pelaksanaMap, err := getPelaksanaByDistribusiIDs([]string{data.ID})
+	if err != nil {
+		return DistribusiFullResponse{}, err
+	}
+	if p, ok := pelaksanaMap[data.ID]; ok {
+		data.Pelaksana = p
+	} else {
+		data.Pelaksana = []PelaksanaInfo{}
+	}
+
+	return data, nil
 }
 
 // getPelaksanaByDistribusiIDs mengambil pelaksana untuk beberapa distribusi_id sekaligus.

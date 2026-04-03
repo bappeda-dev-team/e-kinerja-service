@@ -1,11 +1,11 @@
 package distribusi
 
-func GetDistribusiDetailServices() ([]DistribusiDetailResponse, error) {
-	return GetAllDetail()
+func GetDistribusiDetailServices() ([]DistribusiFullResponse, error) {
+	return GetAll()
 }
 
-func GetDistribusiDetailServicesID(id string) (DistribusiDetailResponse, error) {
-	return GetByIdDetail(id)
+func GetDistribusiDetailServicesID(id string) (DistribusiFullResponse, error) {
+	return GetById(id)
 }
 
 func CreateDistribusiServices(permintaanID string, adminID string, req DistribusiRequest) (*DistribusiDetailResponse, error) {
