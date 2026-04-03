@@ -7,11 +7,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetUserServices() ([]UserResponse, error) {
+func GetUserServices() ([]UserResponseDetail, error) {
 	return GetAll()
 }
 
-func GetUserServicesID(id string) (UserResponse, error) {
+func GetUserServicesID(id string) (UserResponseDetail, error) {
 	return GetId(id)
 }
 
@@ -104,3 +104,14 @@ func LoginService(req LoginRequest) (string, error) {
 
 	return token, nil
 }
+
+func DeactivateUserService(id string) error {
+
+	err := DeactivateUser(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+

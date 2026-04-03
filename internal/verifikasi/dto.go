@@ -23,9 +23,10 @@ type VerifikasiResponse struct {
 }
 
 type ProgrammerInfo struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	FullName string `json:"full_name"`
+	ID       	   string `json:"id"`
+	Username 	   string `json:"username"`
+	FullName 	   string `json:"full_name"`
+	ProfilePicture string `json:"profile_picture"`
 }
 
 type LaporanInfo struct {
@@ -36,9 +37,10 @@ type LaporanInfo struct {
 }
 
 type VerifikatorInfo struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	FullName string `json:"full_name"`
+	ID       	   string `json:"id"`
+	Username 	   string `json:"username"`
+	FullName 	   string `json:"full_name"`
+	ProfilePicture string `json:"profile_picture"`
 }
 
 type VerifikasiDetailResponse struct {

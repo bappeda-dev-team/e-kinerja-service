@@ -2,21 +2,19 @@ package user
 
 import "aplikasi-internal/config"
 
-func GetAll() ([]UserResponse, error) {
-	rows, err := config.DB.Query(`
-		SELECT u.id, r.id, r.name, r.description, u.username, u.full_name, u.profile_picture, u.is_active, u.created_at, u.updated_at
-		FROM users u
-		LEFT JOIN roles r ON u.role_id = r.id
-	`)
+func GetAll() ([]UserResponseDetail, error) {
+	rows, err := config.DB.Query(
+		`SELECT u.id, u.role_id, r.name, r.description, u.username, u.full_name, u.profile_picture, u.is_active, u.created_at, u.updated_at FROM users u
+		LEFT JOIN roles r ON u.role_id = r.id`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []UserResponse
+	var users []UserResponseDetail
 
 	for rows.Next() {
-		var data UserResponse
+		var data UserResponseDetail
 		err := rows.Scan(&data.ID, &data.Role.ID, &data.Role.Name, &data.Role.Description, &data.Username, &data.FullName, &data.ProfilePicture, &data.IsActive, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
@@ -27,22 +25,19 @@ func GetAll() ([]UserResponse, error) {
 	return users, err
 }
 
-func GetId(id string) (UserResponse, error) {
-	var data UserResponse
-	err := config.DB.QueryRow(`
-		SELECT u.id, r.id, r.name, r.description, u.username, u.full_name, u.profile_picture, u.is_active, u.created_at, u.updated_at
-		FROM users u
-		LEFT JOIN roles r ON u.role_id = r.id
-		WHERE u.id = $1
-	`, id).Scan(&data.ID, &data.Role.ID, &data.Role.Name, &data.Role.Description, &data.Username, &data.FullName, &data.ProfilePicture, &data.IsActive, &data.CreatedAt, &data.UpdatedAt)
+func GetId(id string) (UserResponseDetail, error) {
+	var data UserResponseDetail
+	err := config.DB.QueryRow(`SELECT u.id, u.role_id, r.name, r.description, u.username, u.full_name, u.profile_picture, u.is_active, u.created_at, u.updated_at FROM users u
+	LEFT JOIN roles r ON u.role_id = r.id
+	WHERE u.id=$1`, id).
+		Scan(&data.ID, &data.Role.ID, &data.Role.Name, &data.Role.Description, &data.Username, &data.FullName, &data.ProfilePicture, &data.IsActive, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
-		return UserResponse{}, err
+		return UserResponseDetail{}, err
 	}
 
 	return data, err
 }
-
 
 func IsUsernameExists(username string) (bool, error) {
 	var exists bool
@@ -114,4 +109,18 @@ func GetUserByUsername(username string) (*UserRole, error) {
 	}
 
 	return &user, nil
+}
+
+func DeactivateUser(id string) error {
+
+	query := `
+	UPDATE users
+	SET is_active = false,
+	    updated_at = NOW()
+	WHERE id = $1
+	`
+
+	_, err := config.DB.Exec(query, id)
+
+	return err
 }

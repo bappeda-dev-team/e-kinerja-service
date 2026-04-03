@@ -13,6 +13,7 @@ func CreateMasterAplikasiServices(req CreateMasterAplikasiRequest, logoURL strin
 	data := &MasterAplikasi{
 		Name: req.Name,
 		Logo: logoURL,
+		Link: req.Link,
 	}
 
 	err := CreateMasterAplikasi(data)
@@ -28,6 +29,7 @@ func UpdateMasterAplikasiServices(id string, req CreateMasterAplikasiRequest, lo
 	data := &MasterAplikasi{
 		Name: req.Name,
 		Logo: logoURL,
+		Link: req.Link,
 	}
 
 	err := UpdateMasterAplikasi(id, data)
