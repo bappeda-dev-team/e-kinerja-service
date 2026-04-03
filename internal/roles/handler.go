@@ -10,6 +10,30 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// CreateRole godoc
+// @Summary Buat role baru
+// @Description Menambahkan role baru
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param request body RoleRequest true "Data role"
+// @Success 201 {object} helpers.APIResponse{data=Roles}
+// @Failure 400 {object} helpers.APIResponse
+// @Router /roles [post]
+func CreateRole(c echo.Context) error {
+	var req RoleRequest
+	if err := c.Bind(&req); err != nil || req.Name == "" {
+		return exception.BadRequest("Field 'name' harus diisi")
+	}
+
+	result, err := CreateRoleServices(req.Name, req.Description)
+	if err != nil {
+		return exception.InternalServer("Terjadi kesalahan pada server")
+	}
+
+	return c.JSON(http.StatusCreated, helpers.SuccessResponse(201, "Berhasil membuat data", result))
+}
+
 // UpdateRole godoc
 // @Summary Update role
 // @Description Mengupdate name dan description role berdasarkan ID

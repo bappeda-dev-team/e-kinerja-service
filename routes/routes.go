@@ -28,6 +28,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	r.GET("/roles", roles.GetRoles)
 	r.GET("/roles/:id", roles.GetRoleID)
+	r.POST("/roles", roles.CreateRole)
 	r.PATCH("/roles/:id", roles.UpdateRole)
 	r.DELETE("/roles/:id", roles.DeleteRole)
 

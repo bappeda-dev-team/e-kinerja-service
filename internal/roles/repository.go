@@ -38,6 +38,22 @@ func GetId(id string) (Roles, error) {
 	return data, err
 }
 
+func Create(name string, description string) (Roles, error) {
+	var data Roles
+	err := config.DB.QueryRow(`
+		INSERT INTO roles (name, description)
+		VALUES ($1, $2)
+		RETURNING id, name, description, created_at, updated_at
+	`, name, description).
+		Scan(&data.ID, &data.Name, &data.Description, &data.CreatedAt, &data.UpdatedAt)
+
+	if err != nil {
+		return Roles{}, err
+	}
+
+	return data, nil
+}
+
 func Update(id string, name string, description string) (Roles, error) {
 	var data Roles
 	err := config.DB.QueryRow(`

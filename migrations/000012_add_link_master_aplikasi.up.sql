@@ -1,0 +1,1 @@
+ALTER TABLE master_aplikasi ADD COLUMN link TEXT NOT NULL DEFAULT '';

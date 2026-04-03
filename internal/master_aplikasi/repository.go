@@ -6,7 +6,7 @@ import (
 )
 
 func GetAllMasterAplikasi() ([]MasterAplikasi, error) {
-	rows, err := config.DB.Query("SELECT id, name, logo, created_at, updated_at FROM master_aplikasi")
+	rows, err := config.DB.Query("SELECT id, name, logo, link, created_at, updated_at FROM master_aplikasi")
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func GetAllMasterAplikasi() ([]MasterAplikasi, error) {
 
 	for rows.Next() {
 		var aplikasi MasterAplikasi
-		err := rows.Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.Logo, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
+		err := rows.Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.Logo, &aplikasi.Link, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -29,8 +29,8 @@ func GetAllMasterAplikasi() ([]MasterAplikasi, error) {
 
 func GetMasterAplikasiId(id string) (MasterAplikasi, error) {
 	var aplikasi MasterAplikasi
-	err := config.DB.QueryRow("SELECT id, name, logo, created_at, updated_at FROM master_aplikasi WHERE id=$1", id).
-		Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.Logo, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
+	err := config.DB.QueryRow("SELECT id, name, logo, link, created_at, updated_at FROM master_aplikasi WHERE id=$1", id).
+		Scan(&aplikasi.ID, &aplikasi.Name, &aplikasi.Logo, &aplikasi.Link, &aplikasi.CreatedAt, &aplikasi.UpdatedAt)
 
 	if err != nil {
 		return MasterAplikasi{}, err
@@ -41,8 +41,8 @@ func GetMasterAplikasiId(id string) (MasterAplikasi, error) {
 
 func CreateMasterAplikasi(data *MasterAplikasi) error {
 	query := `
-		INSERT INTO master_aplikasi (name, logo)
-		VALUES ($1, $2)
+		INSERT INTO master_aplikasi (name, logo, link)
+		VALUES ($1, $2, $3)
 		RETURNING id, created_at, updated_at
 	`
 
@@ -50,6 +50,7 @@ func CreateMasterAplikasi(data *MasterAplikasi) error {
 		query,
 		data.Name,
 		data.Logo,
+		data.Link,
 	).Scan(
 		&data.ID,
 		&data.CreatedAt,
@@ -64,8 +65,9 @@ func UpdateMasterAplikasi(id string, data *MasterAplikasi) error {
 		UPDATE master_aplikasi
 		SET name = $1,
 		    logo = CASE WHEN $2 = '' THEN logo ELSE $2 END,
+		    link = $3,
 		    updated_at = NOW()
-		WHERE id = $3
+		WHERE id = $4
 		RETURNING updated_at
 	`
 
@@ -73,6 +75,7 @@ func UpdateMasterAplikasi(id string, data *MasterAplikasi) error {
 		query,
 		data.Name,
 		data.Logo,
+		data.Link,
 		id,
 	).Scan(&data.UpdatedAt)
 
