@@ -1,10 +1,10 @@
 package laporan
 
-func GetLaporanServices() ([]LaporanResponse, error) {
+func GetLaporanServices() ([]LaporanFullResponse, error) {
 	return GetAll()
 }
 
-func GetLaporanServicesID(id string) (LaporanResponse, error) {
+func GetLaporanServicesID(id string) (LaporanFullResponse, error) {
 	return GetId(id)
 }
 
@@ -34,6 +34,25 @@ func CreateLaporanServices(permintaanID string, userID string, req LaporanReques
 		return nil, err
 	}
 
+	return &result, nil
+}
+
+func CreateVerifikasiService(userID string, LaporanID string) (*VerifikasiResponse, error) {
+
+	data := &Verifikasi{
+		LaporanID:    LaporanID,
+		ProgrammerID: userID,
+	}
+
+	err := CreateVerifikasi(data)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := GetVerifId(data.ID)
+	if err != nil {
+		return nil, err
+	}
 	return &result, nil
 }
 

@@ -37,7 +37,7 @@ func handleDBError(err error) error {
 // @Failure 500 {object} helpers.APIResponse
 // @Router /laporan [get]
 func GetLaporan(c echo.Context) error {
-	result, err := GetLaporanDetailServices()
+	result, err := GetLaporanServices()
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func GetLaporanID(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	result, err := GetLaporanDetailServicesID(id)
+	result, err := GetLaporanServicesID(id)
 	if err != nil {
 		return handleDBError(err)
 	}
@@ -103,6 +103,29 @@ func CreateLaporan(c echo.Context) error {
 	return c.JSON(http.StatusCreated,
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
+func CreateVerif(c echo.Context) error {
+	userIDInterface := c.Get("user_id")
+	LaporanID := c.Param("laporan_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
+
+	if _, err := uuid.Parse(LaporanID); err != nil {
+		return exception.BadRequest("UUID tidak valid")
+	}
+
+	result, err := CreateVerifikasiService(userID, LaporanID)
+	if err != nil {
+		return handleDBError(err)
+	}
+
+	return c.JSON(http.StatusCreated,
+		helpers.SuccessResponse(201, "Berhasil membuat data", result))
+}
+
 
 // UpdateLaporan godoc
 // @Summary Update laporan
@@ -170,3 +193,6 @@ func DeleteLaporan(c echo.Context) error {
 	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }
+
+
+

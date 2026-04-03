@@ -11,3 +11,15 @@ type Laporan struct {
 	UpdatedAt   	time.Time `json:"updated_at"`
 }
 
+type Verifikasi struct {
+	ID         	   string    `json:"id"`
+	LaporanID 	   string    `json:"laporan_id"`
+	ProgrammerID   string    `json:"programmer_id"`
+	Komentar  	   string    `json:"komentar"`
+	StatusVerified string    `json:"status_verified"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
+
+

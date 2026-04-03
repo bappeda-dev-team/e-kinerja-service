@@ -12,6 +12,10 @@ type LaporanRequest struct {
 	LaporanProgress string `json:"laporan_progress" validate:"required,min=3"`
 }
 
+type VerifikasiRequest struct {
+	LaporanID      string `json:"laporan_id" validate:"required,uuid4"`
+}
+
 // === Response ===
 
 type LaporanResponse struct {
@@ -54,12 +58,38 @@ type ProgrammerInfo struct {
 	ProfilePicture string `json:"profile_picture"`
 }
 
+type VerifikasiInfo struct {
+	ID       		*string  `json:"id"`
+	Komentar        *string  `json:"komentar"`
+	StatusVerified  *string  `json:"status_verified"`
+}
+
+type VerifikasiResponse struct {
+	ID             string    `json:"id"`
+	LaporanID      string    `json:"laporan_id"`
+	ProgrammerID   string    `json:"programmer_id"`
+	StatusVerified string    `json:"status_verified"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
 type LaporanDetailResponse struct {
 	ID              string         `json:"id"`
 	Permintaan      PermintaanInfo `json:"permintaan"`
 	Programmer      ProgrammerInfo `json:"programmer"`
 	LaporanProgress string         `json:"laporan_progress"`
 	Status          string         `json:"status"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+}
+
+type LaporanFullResponse struct {
+	ID              string         `json:"id"`
+	Permintaan      PermintaanInfo `json:"permintaan"`
+	Programmer      ProgrammerInfo `json:"programmer"`
+	LaporanProgress string         `json:"laporan_progress"`
+	Status          string         `json:"status"`
+	Verifikasi      *VerifikasiInfo `json:"verifikasi"`
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 }
