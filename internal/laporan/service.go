@@ -1,10 +1,10 @@
 package laporan
 
-func GetLaporanServices() ([]LaporanResponse, error) {
+func GetLaporanServices() ([]LaporanFullResponse, error) {
 	return GetAll()
 }
 
-func GetLaporanServicesID(id string) (LaporanResponse, error) {
+func GetLaporanServicesID(id string) (LaporanFullResponse, error) {
 	return GetId(id)
 }
 
@@ -16,12 +16,13 @@ func GetLaporanDetailServicesID(id string) (LaporanDetailResponse, error) {
 	return GetByIdDetail(id)
 }
 
-func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest) (*LaporanDetailResponse, error) {
+func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest) (*LaporanFullResponse, error) {
 
 	data := &Laporan{
 		PermintaanID:    permintaanID,
 		ProgrammerID:    userID,
 		LaporanProgress: req.LaporanProgress,
+		Status:          req.Status,
 	}
 
 	err := Create(data)
@@ -29,7 +30,7 @@ func CreateLaporanServices(permintaanID string, userID string, req LaporanReques
 		return nil, err
 	}
 
-	result, err := GetByIdDetail(data.ID)
+	result, err := GetId(data.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -37,12 +38,32 @@ func CreateLaporanServices(permintaanID string, userID string, req LaporanReques
 	return &result, nil
 }
 
-func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanRequest) (*LaporanDetailResponse, error) {
+func CreateVerifikasiService(userID string, LaporanID string) (*VerifikasiResponse, error) {
+
+	data := &Verifikasi{
+		LaporanID:    LaporanID,
+		ProgrammerID: userID,
+	}
+
+	err := CreateVerifikasi(data)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := GetVerifId(data.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanRequest) (*LaporanFullResponse, error) {
 
 	data := &Laporan{
 		PermintaanID:    permintaanID,
 		ProgrammerID:    userID,
 		LaporanProgress: req.LaporanProgress,
+		Status:          req.Status,
 	}
 
 	err := Update(id, data)
@@ -50,7 +71,7 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 		return nil, err
 	}
 
-	result, err := GetByIdDetail(id)
+	result, err := GetId(id)
 	if err != nil {
 		return nil, err
 	}

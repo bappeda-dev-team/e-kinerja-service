@@ -61,12 +61,29 @@ type PelaksanaInfo struct {
 	ProfilePicture  string `json:"profile_picture"`
 }
 
+type VerifikasiInfo struct {
+	ID       		string  `json:"id"`
+	Komentar        string  `json:"komentar"`
+	StatusVerified  string  `json:"status_verified"`
+}
+
 type DistribusiDetailResponse struct {
 	ID         string          `json:"id"`
 	Permintaan PermintaanInfo  `json:"permintaan"`
 	Admin      AdminInfo       `json:"admin"`
 	Komentar   string          `json:"komentar"`
 	Pelaksana  []PelaksanaInfo `json:"pelaksana"`
+	CreatedAt  time.Time       `json:"created_at"`
+	UpdatedAt  time.Time       `json:"updated_at"`
+}
+
+type DistribusiFullResponse struct {
+	ID         string          `json:"id"`
+	Permintaan PermintaanInfo  `json:"permintaan"`
+	Admin      AdminInfo       `json:"admin"`
+	Komentar   string          `json:"komentar"`
+	Pelaksana  []PelaksanaInfo `json:"pelaksana"`
+	Verifikasi VerifikasiInfo  `json:"verifikasi"`
 	CreatedAt  time.Time       `json:"created_at"`
 	UpdatedAt  time.Time       `json:"updated_at"`
 }
