@@ -192,8 +192,31 @@ func GetByIdDetail(id string) (LaporanDetailResponse, error) {
 
 func GetVerifId(id string) (VerifikasiResponse, error) {
 	var data VerifikasiResponse
-	err := config.DB.QueryRow(`SELECT id, laporan_id, verifikator_id, status_verified, created_at, updated_at FROM verifikasi WHERE id=$1`, id).
-		Scan(&data.ID, &data.LaporanID, &data.ProgrammerID, &data.StatusVerified, &data.CreatedAt, &data.UpdatedAt)
+	err := config.DB.QueryRow(`
+		SELECT 
+			v.id, v.laporan_id, 
+			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
+			l.laporan_progress, l.status,
+			v.verifikator_id, u.username, u.full_name, u.profile_picture,
+			v.status_verified,
+			v.created_at, v.updated_at 
+			FROM verifikasi v
+			LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
+			LEFT JOIN permintaan p ON l.permintaan_id = p.id
+			LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+			LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+			LEFT JOIN users u ON v.verifikator_id = u.id
+			WHERE v.id=$1`, id).
+		Scan(&data.ID, 
+			&data.Laporan.ID, &data.Laporan.Permintaan.ID, 
+			&data.Laporan.Permintaan.Pemda.ID, &data.Laporan.Permintaan.Pemda.Name, &data.Laporan.Permintaan.Pemda.Logo,
+			&data.Laporan.Permintaan.Aplikasi.ID, &data.Laporan.Permintaan.Aplikasi.Name, &data.Laporan.Permintaan.Aplikasi.Logo,
+			&data.Laporan.Permintaan.Menu, &data.Laporan.Permintaan.KondisiAwal, &data.Laporan.Permintaan.KondisiDiharapkan,
+			&data.Laporan.Permintaan.TanggalPesanan, &data.Laporan.Permintaan.TanggalDeadline, &data.Laporan.Permintaan.Lampiran,
+			&data.Laporan.LaporanProgress, &data.Laporan.Status,
+			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
+			&data.StatusVerified, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
 		return VerifikasiResponse{}, err
