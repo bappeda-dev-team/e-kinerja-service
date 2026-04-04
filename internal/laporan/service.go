@@ -57,12 +57,13 @@ func CreateVerifikasiService(userID string, LaporanID string) (*VerifikasiRespon
 	return &result, nil
 }
 
-func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanRequest) (*LaporanDetailResponse, error) {
+func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanRequest) (*LaporanFullResponse, error) {
 
 	data := &Laporan{
 		PermintaanID:    permintaanID,
 		ProgrammerID:    userID,
 		LaporanProgress: req.LaporanProgress,
+		Status:          req.Status,
 	}
 
 	err := Update(id, data)
@@ -70,7 +71,7 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 		return nil, err
 	}
 
-	result, err := GetByIdDetail(id)
+	result, err := GetId(id)
 	if err != nil {
 		return nil, err
 	}

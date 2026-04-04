@@ -275,8 +275,9 @@ func Update(id string, data *Laporan) error {
 		SET permintaan_id = $1,
 			programmer_id = $2,
 			laporan_progress = $3,
+			status           = $4,
 		    updated_at = NOW()
-		WHERE id = $4
+		WHERE id = $5
 		RETURNING updated_at
 	`
 
@@ -285,6 +286,7 @@ func Update(id string, data *Laporan) error {
 		data.PermintaanID,
 		data.ProgrammerID,
 		data.LaporanProgress,
+		data.Status,
 		id,
 	).Scan(&data.UpdatedAt)
 
