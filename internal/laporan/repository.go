@@ -227,8 +227,8 @@ func GetVerifId(id string) (VerifikasiResponse, error) {
 
 func Create(data *Laporan) error {
 	query := `
-		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, laporan_progress)
-		VALUES ($1, $2, $3)
+		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, laporan_progress, status)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at
 	`
 
@@ -237,6 +237,7 @@ func Create(data *Laporan) error {
 		data.PermintaanID,
 		data.ProgrammerID,
 		data.LaporanProgress,
+		data.Status,
 	).Scan(
 		&data.ID,
 		&data.CreatedAt,

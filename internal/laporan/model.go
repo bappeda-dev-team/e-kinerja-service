@@ -7,6 +7,7 @@ type Laporan struct {
 	PermintaanID    string    `json:"permintaan_id"`
 	ProgrammerID 	string    `json:"programmer_id"`
 	LaporanProgress string    `json:"laporan_progress"`
+	Status			string    `json:"status"`
 	CreatedAt   	time.Time `json:"created_at"`
 	UpdatedAt   	time.Time `json:"updated_at"`
 }

@@ -16,12 +16,13 @@ func GetLaporanDetailServicesID(id string) (LaporanDetailResponse, error) {
 	return GetByIdDetail(id)
 }
 
-func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest) (*LaporanDetailResponse, error) {
+func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest) (*LaporanFullResponse, error) {
 
 	data := &Laporan{
 		PermintaanID:    permintaanID,
 		ProgrammerID:    userID,
 		LaporanProgress: req.LaporanProgress,
+		Status:          req.Status,
 	}
 
 	err := Create(data)
@@ -29,7 +30,7 @@ func CreateLaporanServices(permintaanID string, userID string, req LaporanReques
 		return nil, err
 	}
 
-	result, err := GetByIdDetail(data.ID)
+	result, err := GetId(data.ID)
 	if err != nil {
 		return nil, err
 	}
