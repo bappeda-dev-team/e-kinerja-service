@@ -88,7 +88,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	dp := r.Group("/pelaksana")
 	dp.Use(middle_ware.JWTMiddleware)
-	dp.Use(middle_ware.RoleMiddleware("admin"))
+	dp.Use(middle_ware.RoleMiddleware("admin", "programmer"))
 
 	dp.GET("", pelaksana.GetPelaksana)         // ?expand=names untuk join nama
 	dp.GET("/:id", pelaksana.GetPelaksanaID)   // ?expand=names untuk join nama

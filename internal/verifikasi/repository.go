@@ -95,7 +95,7 @@ func GetAllBylaporan() ([]VerifikasiDetailResponse, error) {
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users up ON l.programmer_id = up.id
 		LEFT JOIN users uv ON v.verifikator_id = uv.id
-		ORDER BY l.id, v.created_at DESC
+		ORDER BY l.id, v.updated_at DESC
 	`)
 	if err != nil {
 		return nil, err

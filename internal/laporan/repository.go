@@ -3,6 +3,8 @@ package laporan
 import (
 	"aplikasi-internal/config"
 	"database/sql"
+	"fmt"
+	"strings"
 )
 
 func GetAll() ([]LaporanFullResponse, error) {
@@ -13,14 +15,14 @@ func GetAll() ([]LaporanFullResponse, error) {
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
 			l.laporan_progress, l.status,
-			v.id, v.komentar, v.status_verified,
+			
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
 		LEFT JOIN permintaan p ON l.permintaan_id = p.id
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users u ON l.programmer_id = u.id
-		LEFT JOIN verifikasi v ON l.id = v.laporan_id
+
 	`)
 	if err != nil {
 		return nil, err
@@ -30,7 +32,7 @@ func GetAll() ([]LaporanFullResponse, error) {
 	var laporan []LaporanFullResponse
 	for rows.Next() {
 		var data LaporanFullResponse
-		var vID, vKomentar, vStatus sql.NullString
+		// var vID, vKomentar, vStatus sql.NullString
 		err := rows.Scan(
 			&data.ID,
 			&data.Permintaan.ID, 
@@ -40,26 +42,41 @@ func GetAll() ([]LaporanFullResponse, error) {
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 			&data.LaporanProgress, &data.Status,
-			&vID, &vKomentar, &vStatus,
+			// &vID, &vKomentar, &vStatus,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
-		if vID.Valid || vKomentar.Valid || vStatus.Valid {
-			data.Verifikasi = &VerifikasiInfo{}
+		// if vID.Valid || vKomentar.Valid || vStatus.Valid {
+		// 	data.Verifikasi = &VerifikasiInfo{}
 
-			if vID.Valid {
-				data.Verifikasi.ID = &vID.String
-			}
-			if vKomentar.Valid {
-				data.Verifikasi.Komentar = &vKomentar.String
-			}
-			if vStatus.Valid {
-				data.Verifikasi.StatusVerified = &vStatus.String
+		// 	if vID.Valid {
+		// 		data.Verifikasi.ID = &vID.String
+		// 	}
+		// 	if vKomentar.Valid {
+		// 		data.Verifikasi.Komentar = &vKomentar.String
+		// 	}
+		// 	if vStatus.Valid {
+		// 		data.Verifikasi.StatusVerified = &vStatus.String
+		// 	}
+		// }
+		data.Verifikasi = []VerifikasiInfo{}
+		laporan = append(laporan, data)
+
+		ids := make([]string, len(laporan))
+		for i, l := range laporan {
+			ids[i] = l.ID
+		}
+		verifikasiMap, err := getVerifikasiByLaporanIDs(ids)
+		if err != nil {
+			return nil, err
+		}
+		for i, l := range laporan {
+			if v, ok := verifikasiMap[l.ID]; ok {
+				laporan[i].Verifikasi = v
 			}
 		}
-		laporan = append(laporan, data)
 	}
 	return laporan, err
 
@@ -67,7 +84,7 @@ func GetAll() ([]LaporanFullResponse, error) {
 
 func GetId(id string) (LaporanFullResponse, error) {
 	var data LaporanFullResponse
-	var vID, vKomentar, vStatus sql.NullString
+	// var vID, vKomentar, vStatus sql.NullString
 	err := config.DB.QueryRow(`
 		SELECT
 			l.id,
@@ -75,14 +92,14 @@ func GetId(id string) (LaporanFullResponse, error) {
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
 			l.laporan_progress, l.status,
-			v.id, v.komentar, v.status_verified,
+			
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
 		LEFT JOIN permintaan p ON l.permintaan_id = p.id
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users u ON l.programmer_id = u.id
-		LEFT JOIN verifikasi v ON l.id = v.laporan_id
+		
 		WHERE l.id = $1
 	`, id).Scan(
 		&data.ID,
@@ -93,26 +110,76 @@ func GetId(id string) (LaporanFullResponse, error) {
 		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 		&data.LaporanProgress, &data.Status,
-		&vID, &vKomentar, &vStatus,
+		// &vID, &vKomentar, &vStatus,
 		&data.CreatedAt, &data.UpdatedAt,
 	)
-	if vID.Valid || vKomentar.Valid || vStatus.Valid {
-			data.Verifikasi = &VerifikasiInfo{}
+	// if vID.Valid || vKomentar.Valid || vStatus.Valid {
+	// 		data.Verifikasi = &VerifikasiInfo{}
 
-			if vID.Valid {
-				data.Verifikasi.ID = &vID.String
-			}
-			if vKomentar.Valid {
-				data.Verifikasi.Komentar = &vKomentar.String
-			}
-			if vStatus.Valid {
-				data.Verifikasi.StatusVerified = &vStatus.String
-			}
-		}
+	// 		if vID.Valid {
+	// 			data.Verifikasi.ID = &vID.String
+	// 		}
+	// 		if vKomentar.Valid {
+	// 			data.Verifikasi.Komentar = &vKomentar.String
+	// 		}
+	// 		if vStatus.Valid {
+	// 			data.Verifikasi.StatusVerified = &vStatus.String
+	// 		}
+	// 	}
 	if err != nil {
 		return LaporanFullResponse{}, err
 	}
+
+	verifikasiMap, err := getVerifikasiByLaporanIDs([]string{data.ID})
+	if err != nil {
+		return LaporanFullResponse{}, err
+	}
+	if p, ok := verifikasiMap[data.ID]; ok {
+		data.Verifikasi = p
+	} else {
+		data.Verifikasi = []VerifikasiInfo{}
+	}
+
 	return data, err
+}
+
+func getVerifikasiByLaporanIDs(ids []string) (map[string][]VerifikasiInfo, error) {
+	result := make(map[string][]VerifikasiInfo)
+	if len(ids) == 0 {
+		return result, nil
+	}
+
+	placeholders := make([]string, len(ids))
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+		args[i] = id
+	}
+
+	query := fmt.Sprintf(`
+		SELECT DISTINCT ON (l.id)
+		l.id, v.id, v.komentar, v.status_verified, v.created_at, v.updated_at
+		FROM verifikasi v
+		LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
+		WHERE l.id IN (%s)
+		ORDER BY l.id, v.updated_at DESC
+	`, strings.Join(placeholders, ","))
+
+	rows, err := config.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var laporanID string
+		var v VerifikasiInfo
+		if err := rows.Scan(&laporanID, &v.ID, &v.Komentar, &v.StatusVerified, &v.CreatedAt, &v.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result[laporanID] = append(result[laporanID], v)
+	}
+	return result, nil
 }
 
 func GetAllDetail() ([]LaporanDetailResponse, error) {
