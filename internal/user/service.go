@@ -114,4 +114,3 @@ func DeactivateUserService(id string) error {
 
 	return nil
 }
-

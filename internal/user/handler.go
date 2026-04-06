@@ -178,4 +178,3 @@ func DeleteUser(c echo.Context) error {
 	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Akun berhasil dinonaktifkan", nil))
 }
-

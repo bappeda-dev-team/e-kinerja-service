@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"aplikasi-internal/internal/all_activity"
 	"aplikasi-internal/internal/distribusi"
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/laporan"
@@ -90,8 +91,8 @@ func SetupRoutes(r *echo.Echo) {
 	dp.Use(middle_ware.JWTMiddleware)
 	dp.Use(middle_ware.RoleMiddleware("admin", "programmer"))
 
-	dp.GET("", pelaksana.GetPelaksana)         // ?expand=names untuk join nama
-	dp.GET("/:id", pelaksana.GetPelaksanaID)   // ?expand=names untuk join nama
+	dp.GET("", pelaksana.GetPelaksana)       // ?expand=names untuk join nama
+	dp.GET("/:id", pelaksana.GetPelaksanaID) // ?expand=names untuk join nama
 	dp.POST("", pelaksana.CreatePelaksana)
 	dp.PUT("/:id", pelaksana.UpdatePelaksana)
 	dp.DELETE("/:id", pelaksana.DeletePelaksana)
@@ -121,4 +122,9 @@ func SetupRoutes(r *echo.Echo) {
 	v.POST("", verifikasi.CreateVerifikasi)
 	v.PUT("/:id", verifikasi.UpdateVerifikasi)
 	v.DELETE("/:id", verifikasi.DeleteVerifikasi)
+
+	aa := r.Group("/all-activity")
+	aa.Use(middle_ware.JWTMiddleware)
+	aa.Use(middle_ware.RoleMiddleware("super_admin", "admin"))
+	aa.GET("", all_activity.GetAllActivity)
 }

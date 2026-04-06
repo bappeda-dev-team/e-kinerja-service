@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-
 type CustomValidator struct {
 	Validator *validator.Validate
 }

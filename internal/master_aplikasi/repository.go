@@ -119,5 +119,3 @@ func DeleteMasterAplikasi(id string) error {
 
 	return nil
 }
-
-

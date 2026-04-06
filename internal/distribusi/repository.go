@@ -9,7 +9,7 @@ import (
 
 func GetAll() ([]DistribusiFullResponse, error) {
 	rows, err := config.DB.Query(`
-		SELECT
+		SELECT DISTINCT ON (d.id)
 			d.id,
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
@@ -23,6 +23,7 @@ func GetAll() ([]DistribusiFullResponse, error) {
 		LEFT JOIN users u ON d.admin_id = u.id
 		LEFT JOIN laporan_kinerja l ON p.id = l.permintaan_id
 		LEFT JOIN verifikasi v ON l.id = v.laporan_id
+		ORDER BY d.id, v.updated_at DESC NULLS LAST
 	`)
 	if err != nil {
 		return nil, err
@@ -32,18 +33,24 @@ func GetAll() ([]DistribusiFullResponse, error) {
 	var distribusi []DistribusiFullResponse
 	for rows.Next() {
 		var data DistribusiFullResponse
+		var vID, vStatus, vKomentar sql.NullString
 		err := rows.Scan(
 			&data.ID,
-			&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo, 
+			&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo,
 			&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 			&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
-			&data.Verifikasi.ID, &data.Verifikasi.StatusVerified, &data.Verifikasi.Komentar,
+			&vID, &vStatus, &vKomentar,
 			&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
+		}
+		data.Verifikasi = VerifikasiInfo{
+			ID:             vID.String,
+			StatusVerified: vStatus.String,
+			Komentar:       vKomentar.String,
 		}
 		data.Pelaksana = []PelaksanaInfo{}
 		distribusi = append(distribusi, data)
@@ -70,8 +77,9 @@ func GetAll() ([]DistribusiFullResponse, error) {
 
 func GetById(id string) (DistribusiFullResponse, error) {
 	var data DistribusiFullResponse
+	var vID, vStatus, vKomentar sql.NullString
 	err := config.DB.QueryRow(`
-		SELECT
+		SELECT DISTINCT ON (d.id)
 			d.id,
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
@@ -86,18 +94,24 @@ func GetById(id string) (DistribusiFullResponse, error) {
 		LEFT JOIN laporan_kinerja l ON p.id = l.permintaan_id
 		LEFT JOIN verifikasi v ON l.id = v.laporan_id
 		WHERE d.id = $1
+		ORDER BY d.id, v.updated_at DESC NULLS LAST
 	`, id).Scan(
 		&data.ID,
-		&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo, 
+		&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo,
 		&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 		&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
-		&data.Verifikasi.ID, &data.Verifikasi.StatusVerified, &data.Verifikasi.Komentar,
+		&vID, &vStatus, &vKomentar,
 		&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
 	)
 	if err != nil {
 		return DistribusiFullResponse{}, err
+	}
+	data.Verifikasi = VerifikasiInfo{
+		ID:             vID.String,
+		StatusVerified: vStatus.String,
+		Komentar:       vKomentar.String,
 	}
 
 	pelaksanaMap, err := getPelaksanaByDistribusiIDs([]string{data.ID})
@@ -176,7 +190,7 @@ func GetAllDetail() ([]DistribusiDetailResponse, error) {
 		var data DistribusiDetailResponse
 		err := rows.Scan(
 			&data.ID,
-			&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo, 
+			&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo,
 			&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
@@ -225,7 +239,7 @@ func GetByIdDetail(id string) (DistribusiDetailResponse, error) {
 		WHERE d.id = $1
 	`, id).Scan(
 		&data.ID,
-		&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo, 
+		&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo,
 		&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,

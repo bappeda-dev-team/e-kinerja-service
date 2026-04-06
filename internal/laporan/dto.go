@@ -10,11 +10,11 @@ import (
 type LaporanRequest struct {
 	PermintaanID    string `json:"permintaan_id" validate:"required,uuid4"`
 	LaporanProgress string `json:"laporan_progress" validate:"required,min=3"`
-	Status 			string `json:"status" validate:"required"`
+	Status          string `json:"status" validate:"required"`
 }
 
 type VerifikasiRequest struct {
-	LaporanID      string `json:"laporan_id" validate:"required,uuid4"`
+	LaporanID string `json:"laporan_id" validate:"required,uuid4"`
 }
 
 // === Response ===
@@ -29,15 +29,15 @@ type LaporanResponse struct {
 }
 
 type PemdaInfo struct {
-	ID			string     `json:"id"`
-	Name		string	   `json:"name"`
-	Logo		string 	   `json:"logo"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Logo string `json:"logo"`
 }
 
 type AplikasiInfo struct {
-	ID			string     `json:"id"`
-	Name		string	   `json:"name"`
-	Logo		string 	   `json:"logo"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Logo string `json:"logo"`
 }
 
 type PermintaanInfo struct {
@@ -53,18 +53,18 @@ type PermintaanInfo struct {
 }
 
 type ProgrammerInfo struct {
-	ID       	   string `json:"id"`
-	Username 	   string `json:"username"`
-	FullName 	   string `json:"full_name"`
+	ID             string `json:"id"`
+	Username       string `json:"username"`
+	FullName       string `json:"full_name"`
 	ProfilePicture string `json:"profile_picture"`
 }
 
 type VerifikasiInfo struct {
-	ID       		string  `json:"id"`
-	Komentar        *string  `json:"komentar"`
-	StatusVerified  string  `json:"status_verified"`
-	CreatedAt       time.Time      `json:"created_at"`
-	UpdatedAt       time.Time      `json:"updated_at"`
+	ID             string    `json:"id"`
+	Komentar       *string   `json:"komentar"`
+	StatusVerified string    `json:"status_verified"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 type LaporanDetailResponse struct {
@@ -85,12 +85,12 @@ type LaporanVerifikasiResponse struct {
 }
 
 type VerifikasiResponse struct {
-	ID             string    				    `json:"id"`
-	Laporan        LaporanVerifikasiResponse    `json:"laporan"`
-	Programmer     ProgrammerInfo    		    `json:"programmer"`
-	StatusVerified string    					`json:"status_verified"`
-	CreatedAt      time.Time 					`json:"created_at"`
-	UpdatedAt      time.Time 					`json:"updated_at"`
+	ID             string                    `json:"id"`
+	Laporan        LaporanVerifikasiResponse `json:"laporan"`
+	Programmer     ProgrammerInfo            `json:"programmer"`
+	StatusVerified string                    `json:"status_verified"`
+	CreatedAt      time.Time                 `json:"created_at"`
+	UpdatedAt      time.Time                 `json:"updated_at"`
 }
 
 type LaporanFullResponse struct {
@@ -98,7 +98,7 @@ type LaporanFullResponse struct {
 	Permintaan      PermintaanInfo   `json:"permintaan"`
 	Programmer      ProgrammerInfo   `json:"programmer"`
 	LaporanProgress string           `json:"laporan_progress"`
-	Status          string         	 `json:"status"`
+	Status          string           `json:"status"`
 	Verifikasi      []VerifikasiInfo `json:"verifikasi"`
 	CreatedAt       time.Time        `json:"created_at"`
 	UpdatedAt       time.Time        `json:"updated_at"`

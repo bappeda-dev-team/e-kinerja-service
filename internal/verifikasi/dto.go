@@ -26,15 +26,15 @@ type VerifikasiResponse struct {
 }
 
 type PemdaInfo struct {
-	ID			string     `json:"id"`
-	Name		string	   `json:"name"`
-	Logo		string 	   `json:"logo"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Logo string `json:"logo"`
 }
 
 type AplikasiInfo struct {
-	ID			string     `json:"id"`
-	Name		string	   `json:"name"`
-	Logo		string 	   `json:"logo"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Logo string `json:"logo"`
 }
 
 type PermintaanInfo struct {
@@ -50,23 +50,23 @@ type PermintaanInfo struct {
 }
 
 type ProgrammerInfo struct {
-	ID       	   string `json:"id"`
-	Username 	   string `json:"username"`
-	FullName 	   string `json:"full_name"`
+	ID             string `json:"id"`
+	Username       string `json:"username"`
+	FullName       string `json:"full_name"`
 	ProfilePicture string `json:"profile_picture"`
 }
 
 type LaporanInfo struct {
-	ID              string        `json:"id"`
-	LaporanProgress string        `json:"laporan_progress"`
-	Status          string        `json:"status"`
+	ID              string         `json:"id"`
+	LaporanProgress string         `json:"laporan_progress"`
+	Status          string         `json:"status"`
 	Programmer      ProgrammerInfo `json:"programmer"`
 }
 
 type VerifikatorInfo struct {
-	ID       	   string `json:"id"`
-	Username 	   string `json:"username"`
-	FullName 	   string `json:"full_name"`
+	ID             string `json:"id"`
+	Username       string `json:"username"`
+	FullName       string `json:"full_name"`
 	ProfilePicture string `json:"profile_picture"`
 }
 
@@ -75,7 +75,7 @@ type VerifikasiDetailResponse struct {
 	Permintaan     PermintaanInfo  `json:"permintaan"`
 	Laporan        LaporanInfo     `json:"laporan"`
 	Verifikator    VerifikatorInfo `json:"verifikator"`
-	Komentar       *string          `json:"komentar"`
+	Komentar       *string         `json:"komentar"`
 	StatusVerified string          `json:"status_verified"`
 	CreatedAt      time.Time       `json:"created_at"`
 	UpdatedAt      time.Time       `json:"updated_at"`

@@ -4,6 +4,10 @@ func GetLaporanServices() ([]LaporanFullResponse, error) {
 	return GetAll()
 }
 
+func GetLaporanByProgrammerServices(programmerID string) ([]LaporanFullResponse, error) {
+	return GetAllByProgrammer(programmerID)
+}
+
 func GetLaporanServicesID(id string) (LaporanFullResponse, error) {
 	return GetId(id)
 }

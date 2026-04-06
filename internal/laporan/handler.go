@@ -29,15 +29,31 @@ func handleDBError(err error) error {
 }
 
 // GetLaporan godoc
-// @Summary Ambil semua Laporan
-// @Description Mendapatkan daftar laporan
+// @Summary Ambil laporan milik programmer yang login
+// @Description Mendapatkan daftar laporan berdasarkan programmer yang sedang login
 // @Tags Laporan
 // @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]LaporanDetailResponse}
+// @Success 200 {object} helpers.APIResponse{data=[]LaporanFullResponse}
+// @Failure 401 {object} helpers.APIResponse
 // @Failure 500 {object} helpers.APIResponse
 // @Router /laporan [get]
 func GetLaporan(c echo.Context) error {
-	result, err := GetLaporanServices()
+	userIDInterface := c.Get("user_id")
+	if userIDInterface == nil {
+		return c.JSON(http.StatusUnauthorized, "user tidak ditemukan di token")
+	}
+	userID := userIDInterface.(string)
+
+	roleInterface := c.Get("name")
+	var result []LaporanFullResponse
+	var err error
+
+	if roleInterface != nil && roleInterface.(string) == "super_admin" {
+		result, err = GetLaporanServices()
+	} else {
+		result, err = GetLaporanByProgrammerServices(userID)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -126,7 +142,6 @@ func CreateVerif(c echo.Context) error {
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
 
-
 // UpdateLaporan godoc
 // @Summary Update laporan
 // @Description Mengupdate data laporan
@@ -193,6 +208,3 @@ func DeleteLaporan(c echo.Context) error {
 	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }
-
-
-

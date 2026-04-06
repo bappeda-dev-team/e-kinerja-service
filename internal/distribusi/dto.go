@@ -24,15 +24,15 @@ type DistribusiResponse struct {
 }
 
 type PemdaInfo struct {
-	ID			string     `json:"id"`
-	Name		string	   `json:"name"`
-	Logo		string 	   `json:"logo"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Logo string `json:"logo"`
 }
 
 type AplikasiInfo struct {
-	ID			string     `json:"id"`
-	Name		string	   `json:"name"`
-	Logo		string 	   `json:"logo"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Logo string `json:"logo"`
 }
 
 type PermintaanInfo struct {
@@ -48,23 +48,23 @@ type PermintaanInfo struct {
 }
 
 type AdminInfo struct {
-	ID       	   string `json:"id"`
-	Username 	   string `json:"username"`
-	FullName 	   string `json:"full_name"`
+	ID             string `json:"id"`
+	Username       string `json:"username"`
+	FullName       string `json:"full_name"`
 	ProfilePicture string `json:"profile_picture"`
 }
 
 type PelaksanaInfo struct {
-	ID       		string `json:"id"`
-	Username 		string `json:"username"`
-	FullName 		string `json:"full_name"`
-	ProfilePicture  string `json:"profile_picture"`
+	ID             string `json:"id"`
+	Username       string `json:"username"`
+	FullName       string `json:"full_name"`
+	ProfilePicture string `json:"profile_picture"`
 }
 
 type VerifikasiInfo struct {
-	ID       		string  `json:"id"`
-	Komentar        string  `json:"komentar"`
-	StatusVerified  string  `json:"status_verified"`
+	ID             string `json:"id"`
+	Komentar       string `json:"komentar"`
+	StatusVerified string `json:"status_verified"`
 }
 
 type DistribusiDetailResponse struct {

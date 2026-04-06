@@ -39,7 +39,6 @@ func GetId(id string) (UserResponseDetail, error) {
 	return data, err
 }
 
-
 func IsUsernameExists(username string) (bool, error) {
 	var exists bool
 	query := `SELECT EXISTS (SELECT 1 FROM users WHERE username = $1)`
@@ -125,4 +124,3 @@ func DeactivateUser(id string) error {
 
 	return err
 }
-
