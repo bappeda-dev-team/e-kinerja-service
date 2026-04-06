@@ -27,9 +27,9 @@ type DistribusiInfo struct {
 }
 
 type ProgrammerInfo struct {
-	ID       	   string `json:"id"`
-	Username 	   string `json:"username"`
-	FullName 	   string `json:"full_name"`
+	ID             string `json:"id"`
+	Username       string `json:"username"`
+	FullName       string `json:"full_name"`
 	ProfilePicture string `json:"profile_picture"`
 }
 

@@ -56,21 +56,21 @@ type LaporanInfo struct {
 }
 
 type DashboardPermintaanItem struct {
-	ID                string                     `json:"id"`
-	Pemda             PemdaInfo                  `json:"pemda"`
-	Aplikasi          AplikasiInfo               `json:"aplikasi"`
-	Menu              string                     `json:"menu"`
-	KondisiAwal       string                     `json:"kondisi_awal"`
-	KondisiDiharapkan string                     `json:"kondisi_diharapkan"`
-	TanggalPesanan    time.Time                  `json:"tanggal_pesanan"`
-	TanggalDeadline   time.Time                  `json:"tanggal_deadline"`
-	Lampiran          permintaan.StringArray     `json:"lampiran"`
-	Status            string                     `json:"status"`
-	Pembuat           PembuatInfo                `json:"pembuat"`
-	Distribusi        []DistribusiInfo           `json:"distribusi"`
-	Laporan           []LaporanInfo              `json:"laporan"`
-	CreatedAt         time.Time                  `json:"created_at"`
-	UpdatedAt         time.Time                  `json:"updated_at"`
+	ID                string                 `json:"id"`
+	Pemda             PemdaInfo              `json:"pemda"`
+	Aplikasi          AplikasiInfo           `json:"aplikasi"`
+	Menu              string                 `json:"menu"`
+	KondisiAwal       string                 `json:"kondisi_awal"`
+	KondisiDiharapkan string                 `json:"kondisi_diharapkan"`
+	TanggalPesanan    time.Time              `json:"tanggal_pesanan"`
+	TanggalDeadline   time.Time              `json:"tanggal_deadline"`
+	Lampiran          permintaan.StringArray `json:"lampiran"`
+	Status            string                 `json:"status"`
+	Pembuat           PembuatInfo            `json:"pembuat"`
+	Distribusi        []DistribusiInfo       `json:"distribusi"`
+	Laporan           []LaporanInfo          `json:"laporan"`
+	CreatedAt         time.Time              `json:"created_at"`
+	UpdatedAt         time.Time              `json:"updated_at"`
 }
 
 type DashboardResponse struct {

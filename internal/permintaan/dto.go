@@ -51,8 +51,8 @@ type AplikasiInfo struct {
 }
 
 type PembuatInfo struct {
-	ID       	   string `json:"id"`
-	Username 	   string `json:"username"`
+	ID             string `json:"id"`
+	Username       string `json:"username"`
 	FullName       string `json:"full_name"`
 	ProfilePicture string `json:"profile_picture"`
 }

@@ -13,6 +13,7 @@ func CreateMasterPemdaServices(req MasterPemdaRequest, logoURL string) (*MasterP
 	data := &MasterPemda{
 		Name: req.Name,
 		Logo: logoURL,
+		Link: req.Link,
 	}
 
 	err := CreateMasterPemda(data)
@@ -28,6 +29,7 @@ func UpdateMasterPemdaServices(id string, req MasterPemdaRequest, logoURL string
 	data := &MasterPemda{
 		Name: req.Name,
 		Logo: logoURL,
+		Link: req.Link,
 	}
 
 	err := UpdateMasterPemda(id, data)

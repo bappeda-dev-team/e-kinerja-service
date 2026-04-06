@@ -1,0 +1,1 @@
+ALTER TABLE master_pemda ADD COLUMN link VARCHAR(255) DEFAULT '';
