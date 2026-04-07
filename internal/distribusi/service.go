@@ -9,15 +9,17 @@ func GetDistribusiDetailServicesID(id string) (DistribusiFullResponse, error) {
 }
 
 func CreateDistribusiServices(permintaanID string, adminID string, req DistribusiRequest) (*DistribusiDetailResponse, error) {
-
 	data := &Distribusi{
 		PermintaanID: permintaanID,
 		AdminID:      adminID,
 		Komentar:     req.Komentar,
 	}
 
-	err := Create(data)
-	if err != nil {
+	if err := Create(data); err != nil {
+		return nil, err
+	}
+
+	if err := InsertPelaksana(data.ID, req.ProgrammerIDs); err != nil {
 		return nil, err
 	}
 
@@ -30,15 +32,17 @@ func CreateDistribusiServices(permintaanID string, adminID string, req Distribus
 }
 
 func UpdateDistribusiServices(id string, permintaanID string, adminID string, req DistribusiRequest) (*DistribusiDetailResponse, error) {
-
 	data := &Distribusi{
 		PermintaanID: permintaanID,
 		AdminID:      adminID,
 		Komentar:     req.Komentar,
 	}
 
-	err := Update(id, data)
-	if err != nil {
+	if err := Update(id, data); err != nil {
+		return nil, err
+	}
+
+	if err := ReplacePelaksana(id, req.ProgrammerIDs); err != nil {
 		return nil, err
 	}
 

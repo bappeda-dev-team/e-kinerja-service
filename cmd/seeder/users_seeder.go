@@ -10,7 +10,7 @@ import (
 func SeedUsers(db *sql.DB) {
 	// Ambil semua role berdasarkan nama
 	roles := map[string]string{}
-	rows, err := db.Query(`SELECT id, name FROM roles WHERE name IN ('super_admin', 'admin', 'programmer', 'level2')`)
+	rows, err := db.Query(`SELECT id, name FROM roles WHERE name IN ('super_admin', 'admin', 'programmer', 'verifikator')`)
 	if err != nil {
 		log.Fatal("Gagal query roles:", err)
 	}
@@ -37,7 +37,7 @@ func SeedUsers(db *sql.DB) {
 		{"super_admin", "superadmin", "Super Admin", "superadmin123"},
 		{"admin", "admin", "Admin", "admin123"},
 		{"programmer", "programmer", "Programmer", "programmer123"},
-		{"level2", "level2", "Level 2 User", "level2123"},
+		{"verifikator", "verifikator", "Level 2 User", "verifikator123"},
 	}
 
 	for _, u := range users {

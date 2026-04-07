@@ -263,6 +263,28 @@ func GetByIdDetail(id string) (DistribusiDetailResponse, error) {
 	return data, nil
 }
 
+func InsertPelaksana(distribusiID string, programmerIDs []string) error {
+	for _, programmerID := range programmerIDs {
+		_, err := config.DB.Exec(`
+			INSERT INTO distribusi_pelaksana (distribusi_id, programmer_id)
+			VALUES ($1, $2)
+			ON CONFLICT (distribusi_id, programmer_id) DO NOTHING
+		`, distribusiID, programmerID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ReplacePelaksana(distribusiID string, programmerIDs []string) error {
+	_, err := config.DB.Exec(`DELETE FROM distribusi_pelaksana WHERE distribusi_id = $1`, distribusiID)
+	if err != nil {
+		return err
+	}
+	return InsertPelaksana(distribusiID, programmerIDs)
+}
+
 func Create(data *Distribusi) error {
 	query := `
 		INSERT INTO distribusi (permintaan_id, admin_id, komentar)

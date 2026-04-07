@@ -16,6 +16,14 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type UpdateUserRequest struct {
+	RoleID   string `json:"role_id"   validate:"omitempty,uuid4"`
+	Username string `json:"username"  validate:"omitempty,min=4"`
+	FullName string `json:"full_name" validate:"omitempty,min=3"`
+	Password string `json:"password"  validate:"omitempty,min=6"`
+	IsActive *bool  `json:"is_active"`
+}
+
 // === Response ===
 
 type UserResponse struct {

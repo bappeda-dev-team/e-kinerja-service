@@ -1,6 +1,10 @@
 package user
 
-import "aplikasi-internal/config"
+import (
+	"aplikasi-internal/config"
+	"fmt"
+	"strings"
+)
 
 func GetAll() ([]UserResponseDetail, error) {
 	rows, err := config.DB.Query(
@@ -73,6 +77,21 @@ func CreateUser(user *User, hashedPassword string) error {
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
+}
+
+func UpdateUser(id string, fields map[string]interface{}) error {
+	setClauses := []string{}
+	args := []interface{}{}
+	i := 1
+	for col, val := range fields {
+		setClauses = append(setClauses, col+" = $"+fmt.Sprintf("%d", i))
+		args = append(args, val)
+		i++
+	}
+	args = append(args, id)
+	query := "UPDATE users SET " + strings.Join(setClauses, ", ") + ", updated_at = NOW() WHERE id = $" + fmt.Sprintf("%d", i)
+	_, err := config.DB.Exec(query, args...)
+	return err
 }
 
 func UpdateProfilePicture(id string, profilePicture string) error {

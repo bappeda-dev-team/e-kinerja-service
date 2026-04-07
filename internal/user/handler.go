@@ -159,6 +159,42 @@ func UploadProfilePic(c echo.Context) error {
 	}))
 }
 
+// PatchUser godoc
+// @Summary Update data user
+// @Description Update sebagian atau semua field user (role, username, full_name, password, is_active)
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID (UUID)"
+// @Param request body UpdateUserRequest true "Data user yang diupdate"
+// @Success 200 {object} helpers.APIResponse{data=UserResponseDetail}
+// @Failure 400 {object} helpers.APIResponse
+// @Failure 404 {object} helpers.APIResponse
+// @Router /users/{id} [patch]
+func PatchUser(c echo.Context) error {
+	id := c.Param("id")
+	if _, err := uuid.Parse(id); err != nil {
+		return exception.BadRequest("UUID tidak valid")
+	}
+
+	var req UpdateUserRequest
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return exception.BadRequest("Validasi gagal")
+	}
+
+	result, err := UpdateUserService(id, req)
+	if err != nil {
+		if err.Error() == "role tidak ditemukan" ||
+			err.Error() == "username sudah digunakan" ||
+			err.Error() == "tidak ada field yang diupdate" {
+			return exception.BadRequest(err.Error())
+		}
+		return handleDBError(err)
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengupdate data", result))
+}
+
 func DeleteUser(c echo.Context) error {
 
 	id := c.Param("id")

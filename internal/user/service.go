@@ -67,6 +67,58 @@ func CreateUserService(req RegisterRequest, pictureURL string) (*UserResponse, e
 	}, nil
 }
 
+func UpdateUserService(id string, req UpdateUserRequest) (*UserResponseDetail, error) {
+	fields := map[string]interface{}{}
+
+	if req.RoleID != "" {
+		roleExists, err := IsRoleExists(req.RoleID)
+		if err != nil {
+			return nil, err
+		}
+		if !roleExists {
+			return nil, errors.New("role tidak ditemukan")
+		}
+		fields["role_id"] = req.RoleID
+	}
+	if req.Username != "" {
+		usernameExists, err := IsUsernameExists(req.Username)
+		if err != nil {
+			return nil, err
+		}
+		if usernameExists {
+			return nil, errors.New("username sudah digunakan")
+		}
+		fields["username"] = req.Username
+	}
+	if req.FullName != "" {
+		fields["full_name"] = req.FullName
+	}
+	if req.Password != "" {
+		hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+		fields["password"] = string(hashed)
+	}
+	if req.IsActive != nil {
+		fields["is_active"] = *req.IsActive
+	}
+
+	if len(fields) == 0 {
+		return nil, errors.New("tidak ada field yang diupdate")
+	}
+
+	if err := UpdateUser(id, fields); err != nil {
+		return nil, err
+	}
+
+	result, err := GetId(id)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 func UpdateProfilePictureService(id string, pictureURL string) error {
 	return UpdateProfilePicture(id, pictureURL)
 }

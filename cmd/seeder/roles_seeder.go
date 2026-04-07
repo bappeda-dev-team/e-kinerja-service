@@ -8,11 +8,11 @@ import (
 func SeedRoles(db *sql.DB) {
 	query := `
 	INSERT INTO roles (name, description)
-	VALUES 
+	VALUES
 	('super_admin', 'Super Administrator'),
 	('admin', 'Administrator'),
 	('programmer', 'Programmer'),
-	('level2', 'Programmer & Verifikator')
+	('verifikator', 'Verifikator')
 	ON CONFLICT (name) DO NOTHING;
 	`
 
