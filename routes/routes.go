@@ -42,6 +42,7 @@ func SetupRoutes(r *echo.Echo) {
 	r.POST("/users", user.Create)
 	r.DELETE("/users/:id", user.DeleteUser)
 	r.PATCH("/users/:id/profile-picture", user.UploadProfilePic, middle_ware.JWTMiddleware)
+	r.PATCH("/users/:id", user.PatchUser, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 
 	ma := r.Group("/master-aplikasi")
 	ma.Use(middle_ware.JWTMiddleware)
@@ -67,10 +68,10 @@ func SetupRoutes(r *echo.Echo) {
 
 	p := r.Group("/permintaan")
 	p.Use(middle_ware.JWTMiddleware)
-	p.Use(middle_ware.RoleMiddleware("super_admin"))
+	p.Use(middle_ware.RoleMiddleware("super_admin", "admin"))
 
-	p.GET("", permintaan.GetPermintaan)       // ?expand=names untuk join nama
-	p.GET("/:id", permintaan.GetPermintaanId) // ?expand=names untuk join nama
+	p.GET("", permintaan.GetPermintaan)
+	p.GET("/:id", permintaan.GetPermintaanId)
 	p.POST("", permintaan.CreatePermintaan)
 	p.PUT("/:id", permintaan.UpdatePermintaan)
 	p.DELETE("/:id", permintaan.DeletePermintaan)
@@ -81,8 +82,8 @@ func SetupRoutes(r *echo.Echo) {
 	d.Use(middle_ware.JWTMiddleware)
 	d.Use(middle_ware.RoleMiddleware("admin", "programmer"))
 
-	d.GET("", distribusi.GetDistribusi)         // ?expand=names untuk join nama
-	d.GET("/:id", distribusi.GetDistribusiById) // ?expand=names untuk join nama
+	d.GET("", distribusi.GetDistribusi)
+	d.GET("/:id", distribusi.GetDistribusiById)
 	d.POST("", distribusi.CreateDistribusi)
 	d.PUT("/:id", distribusi.UpdateDistribusi)
 	d.DELETE("/:id", distribusi.DeleteDistribusi)
@@ -91,15 +92,15 @@ func SetupRoutes(r *echo.Echo) {
 	dp.Use(middle_ware.JWTMiddleware)
 	dp.Use(middle_ware.RoleMiddleware("admin", "programmer"))
 
-	dp.GET("", pelaksana.GetPelaksana)       // ?expand=names untuk join nama
-	dp.GET("/:id", pelaksana.GetPelaksanaID) // ?expand=names untuk join nama
+	dp.GET("", pelaksana.GetPelaksana)
+	dp.GET("/:id", pelaksana.GetPelaksanaID)
 	dp.POST("", pelaksana.CreatePelaksana)
 	dp.PUT("/:id", pelaksana.UpdatePelaksana)
 	dp.DELETE("/:id", pelaksana.DeletePelaksana)
 
 	l := r.Group("/laporan")
 	l.Use(middle_ware.JWTMiddleware)
-	l.Use(middle_ware.RoleMiddleware("programmer", "level2"))
+	l.Use(middle_ware.RoleMiddleware("programmer", "verifikator"))
 
 	l.GET("", laporan.GetLaporan)
 	l.GET("/:id", laporan.GetLaporanID)
@@ -115,7 +116,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	v := r.Group("/verifikasi")
 	v.Use(middle_ware.JWTMiddleware)
-	v.Use(middle_ware.RoleMiddleware("level2"))
+	v.Use(middle_ware.RoleMiddleware("verifikator"))
 
 	v.GET("", verifikasi.GetVerifikasi)
 	v.GET("/:id", verifikasi.GetVerifikasiID)

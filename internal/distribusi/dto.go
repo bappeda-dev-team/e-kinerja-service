@@ -8,8 +8,9 @@ import (
 // === Request ===
 
 type DistribusiRequest struct {
-	PermintaanID string `json:"permintaan_id" validate:"required,uuid4"`
-	Komentar     string `json:"komentar"`
+	PermintaanID  string   `json:"permintaan_id" validate:"required,uuid4"`
+	Komentar      string   `json:"komentar"`
+	ProgrammerIDs []string `json:"programmer_ids" validate:"required,min=1,dive,uuid4"`
 }
 
 // === Response ===

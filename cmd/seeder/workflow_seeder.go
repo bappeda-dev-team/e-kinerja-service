@@ -12,7 +12,7 @@ func SeedWorkflow(db *sql.DB) {
 	superAdminID := mustGetUserID(db, "superadmin")
 	adminID := mustGetUserID(db, "admin")
 	programmerID := mustGetUserID(db, "programmer")
-	level2ID := mustGetUserID(db, "level2")
+	verifikatorID := mustGetUserID(db, "verifikator")
 	pemdaID := mustGetFirstID(db, "master_pemda")
 	aplikasiID := mustGetFirstID(db, "master_aplikasi")
 
@@ -66,15 +66,15 @@ func SeedWorkflow(db *sql.DB) {
 	}
 	log.Println("✅ Laporan seeded, id:", laporanID)
 
-	// 5. Verifikasi (oleh level2)
+	// 5. Verifikasi (oleh verifikator)
 	_, err = db.Exec(`
 		INSERT INTO verifikasi (laporan_id, verifikator_id, komentar, status_verified)
 		VALUES ($1, $2, 'Sudah dicek dan sesuai requirement', 'approved')
-	`, laporanID, level2ID)
+	`, laporanID, verifikatorID)
 	if err != nil {
 		log.Fatal("Gagal seed verifikasi:", err)
 	}
-	log.Println("✅ Verifikasi seeded (verifikator: level2)")
+	log.Println("✅ Verifikasi seeded (verifikator: verifikator)")
 }
 
 func mustGetUserID(db *sql.DB, username string) string {
