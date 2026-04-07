@@ -34,10 +34,16 @@ func SeedUsers(db *sql.DB) {
 		FullName string
 		Password string
 	}{
-		{"super_admin", "superadmin", "Super Admin", "superadmin123"},
-		{"admin", "admin", "Admin", "admin123"},
-		{"programmer", "programmer", "Programmer", "programmer123"},
-		{"verifikator", "verifikator", "Level 2 User", "verifikator123"},
+		{"super_admin", "pak_yoga", "Pak Yoga", "pakyoga123"},
+		{"super_admin", "mas_ndaru", "Mas Ndaru", "masndaru123"},
+		{"admin", "mas_ilham", "Mas Ilham", "masilham123"},
+		{"verifikator", "mas_ryan", "Mas Ryan", "masryan123"},
+		{"programmer", "agnar", "Agnar", "agnar123"},
+		{"programmer", "myko", "Myko", "myko123"},
+		{"programmer", "affandi", "Affandi", "affandi123"},
+		{"programmer", "zulfikar", "Zulfikar", "zulfikar123"},
+		{"programmer", "maura", "Maura", "maura123"},
+		{"programmer", "daniel", "Daniel", "daniel123"},
 	}
 
 	for _, u := range users {

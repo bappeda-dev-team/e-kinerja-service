@@ -9,7 +9,7 @@ func SeedMasterPemda(db *sql.DB) {
 	query := `
 	INSERT INTO master_pemda (name)
 	VALUES
-	('Pemda tangerang'),
+	('Pemda Tangerang'),
 	('Pemda Sukoharjo'),
 	('Pemda Semarang')
 	ON CONFLICT (name) DO NOTHING;
