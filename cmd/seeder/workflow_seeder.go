@@ -9,10 +9,10 @@ import (
 // Bergantung pada: SeedRoles, SeedUsers, SeedMasterPemda, SeedMasterAplikasi
 func SeedWorkflow(db *sql.DB) {
 	// Ambil ID yang diperlukan
-	superAdminID := mustGetUserID(db, "superadmin")
-	adminID := mustGetUserID(db, "admin")
-	programmerID := mustGetUserID(db, "programmer")
-	verifikatorID := mustGetUserID(db, "verifikator")
+	superAdminID := mustGetUserID(db, "pak_yoga")
+	adminID := mustGetUserID(db, "mas_ilham")
+	programmerID := mustGetUserID(db, "daniel")
+	verifikatorID := mustGetUserID(db, "mas_ryan")
 	pemdaID := mustGetFirstID(db, "master_pemda")
 	aplikasiID := mustGetFirstID(db, "master_aplikasi")
 
