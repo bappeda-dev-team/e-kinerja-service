@@ -1,7 +1,7 @@
 package pelaksana
 
-func GetPelaksanaDetailServices() ([]PelaksanaDetailResponse, error) {
-	return GetAllDetail()
+func GetPelaksanaDetailServices(userID string) ([]PelaksanaDetailResponse, error) {
+	return GetAllDetail(userID)
 }
 
 func GetPelaksanaDetailServicesID(id string) (PelaksanaDetailResponse, error) {

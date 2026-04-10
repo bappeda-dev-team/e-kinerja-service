@@ -40,7 +40,7 @@ func GetId(id string) (PelaksanaResponse, error) {
 	return data, err
 }
 
-func GetAllDetail() ([]PelaksanaDetailResponse, error) {
+func GetAllDetail(userID string) ([]PelaksanaDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			dp.id,
@@ -53,7 +53,9 @@ func GetAllDetail() ([]PelaksanaDetailResponse, error) {
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users u ON dp.programmer_id = u.id
-	`)
+		WHERE dp.programmer_id = $1
+		ORDER BY dp.created_at DESC
+	`,userID)
 	if err != nil {
 		return nil, err
 	}

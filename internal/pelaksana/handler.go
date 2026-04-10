@@ -37,7 +37,15 @@ func handleDBError(err error) error {
 // @Failure 500 {object} helpers.APIResponse
 // @Router /pelaksana [get]
 func GetPelaksana(c echo.Context) error {
-	result, err := GetPelaksanaDetailServices()
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
+	
+	result, err := GetPelaksanaDetailServices(userID)
 	if err != nil {
 		return err
 	}
