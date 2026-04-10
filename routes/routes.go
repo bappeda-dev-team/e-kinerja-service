@@ -29,9 +29,9 @@ func SetupRoutes(r *echo.Echo) {
 
 	r.GET("/roles", roles.GetRoles)
 	r.GET("/roles/:id", roles.GetRoleID)
-	r.POST("/roles", roles.CreateRole)
-	r.PATCH("/roles/:id", roles.UpdateRole)
-	r.DELETE("/roles/:id", roles.DeleteRole)
+	r.POST("/roles", roles.CreateRole, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
+	r.PATCH("/roles/:id", roles.UpdateRole, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
+	r.DELETE("/roles/:id", roles.DeleteRole, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 
 	auth := r.Group("/auth")
 	auth.POST("/login", user.Login)
@@ -39,8 +39,8 @@ func SetupRoutes(r *echo.Echo) {
 
 	r.GET("/users", user.GetAllUser)
 	r.GET("/users/:id", user.GetUserID)
-	r.POST("/users", user.Create)
-	r.DELETE("/users/:id", user.DeleteUser)
+	r.POST("/users", user.Create, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
+	r.DELETE("/users/:id", user.DeleteUser, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 	r.PATCH("/users/:id/profile-picture", user.UploadProfilePic, middle_ware.JWTMiddleware)
 	r.PATCH("/users/:id", user.PatchUser, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 

@@ -45,13 +45,21 @@ func GetLaporan(c echo.Context) error {
 	userID := userIDInterface.(string)
 
 	roleInterface := c.Get("name")
+	if roleInterface == nil {
+		return exception.Unauthentication("role tidak ditemukan")
+	}
+
+	roleName := roleInterface.(string)
 	var result []LaporanFullResponse
 	var err error
 
-	if roleInterface != nil && roleInterface.(string) == "super_admin" {
+	switch roleName {
+	case "super_admin", "verifikator":
 		result, err = GetLaporanServices()
-	} else {
+	case "programmer":
 		result, err = GetLaporanByProgrammerServices(userID)
+	default:
+		return exception.AccessDenied("akses ditolak")
 	}
 
 	if err != nil {
