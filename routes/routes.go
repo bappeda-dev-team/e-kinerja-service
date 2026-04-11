@@ -68,15 +68,20 @@ func SetupRoutes(r *echo.Echo) {
 
 	p := r.Group("/permintaan")
 	p.Use(middle_ware.JWTMiddleware)
-	p.Use(middle_ware.RoleMiddleware("super_admin", "admin"))
+	p.Use(middle_ware.RoleMiddleware("super_admin", "admin", "programmer"))
 
 	p.GET("", permintaan.GetPermintaan)
 	p.GET("/:id", permintaan.GetPermintaanId)
-	p.POST("", permintaan.CreatePermintaan)
-	p.PUT("/:id", permintaan.UpdatePermintaan)
-	p.DELETE("/:id", permintaan.DeletePermintaan)
-	p.PATCH("/:id/lampiran", permintaan.UploadLampiran)
-	p.PATCH("/:id/status", permintaan.UpdateStatusPermintaan)
+
+	pAdmin := r.Group("/permintaan")
+	pAdmin.Use(middle_ware.JWTMiddleware)
+	pAdmin.Use(middle_ware.RoleMiddleware("super_admin", "admin"))
+
+	pAdmin.POST("", permintaan.CreatePermintaan)
+	pAdmin.PUT("/:id", permintaan.UpdatePermintaan)
+	pAdmin.DELETE("/:id", permintaan.DeletePermintaan)
+	pAdmin.PATCH("/:id/lampiran", permintaan.UploadLampiran)
+	pAdmin.PATCH("/:id/status", permintaan.UpdateStatusPermintaan)
 
 	d := r.Group("/distribusi")
 	d.Use(middle_ware.JWTMiddleware)
