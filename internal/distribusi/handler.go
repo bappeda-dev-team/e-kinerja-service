@@ -95,6 +95,11 @@ func CreateDistribusi(c echo.Context) error {
 		return exception.BadRequest("Validasi gagal")
 	}
 
+	req.NormalizePelaksana()
+	if err := req.ValidatePelaksana(); err != nil {
+		return exception.BadRequest(err.Error())
+	}
+
 	result, err := CreateDistribusiServices(req.PermintaanID, userID, req)
 	if err != nil {
 		return handleDBError(err)
@@ -135,6 +140,11 @@ func UpdateDistribusi(c echo.Context) error {
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
 		return exception.BadRequest("Validasi gagal")
+	}
+
+	req.NormalizePelaksana()
+	if err := req.ValidatePelaksana(); err != nil {
+		return exception.BadRequest(err.Error())
 	}
 
 	result, err := UpdateDistribusiServices(id, req.PermintaanID, userID, req)

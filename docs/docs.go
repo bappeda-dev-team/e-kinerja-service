@@ -2492,8 +2492,20 @@ const docTemplate = `{
                 "komentar": {
                     "type": "string"
                 },
+                "pelaksana": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "permintaan_id": {
                     "type": "string"
+                },
+                "programmer_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

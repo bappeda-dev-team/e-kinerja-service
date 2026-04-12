@@ -4,8 +4,16 @@ definitions:
     properties:
       komentar:
         type: string
+      pelaksana:
+        items:
+          type: string
+        type: array
       permintaan_id:
         type: string
+      programmer_ids:
+        items:
+          type: string
+        type: array
     required:
     - permintaan_id
     type: object

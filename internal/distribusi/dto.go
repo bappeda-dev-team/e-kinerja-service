@@ -2,7 +2,10 @@ package distribusi
 
 import (
 	"aplikasi-internal/internal/permintaan"
+	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // === Request ===
@@ -10,7 +13,36 @@ import (
 type DistribusiRequest struct {
 	PermintaanID  string   `json:"permintaan_id" validate:"required,uuid4"`
 	Komentar      string   `json:"komentar"`
-	ProgrammerIDs []string `json:"programmer_ids" validate:"required,min=1,dive,uuid4"`
+	ProgrammerIDs []string `json:"programmer_ids"`
+	Pelaksana     []string `json:"pelaksana"`
+}
+
+func (r *DistribusiRequest) NormalizePelaksana() {
+	ids := r.ProgrammerIDs
+	if len(r.Pelaksana) > 0 {
+		ids = r.Pelaksana
+	}
+
+	if len(ids) == 0 {
+		return
+	}
+
+	r.ProgrammerIDs = append([]string(nil), ids...)
+	r.Pelaksana = append([]string(nil), ids...)
+}
+
+func (r DistribusiRequest) ValidatePelaksana() error {
+	if len(r.ProgrammerIDs) == 0 {
+		return errors.New("pelaksana atau programmer_ids harus diisi")
+	}
+
+	for _, programmerID := range r.ProgrammerIDs {
+		if _, err := uuid.Parse(programmerID); err != nil {
+			return errors.New("pelaksana atau programmer_ids harus berupa daftar UUID yang valid")
+		}
+	}
+
+	return nil
 }
 
 // === Response ===
