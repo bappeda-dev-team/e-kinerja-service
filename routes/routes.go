@@ -85,7 +85,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	d := r.Group("/distribusi")
 	d.Use(middle_ware.JWTMiddleware)
-	d.Use(middle_ware.RoleMiddleware("admin", "programmer"))
+	d.Use(middle_ware.RoleMiddleware("super_admin", "admin", "programmer"))
 
 	d.GET("", distribusi.GetDistribusi)
 	d.GET("/:id", distribusi.GetDistribusiById)
