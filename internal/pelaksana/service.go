@@ -49,3 +49,7 @@ func UpdatePelaksanaServices(id string, distribusiID string, programmerID string
 func DeletePelaksanaServices(id string) error {
 	return Delete(id)
 }
+
+func MarkAllReadPelaksanaServices(programmerID string) error {
+	return MarkAllReadByProgrammerID(programmerID)
+}

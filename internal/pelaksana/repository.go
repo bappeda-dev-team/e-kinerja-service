@@ -7,7 +7,7 @@ import (
 
 func GetAll() ([]PelaksanaResponse, error) {
 	rows, err := config.DB.Query(
-		`SELECT id, distribusi_id, Programmer_id, created_at, updated_at FROM distribusi_pelaksana`)
+		`SELECT id, distribusi_id, programmer_id, is_read, created_at, updated_at FROM distribusi_pelaksana`)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +17,7 @@ func GetAll() ([]PelaksanaResponse, error) {
 
 	for rows.Next() {
 		var data PelaksanaResponse
-		err := rows.Scan(&data.ID, &data.DistribusiID, &data.ProgrammerID, &data.CreatedAt, &data.UpdatedAt)
+		err := rows.Scan(&data.ID, &data.DistribusiID, &data.ProgrammerID, &data.IsRead, &data.CreatedAt, &data.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -30,8 +30,8 @@ func GetAll() ([]PelaksanaResponse, error) {
 
 func GetId(id string) (PelaksanaResponse, error) {
 	var data PelaksanaResponse
-	err := config.DB.QueryRow(`SELECT id, distribusi_id, Programmer_id, created_at, updated_at FROM distribusi_pelaksana WHERE id=$1`, id).
-		Scan(&data.ID, &data.DistribusiID, &data.ProgrammerID, &data.CreatedAt, &data.UpdatedAt)
+	err := config.DB.QueryRow(`SELECT id, distribusi_id, programmer_id, is_read, created_at, updated_at FROM distribusi_pelaksana WHERE id=$1`, id).
+		Scan(&data.ID, &data.DistribusiID, &data.ProgrammerID, &data.IsRead, &data.CreatedAt, &data.UpdatedAt)
 
 	if err != nil {
 		return PelaksanaResponse{}, err
@@ -46,6 +46,7 @@ func GetAllDetail(userID string) ([]PelaksanaDetailResponse, error) {
 			dp.id,
 			d.id, mp.name, ma.name, d.komentar,
 			u.id, u.username, u.full_name, u.profile_picture,
+			dp.is_read,
 			dp.created_at, dp.updated_at
 		FROM distribusi_pelaksana dp
 		LEFT JOIN distribusi d ON dp.distribusi_id = d.id
@@ -55,7 +56,7 @@ func GetAllDetail(userID string) ([]PelaksanaDetailResponse, error) {
 		LEFT JOIN users u ON dp.programmer_id = u.id
 		WHERE dp.programmer_id = $1
 		ORDER BY dp.created_at DESC
-	`,userID)
+	`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -68,6 +69,7 @@ func GetAllDetail(userID string) ([]PelaksanaDetailResponse, error) {
 			&data.ID,
 			&data.Distribusi.ID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi, &data.Distribusi.Komentar,
 			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
+			&data.IsRead,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
@@ -85,6 +87,7 @@ func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 			dp.id,
 			d.id, mp.name, ma.name, d.komentar,
 			u.id, u.username, u.full_name, u.profile_picture,
+			dp.is_read,
 			dp.created_at, dp.updated_at
 		FROM distribusi_pelaksana dp
 		LEFT JOIN distribusi d ON dp.distribusi_id = d.id
@@ -97,6 +100,7 @@ func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 		&data.ID,
 		&data.Distribusi.ID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi, &data.Distribusi.Komentar,
 		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
+		&data.IsRead,
 		&data.CreatedAt, &data.UpdatedAt,
 	)
 	if err != nil {
@@ -121,17 +125,19 @@ func IsProgrammerIdExists(programmer_id string) (bool, error) {
 
 func Create(data *Pelaksana) error {
 	query := `
-		INSERT INTO distribusi_pelaksana (distribusi_id, programmer_id)
-		VALUES ($1, $2)
-		RETURNING id, created_at, updated_at
+		INSERT INTO distribusi_pelaksana (distribusi_id, programmer_id, is_read)
+		VALUES ($1, $2, $3)
+		RETURNING id, is_read, created_at, updated_at
 	`
 
 	err := config.DB.QueryRow(
 		query,
 		data.DistribusiID,
 		data.ProgrammerID,
+		false,
 	).Scan(
 		&data.ID,
+		&data.IsRead,
 		&data.CreatedAt,
 		&data.UpdatedAt,
 	)
@@ -144,18 +150,31 @@ func Update(id string, data *Pelaksana) error {
 		UPDATE distribusi_pelaksana
 		SET distribusi_id = $1,
 			programmer_id = $2,
+			is_read = $3,
 		    updated_at = NOW()
-		WHERE id = $3
-		RETURNING updated_at
+		WHERE id = $4
+		RETURNING is_read, updated_at
 	`
 
 	err := config.DB.QueryRow(
 		query,
 		data.DistribusiID,
 		data.ProgrammerID,
+		false,
 		id,
-	).Scan(&data.UpdatedAt)
+	).Scan(&data.IsRead, &data.UpdatedAt)
 
+	return err
+}
+
+func MarkAllReadByProgrammerID(programmerID string) error {
+	_, err := config.DB.Exec(`
+		UPDATE distribusi_pelaksana
+		SET is_read = TRUE,
+			updated_at = NOW()
+		WHERE programmer_id = $1
+			AND is_read = FALSE
+	`, programmerID)
 	return err
 }
 

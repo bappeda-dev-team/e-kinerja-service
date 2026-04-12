@@ -266,10 +266,10 @@ func GetByIdDetail(id string) (DistribusiDetailResponse, error) {
 func InsertPelaksana(distribusiID string, programmerIDs []string) error {
 	for _, programmerID := range programmerIDs {
 		_, err := config.DB.Exec(`
-			INSERT INTO distribusi_pelaksana (distribusi_id, programmer_id)
-			VALUES ($1, $2)
+			INSERT INTO distribusi_pelaksana (distribusi_id, programmer_id, is_read)
+			VALUES ($1, $2, $3)
 			ON CONFLICT (distribusi_id, programmer_id) DO NOTHING
-		`, distribusiID, programmerID)
+		`, distribusiID, programmerID, false)
 		if err != nil {
 			return err
 		}

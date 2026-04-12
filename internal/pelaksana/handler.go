@@ -33,7 +33,7 @@ func handleDBError(err error) error {
 // @Description Mendapatkan daftar pelaksana
 // @Tags Pelaksana
 // @Produce json
-// @Success 200 {object} helpers.APIResponse{data=[]PelaksanaDetailResponse}
+// @Success 200 {object} helpers.APIResponse{data=[]pelaksana.PelaksanaDetailResponse}
 // @Failure 500 {object} helpers.APIResponse
 // @Router /pelaksana [get]
 func GetPelaksana(c echo.Context) error {
@@ -44,7 +44,7 @@ func GetPelaksana(c echo.Context) error {
 	}
 
 	userID := userIDInterface.(string)
-	
+
 	result, err := GetPelaksanaDetailServices(userID)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func GetPelaksana(c echo.Context) error {
 // @Tags Pelaksana
 // @Produce json
 // @Param id path string true "Pelaksana ID (UUID)"
-// @Success 200 {object} helpers.APIResponse{data=PelaksanaDetailResponse}
+// @Success 200 {object} helpers.APIResponse{data=pelaksana.PelaksanaDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana/{id} [get]
@@ -85,7 +85,7 @@ func GetPelaksanaID(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body PelaksanaRequest true "Data pelaksana"
-// @Success 201 {object} helpers.APIResponse{data=PelaksanaDetailResponse}
+// @Success 201 {object} helpers.APIResponse{data=pelaksana.PelaksanaDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana [post]
 func CreatePelaksana(c echo.Context) error {
@@ -112,7 +112,7 @@ func CreatePelaksana(c echo.Context) error {
 // @Produce json
 // @Param id path string true "ID Pelaksana"
 // @Param request body PelaksanaRequest true "Data pelaksana"
-// @Success 200 {object} helpers.APIResponse{data=PelaksanaDetailResponse}
+// @Success 200 {object} helpers.APIResponse{data=pelaksana.PelaksanaDetailResponse}
 // @Failure 400 {object} helpers.APIResponse{errors=[]string}
 // @Failure 404 {object} helpers.APIResponse{errors=[]string}
 // @Router /pelaksana/{id} [put]
@@ -162,4 +162,28 @@ func DeletePelaksana(c echo.Context) error {
 
 	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
+}
+
+// MarkAllReadPelaksana godoc
+// @Summary Tandai semua pelaksana sebagai dibaca
+// @Description Menandai semua penugasan milik programmer yang sedang login sebagai sudah dibaca
+// @Tags Pelaksana
+// @Produce json
+// @Success 200 {object} helpers.APIResponse
+// @Failure 401 {object} helpers.APIResponse
+// @Failure 500 {object} helpers.APIResponse
+// @Router /pelaksana/mark-all-read [patch]
+func MarkAllReadPelaksana(c echo.Context) error {
+	userIDInterface := c.Get("user_id")
+	if userIDInterface == nil {
+		return exception.Unauthentication("user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
+	if err := MarkAllReadPelaksanaServices(userID); err != nil {
+		return handleDBError(err)
+	}
+
+	return c.JSON(http.StatusOK,
+		helpers.SuccessResponse(200, "Berhasil menandai semua penugasan sebagai dibaca", nil))
 }

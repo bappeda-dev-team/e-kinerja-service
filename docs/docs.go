@@ -1357,7 +1357,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/pelaksana.PelaksanaResponse"
+                                                "$ref": "#/definitions/pelaksana.PelaksanaDetailResponse"
                                             }
                                         }
                                     }
@@ -1408,7 +1408,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pelaksana.PelaksanaResponse"
+                                            "$ref": "#/definitions/pelaksana.PelaksanaDetailResponse"
                                         }
                                     }
                                 }
@@ -1434,6 +1434,38 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    }
+                }
+            }
+        },
+        "/pelaksana/mark-all-read": {
+            "patch": {
+                "description": "Menandai semua penugasan milik programmer yang sedang login sebagai sudah dibaca",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pelaksana"
+                ],
+                "summary": "Tandai semua pelaksana sebagai dibaca",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.APIResponse"
                         }
                     }
                 }
@@ -1476,10 +1508,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/pelaksana.PelaksanaResponse"
-                                            }
+                                            "$ref": "#/definitions/pelaksana.PelaksanaDetailResponse"
                                         }
                                     }
                                 }
@@ -1572,7 +1601,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/pelaksana.PelaksanaResponse"
+                                            "$ref": "#/definitions/pelaksana.PelaksanaDetailResponse"
                                         }
                                     }
                                 }
@@ -2619,6 +2648,63 @@ const docTemplate = `{
                 }
             }
         },
+        "pelaksana.DistribusiInfo": {
+            "type": "object",
+            "properties": {
+                "aplikasi": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "komentar": {
+                    "type": "string"
+                },
+                "pemda": {
+                    "type": "string"
+                }
+            }
+        },
+        "pelaksana.ProgrammerInfo": {
+            "type": "object",
+            "properties": {
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "profile_picture": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "pelaksana.PelaksanaDetailResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "distribusi": {
+                    "$ref": "#/definitions/pelaksana.DistribusiInfo"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_read": {
+                    "type": "boolean"
+                },
+                "programmer": {
+                    "$ref": "#/definitions/pelaksana.ProgrammerInfo"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "pelaksana.PelaksanaResponse": {
             "type": "object",
             "properties": {
@@ -2630,6 +2716,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "is_read": {
+                    "type": "boolean"
                 },
                 "programmer_id": {
                     "type": "string"

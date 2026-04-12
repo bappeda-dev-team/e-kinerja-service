@@ -1,0 +1,2 @@
+ALTER TABLE distribusi_pelaksana
+ADD COLUMN is_read BOOLEAN NOT NULL DEFAULT FALSE;

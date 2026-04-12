@@ -98,6 +98,7 @@ func SetupRoutes(r *echo.Echo) {
 	dp.Use(middle_ware.RoleMiddleware("admin", "programmer"))
 
 	dp.GET("", pelaksana.GetPelaksana)
+	dp.PATCH("/mark-all-read", pelaksana.MarkAllReadPelaksana)
 	dp.GET("/:id", pelaksana.GetPelaksanaID)
 	dp.POST("", pelaksana.CreatePelaksana)
 	dp.PUT("/:id", pelaksana.UpdatePelaksana)
