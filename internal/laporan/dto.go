@@ -13,6 +13,16 @@ type LaporanRequest struct {
 	Status          string `json:"status" validate:"required"`
 }
 
+type LaporanUpdateRequest struct {
+	PermintaanID    	  string `json:"permintaan_id" validate:"required,uuid4"`
+	LaporanProgress 	  string `json:"laporan_progress" validate:"required,min=3"`
+	Status          	  string `json:"status" validate:"required"`
+	VerifikasiID    	  string `json:"verifikasi_id"`
+	StatusVerified  	  string `json:"status_verified"`
+	IsSubmittedToVerified bool   `json:"is_submitted_to_verified"`
+}
+
+
 type VerifikasiRequest struct {
 	LaporanID string `json:"laporan_id" validate:"required,uuid4"`
 }
@@ -60,11 +70,12 @@ type ProgrammerInfo struct {
 }
 
 type VerifikasiInfo struct {
-	ID             string    `json:"id"`
-	Komentar       *string   `json:"komentar"`
-	StatusVerified string    `json:"status_verified"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	ID             		  string    `json:"id"`
+	Komentar      		  *string   `json:"komentar"`
+	StatusVerified 		  string    `json:"status_verified"`
+	IsSubmittedToVerified bool   	`json:"is_submitted_to_verified"`
+	CreatedAt      		  time.Time `json:"created_at"`
+	UpdatedAt      		  time.Time `json:"updated_at"`
 }
 
 type LaporanDetailResponse struct {

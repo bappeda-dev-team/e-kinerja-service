@@ -228,7 +228,7 @@ func getVerifikasiByLaporanIDs(ids []string) (map[string][]VerifikasiInfo, error
 
 	query := fmt.Sprintf(`
 		SELECT DISTINCT ON (l.id)
-		l.id, v.id, v.komentar, v.status_verified, v.created_at, v.updated_at
+		l.id, v.id, v.komentar, v.status_verified, v.is_submitted_to_verified, v.created_at, v.updated_at
 		FROM verifikasi v
 		LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
 		WHERE l.id IN (%s)
@@ -244,7 +244,7 @@ func getVerifikasiByLaporanIDs(ids []string) (map[string][]VerifikasiInfo, error
 	for rows.Next() {
 		var laporanID string
 		var v VerifikasiInfo
-		if err := rows.Scan(&laporanID, &v.ID, &v.Komentar, &v.StatusVerified, &v.CreatedAt, &v.UpdatedAt); err != nil {
+		if err := rows.Scan(&laporanID, &v.ID, &v.Komentar, &v.StatusVerified, &v.IsSubmittedToVerified, &v.CreatedAt, &v.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result[laporanID] = append(result[laporanID], v)
@@ -428,6 +428,20 @@ func Update(id string, data *Laporan) error {
 
 	return err
 }
+
+func UpdateStatusVerified(id string, status string, isSubmitted bool) error {
+	query := `
+		UPDATE verifikasi
+		SET status_verified = $1,
+			is_submitted_to_verified = $2,
+		    updated_at = NOW()
+		WHERE id = $3
+	`
+
+	_, err := config.DB.Exec(query, status, isSubmitted, id)
+	return err
+}
+
 
 func Delete(id string) error {
 	query := `

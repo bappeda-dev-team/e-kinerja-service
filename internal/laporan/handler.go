@@ -176,7 +176,7 @@ func UpdateLaporan(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
-	var req LaporanRequest
+	var req LaporanUpdateRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
 		return exception.BadRequest("Validasi gagal")
