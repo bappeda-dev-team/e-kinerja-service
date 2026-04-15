@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -53,6 +54,22 @@ func main() {
 			log.Fatal(err)
 		}
 		fmt.Println("✅ Migration DOWN sukses")
+
+	case "force":
+		if len(os.Args) < 3 {
+			log.Fatal("Gunakan: go run cmd/migrate/main.go force [version]")
+		}
+
+		version, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			log.Fatal("Version harus berupa angka")
+		}
+
+		err = m.Force(version)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("✅ Force version ke %d sukses\n", version)
 
 	default:
 		log.Fatal("Command harus: up atau down")
