@@ -1,0 +1,1 @@
+ALTER TABLE permintaan DROP COLUMN IF EXISTS is_archived;

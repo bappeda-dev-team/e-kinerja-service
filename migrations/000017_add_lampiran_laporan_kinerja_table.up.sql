@@ -1,0 +1,1 @@
+ALTER TABLE laporan_kinerja ADD COLUMN lampiran TEXT[] NOT NULL DEFAULT '{}';
