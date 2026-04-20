@@ -149,7 +149,7 @@ func GetId(id string) (LaporanFullResponse, error) {
 	return data, err
 }
 
-func GetAllByProgrammer(programmerID string) ([]LaporanFullResponse, error) {
+func GetAllByProgrammer(userID string) ([]LaporanFullResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			l.id,
@@ -164,7 +164,7 @@ func GetAllByProgrammer(programmerID string) ([]LaporanFullResponse, error) {
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users u ON l.programmer_id = u.id
 		WHERE l.programmer_id = $1
-	`, programmerID)
+	`, userID)
 	if err != nil {
 		return nil, err
 	}
