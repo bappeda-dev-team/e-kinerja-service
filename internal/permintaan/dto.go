@@ -68,6 +68,7 @@ type PermintaanDetailResponse struct {
 	TanggalDeadline   time.Time    `json:"tanggal_deadline"`
 	Lampiran          StringArray  `json:"lampiran"`
 	Status            string       `json:"status"`
+	IsArchived		  bool		   `json:"is_archived"`
 	Pembuat           PembuatInfo  `json:"pembuat"`
 	CreatedAt         time.Time    `json:"created_at"`
 	UpdatedAt         time.Time    `json:"updated_at"`

@@ -50,13 +50,14 @@ func GetAllDetail() ([]PermintaanDetailResponse, error) {
 			mp.id, mp.name, mp.logo,
 			ma.id, ma.name, ma.logo,
 			p.menu, p.kondisi_awal, p.kondisi_diharapkan,
-			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status, p.is_archived,
 			u.id, u.username, u.full_name, u.profile_picture,
 			p.created_at, p.updated_at
 		FROM permintaan p
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users u ON p.created_by = u.id
+		WHERE p.is_archived = false
 	`)
 	if err != nil {
 		return nil, err
@@ -71,7 +72,47 @@ func GetAllDetail() ([]PermintaanDetailResponse, error) {
 			&data.Pemda.ID, &data.Pemda.Name, &data.Pemda.Logo,
 			&data.Aplikasi.ID, &data.Aplikasi.Name, &data.Aplikasi.Logo,
 			&data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
-			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status,
+			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status, &data.IsArchived,
+			&data.Pembuat.ID, &data.Pembuat.Username, &data.Pembuat.FullName, &data.Pembuat.ProfilePicture,
+			&data.CreatedAt, &data.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		permintaan = append(permintaan, data)
+	}
+	return permintaan, err
+}
+func GetAllArchived() ([]PermintaanDetailResponse, error) {
+	rows, err := config.DB.Query(`
+		SELECT
+			p.id,
+			mp.id, mp.name, mp.logo,
+			ma.id, ma.name, ma.logo,
+			p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status, p.is_archived,
+			u.id, u.username, u.full_name, u.profile_picture,
+			p.created_at, p.updated_at
+		FROM permintaan p
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+		LEFT JOIN users u ON p.created_by = u.id
+		WHERE p.is_archived = true
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var permintaan []PermintaanDetailResponse
+	for rows.Next() {
+		var data PermintaanDetailResponse
+		err := rows.Scan(
+			&data.ID,
+			&data.Pemda.ID, &data.Pemda.Name, &data.Pemda.Logo,
+			&data.Aplikasi.ID, &data.Aplikasi.Name, &data.Aplikasi.Logo,
+			&data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
+			&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status, &data.IsArchived,
 			&data.Pembuat.ID, &data.Pembuat.Username, &data.Pembuat.FullName, &data.Pembuat.ProfilePicture,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
@@ -91,7 +132,7 @@ func GetByIdDetail(id string) (PermintaanDetailResponse, error) {
 			mp.id, mp.name, mp.logo,
 			ma.id, ma.name, ma.logo,
 			p.menu, p.kondisi_awal, p.kondisi_diharapkan,
-			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status, p.is_archived,
 			u.id, u.username, u.full_name, u.profile_picture,
 			p.created_at, p.updated_at
 		FROM permintaan p
@@ -104,7 +145,7 @@ func GetByIdDetail(id string) (PermintaanDetailResponse, error) {
 		&data.Pemda.ID, &data.Pemda.Name, &data.Pemda.Logo,
 		&data.Aplikasi.ID, &data.Aplikasi.Name, &data.Aplikasi.Logo,
 		&data.Menu, &data.KondisiAwal, &data.KondisiDiharapkan,
-		&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status,
+		&data.TanggalPesanan, &data.TanggalDeadline, &data.Lampiran, &data.Status, &data.IsArchived,
 		&data.Pembuat.ID, &data.Pembuat.Username, &data.Pembuat.FullName, &data.Pembuat.ProfilePicture,
 		&data.CreatedAt, &data.UpdatedAt,
 	)
@@ -152,9 +193,10 @@ func Update(id string, data *Permintaan) error {
 			tanggal_pesanan = $6,
 			tanggal_deadline = $7,
 			lampiran = $8,
-			created_by = $9,
+			is_archived = $9,
+			created_by = $10,
 		    updated_at = NOW()
-		WHERE id = $10
+		WHERE id = $11
 		RETURNING updated_at
 	`
 
@@ -168,6 +210,7 @@ func Update(id string, data *Permintaan) error {
 		data.TanggalPesanan,
 		data.TanggalDeadline,
 		data.Lampiran,
+		data.IsArchived,
 		data.CreatedBy,
 		id,
 	).Scan(&data.UpdatedAt)

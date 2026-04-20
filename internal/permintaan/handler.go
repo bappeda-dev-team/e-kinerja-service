@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -40,6 +41,14 @@ func handleDBError(err error) error {
 // @Router /permintaan [get]
 func GetPermintaan(c echo.Context) error {
 	result, err := GetPermintaanDetailServices()
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+}
+func GetArchivedPermintaan(c echo.Context) error {
+	result, err := GetPermintaanArchivedServices()
 	if err != nil {
 		return err
 	}
@@ -153,6 +162,13 @@ func UpdatePermintaan(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
+	isArchivedStr := c.FormValue("is_archived")
+
+	isArchived, err := strconv.ParseBool(isArchivedStr)
+	if err != nil {
+		isArchived = false
+	}
+
 	var req PermintaanRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
@@ -186,7 +202,7 @@ func UpdatePermintaan(c echo.Context) error {
 		}
 	}
 
-	result, err := UpdatePermintaanServices(id, req.PemdaID, req.AplikasiID, userID, req, lampiran)
+	result, err := UpdatePermintaanServices(id, req.PemdaID, req.AplikasiID, userID, req, lampiran, isArchived)
 	if err != nil {
 		return handleDBError(err)
 	}

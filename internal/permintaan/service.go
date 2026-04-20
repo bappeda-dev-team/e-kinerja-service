@@ -8,6 +8,9 @@ import (
 func GetPermintaanDetailServices() ([]PermintaanDetailResponse, error) {
 	return GetAllDetail()
 }
+func GetPermintaanArchivedServices() ([]PermintaanDetailResponse, error) {
+	return GetAllArchived()
+}
 
 func GetPermintaanDetailServicesID(id string) (PermintaanDetailResponse, error) {
 	return GetByIdDetail(id)
@@ -57,7 +60,7 @@ func CreatePermintaanServices(pemdaID string, aplikasiID string, userID string, 
 	return &result, nil
 }
 
-func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, userID string, req PermintaanRequest, lampiran StringArray) (*PermintaanDetailResponse, error) {
+func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, userID string, req PermintaanRequest, lampiran StringArray, isArchived bool) (*PermintaanDetailResponse, error) {
 
 	tanggalPesanan, err := parseDate(req.TanggalPesanan)
 	if err != nil {
@@ -77,6 +80,7 @@ func UpdatePermintaanServices(id string, pemdaID string, aplikasiID string, user
 		TanggalPesanan:    tanggalPesanan,
 		TanggalDeadline:   tanggalDeadline,
 		Lampiran:          lampiran,
+		IsArchived: 	   isArchived,	
 		CreatedBy:         userID,
 	}
 

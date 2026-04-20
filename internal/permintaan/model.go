@@ -103,6 +103,7 @@ type Permintaan struct {
 	TanggalDeadline   time.Time   `json:"tanggal_deadline"`
 	Lampiran          StringArray `json:"lampiran"` // URL S3, max 3
 	Status            string      `json:"status"`   // proses, selesai, revisi
+	IsArchived		  bool		  `json:"is_archived"`
 	CreatedBy         string      `json:"created_by"`
 	CreatedAt         time.Time   `json:"created_at"`
 	UpdatedAt         time.Time   `json:"updated_at"`

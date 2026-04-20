@@ -71,6 +71,7 @@ func SetupRoutes(r *echo.Echo) {
 	p.Use(middle_ware.RoleMiddleware("super_admin", "admin", "programmer"))
 
 	p.GET("", permintaan.GetPermintaan)
+	p.GET("/archived", permintaan.GetArchivedPermintaan)
 	p.GET("/:id", permintaan.GetPermintaanId)
 
 	pAdmin := r.Group("/permintaan")
