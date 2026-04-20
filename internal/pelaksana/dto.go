@@ -21,10 +21,11 @@ type PelaksanaResponse struct {
 }
 
 type DistribusiInfo struct {
-	ID       string `json:"id"`
-	Pemda    string `json:"pemda"`
-	Aplikasi string `json:"aplikasi"`
-	Komentar string `json:"komentar"`
+	ID       	 string `json:"id"`
+	PermintaanID string `json:"permintaan_id"`
+	Pemda    	 string `json:"pemda"`
+	Aplikasi 	 string `json:"aplikasi"`
+	Komentar 	 string `json:"komentar"`
 }
 
 type ProgrammerInfo struct {
