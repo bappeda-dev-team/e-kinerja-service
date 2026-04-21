@@ -8,9 +8,9 @@ import (
 // === Request ===
 
 type LaporanRequest struct {
-	PermintaanID    string `json:"permintaan_id" validate:"required,uuid4"`
-	LaporanProgress string `json:"laporan_progress" validate:"required,min=3"`
-	Status          string `json:"status" validate:"required"`
+	PermintaanID    string `form:"permintaan_id" validate:"required,uuid4"`
+	LaporanProgress string `form:"laporan_progress" validate:"required,min=3"`
+	Status          string `form:"status" validate:"required"`
 }
 
 type LaporanUpdateRequest struct {
@@ -110,6 +110,7 @@ type LaporanFullResponse struct {
 	Programmer      ProgrammerInfo   `json:"programmer"`
 	LaporanProgress string           `json:"laporan_progress"`
 	Status          string           `json:"status"`
+	Lampiran		StringArray	     `json:"lampiran"`
 	Verifikasi      []VerifikasiInfo `json:"verifikasi"`
 	CreatedAt       time.Time        `json:"created_at"`
 	UpdatedAt       time.Time        `json:"updated_at"`

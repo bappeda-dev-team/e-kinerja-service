@@ -14,7 +14,7 @@ func GetAll() ([]LaporanFullResponse, error) {
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
-			l.laporan_progress, l.status,
+			l.laporan_progress, l.status, l.lampiran,
 			
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
@@ -41,7 +41,7 @@ func GetAll() ([]LaporanFullResponse, error) {
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
-			&data.LaporanProgress, &data.Status,
+			&data.LaporanProgress, &data.Status, &data.Lampiran,
 			// &vID, &vKomentar, &vStatus,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
@@ -97,7 +97,7 @@ func GetId(id string) (LaporanFullResponse, error) {
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
-			l.laporan_progress, l.status,
+			l.laporan_progress, l.status, l.lampiran,
 			
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
@@ -115,7 +115,7 @@ func GetId(id string) (LaporanFullResponse, error) {
 		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
-		&data.LaporanProgress, &data.Status,
+		&data.LaporanProgress, &data.Status, &data.Lampiran,
 		// &vID, &vKomentar, &vStatus,
 		&data.CreatedAt, &data.UpdatedAt,
 	)
@@ -156,7 +156,7 @@ func GetAllByProgrammer(userID string) ([]LaporanFullResponse, error) {
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
-			l.laporan_progress, l.status,
+			l.laporan_progress, l.status, l.lampiran,
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
 		LEFT JOIN permintaan p ON l.permintaan_id = p.id
@@ -181,7 +181,7 @@ func GetAllByProgrammer(userID string) ([]LaporanFullResponse, error) {
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
-			&data.LaporanProgress, &data.Status,
+			&data.LaporanProgress, &data.Status, &data.Lampiran,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
@@ -387,8 +387,8 @@ func GetVerifId(id string) (VerifikasiResponse, error) {
 
 func Create(data *Laporan) error {
 	query := `
-		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, laporan_progress, status)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, laporan_progress, status, lampiran)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, created_at, updated_at
 	`
 
@@ -398,6 +398,7 @@ func Create(data *Laporan) error {
 		data.ProgrammerID,
 		data.LaporanProgress,
 		data.Status,
+		data.Lampiran,
 	).Scan(
 		&data.ID,
 		&data.CreatedAt,
@@ -457,8 +458,9 @@ func Update(id string, data *Laporan) error {
 			programmer_id = $2,
 			laporan_progress = $3,
 			status           = $4,
+			lampiran         = $5,
 		    updated_at = NOW()
-		WHERE id = $5
+		WHERE id = $6
 		RETURNING updated_at
 	`
 
@@ -468,10 +470,26 @@ func Update(id string, data *Laporan) error {
 		data.ProgrammerID,
 		data.LaporanProgress,
 		data.Status,
+		data.Lampiran,
 		id,
 	).Scan(&data.UpdatedAt)
 
 	return err
+}
+
+func UpdateLampiran(id string, lampiran StringArray) error {
+	result, err := config.DB.Exec(`UPDATE laporan_progress SET lampiran = $1, updated_at = NOW() WHERE id = $2`, lampiran, id)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func UpdateStatusVerified(id string, status string, isSubmitted bool) error {

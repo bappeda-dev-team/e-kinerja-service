@@ -3,7 +3,9 @@ package laporan
 import (
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
+	"aplikasi-internal/internal/storage"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -128,7 +130,28 @@ func CreateLaporan(c echo.Context) error {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := CreateLaporanServices(req.PermintaanID, userID, req)
+	var lampiran StringArray
+	if form, err := c.MultipartForm(); err == nil {
+		if fhs := form.File["files"]; len(fhs) > 0 {
+			if len(fhs) > 3 {
+				return exception.BadRequest(fmt.Sprintf("maksimal 3 lampiran, dikirim %d", len(fhs)))
+			}
+			for _, fh := range fhs {
+				f, err := fh.Open()
+				if err != nil {
+					return exception.BadRequest("Gagal membuka file")
+				}
+				url, err := storage.UploadFile(f, fh, storage.FolderLampiran)
+				f.Close()
+				if err != nil {
+					return err
+				}
+				lampiran = append(lampiran, url)
+			}
+		}
+	}
+
+	result, err := CreateLaporanServices(req.PermintaanID, userID, req, lampiran)
 	if err != nil {
 		return handleDBError(err)
 	}
@@ -191,7 +214,34 @@ func UpdateLaporan(c echo.Context) error {
 		return exception.BadRequest("Validasi gagal")
 	}
 
-	result, err := UpdateLaporanServices(id, req.PermintaanID, userID, req)
+	var lampiran StringArray
+	if form, err := c.MultipartForm(); err == nil {
+		if fhs := form.File["files"]; len(fhs) > 0 {
+			if len(fhs) > 3 {
+				return exception.BadRequest(fmt.Sprintf("maksimal 3 lampiran, dikirim %d", len(fhs)))
+			}
+			for _, fh := range fhs {
+				f, err := fh.Open()
+				if err != nil {
+					return exception.BadRequest("Gagal membuka file")
+				}
+				url, err := storage.UploadFile(f, fh, storage.FolderLampiran)
+				f.Close()
+				if err != nil {
+					return err
+				}
+				lampiran = append(lampiran, url)
+			}
+		}
+	}
+	if lampiran == nil {
+		existing, err := GetId(id)
+		if err == nil {
+			lampiran = existing.Lampiran
+		}
+	}
+
+	result, err := UpdateLaporanServices(id, req.PermintaanID, userID, req, lampiran)
 	if err != nil {
 		return handleDBError(err)
 	}
@@ -225,3 +275,49 @@ func DeleteLaporan(c echo.Context) error {
 	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }
+
+func UploadLampiran(c echo.Context) error {
+	id := c.Param("id")
+	if _, err := uuid.Parse(id); err != nil {
+		return exception.BadRequest("UUID tidak valid")
+	}
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		return exception.BadRequest("Gagal membaca multipart form")
+	}
+
+	fileHeaders := form.File["files"]
+	if len(fileHeaders) == 0 {
+		return exception.BadRequest("File tidak ditemukan, gunakan field 'files'")
+	}
+	if len(fileHeaders) > 3 {
+		return exception.BadRequest(fmt.Sprintf("maksimal 3 lampiran, dikirim %d", len(fileHeaders)))
+	}
+
+	urls := make([]string, 0, len(fileHeaders))
+	for _, fh := range fileHeaders {
+		file, err := fh.Open()
+		if err != nil {
+			return exception.BadRequest("Gagal membuka file")
+		}
+		url, err := storage.UploadFile(file, fh, storage.FolderLampiran)
+		file.Close()
+		if err != nil {
+			return err
+		}
+		urls = append(urls, url)
+	}
+
+	if err := UpdateLampiranServices(id, urls); err != nil {
+		if err == sql.ErrNoRows {
+			return exception.ResourceNotFound("Data tidak ditemukan")
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Lampiran berhasil disimpan", map[string]interface{}{
+		"lampiran": urls,
+	}))
+}
+

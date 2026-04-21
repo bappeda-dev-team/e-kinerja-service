@@ -24,13 +24,14 @@ func GetLaporanDetailServicesID(id string) (LaporanDetailResponse, error) {
 	return GetByIdDetail(id)
 }
 
-func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest) (*LaporanFullResponse, error) {
+func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest, lampiran StringArray) (*LaporanFullResponse, error) {
 
 	data := &Laporan{
 		PermintaanID:    permintaanID,
 		ProgrammerID:    userID,
 		LaporanProgress: req.LaporanProgress,
 		Status:          req.Status,
+		Lampiran:        lampiran,
 	}
 
 	err := Create(data)
@@ -76,7 +77,7 @@ func CreateVerifikasiService(userID string, LaporanID string) (*VerifikasiRespon
 	return &result, nil
 }
 
-func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanUpdateRequest) (*LaporanFullResponse, error) {
+func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanUpdateRequest, lampiran StringArray) (*LaporanFullResponse, error) {
 
 	existing, err := GetId(id)
 	if err != nil {
@@ -88,6 +89,7 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 		ProgrammerID:    userID,
 		LaporanProgress: req.LaporanProgress,
 		Status:          req.Status,
+		Lampiran:        lampiran,
 	}
 
 	err = Update(id, data)
@@ -126,4 +128,8 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 
 func DeleteLaporanServices(id string) error {
 	return Delete(id)
+}
+
+func UpdateLampiranServices(id string, urls []string) error {
+	return UpdateLampiran(id, StringArray(urls))
 }
