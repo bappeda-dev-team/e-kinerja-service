@@ -111,6 +111,7 @@ func SetupRoutes(r *echo.Echo) {
 
 	l.GET("", laporan.GetLaporan)
 	l.GET("/:id", laporan.GetLaporanID)
+	l.GET("/history", laporan.GetHistory)
 	l.POST("", laporan.CreateLaporan)
 	l.POST("/verif/:laporan_id", laporan.CreateVerif)
 	l.PUT("/:id", laporan.UpdateLaporan)

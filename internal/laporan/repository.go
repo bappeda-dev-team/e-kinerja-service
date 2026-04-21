@@ -252,6 +252,29 @@ func getVerifikasiByLaporanIDs(ids []string) (map[string][]VerifikasiInfo, error
 	return result, nil
 }
 
+func getAllHistory() ([]HistoryResponse, error) {
+	rows, err := config.DB.Query(`SELECT id, laporan_id, programmer_id, old_status, new_status, 
+	old_progress, new_progress, created_at FROM progress_history`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var history []HistoryResponse
+
+	for rows.Next() {
+		var data HistoryResponse
+		err := rows.Scan(&data.ID, &data.LaporanID, &data.ProgrammerID, &data.OldStatus, &data.NewStatus, &data.OldProgress,
+		&data.NewProgress, &data.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		history = append(history, data)
+	}
+
+	return history, err
+}
+
 func GetAllDetail() ([]LaporanDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
@@ -379,6 +402,28 @@ func Create(data *Laporan) error {
 		&data.ID,
 		&data.CreatedAt,
 		&data.UpdatedAt,
+	)
+
+	return err
+}
+func CreateHistory(data *History) error {
+	query := `
+		INSERT INTO progress_history (laporan_id, programmer_id, old_status, new_status, old_progress, new_progress)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id, created_at
+	`
+
+	err := config.DB.QueryRow(
+		query,
+		data.LaporanID,
+		data.ProgrammerID,
+		data.OldStatus,
+		data.NewStatus,
+		data.OldProgress,
+		data.NewProgress,
+	).Scan(
+		&data.ID,
+		&data.CreatedAt,
 	)
 
 	return err

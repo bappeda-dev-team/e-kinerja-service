@@ -114,3 +114,14 @@ type LaporanFullResponse struct {
 	CreatedAt       time.Time        `json:"created_at"`
 	UpdatedAt       time.Time        `json:"updated_at"`
 }
+
+type HistoryResponse struct {
+	ID 			       string	 `json:"id"`
+	LaporanID 	   	   string	 `json:"laporan_id"`
+	ProgrammerID 	   string	 `json:"programmer_id"`
+	OldStatus	 	   string	 `json:"old_status"`
+	NewStatus	 	   string	 `json:"new_status"`
+	OldProgress	 	   string	 `json:"old_progress"`
+	NewProgress	 	   string	 `json:"new_progress"`
+	CreatedAt          time.Time `json:"created_at"`
+}

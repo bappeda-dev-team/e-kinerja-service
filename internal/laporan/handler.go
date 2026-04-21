@@ -94,6 +94,15 @@ func GetLaporanID(c echo.Context) error {
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+func GetHistory(c echo.Context) error {
+	result, err := GetHistoryServices()
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+}
+
 // CreateLaporan godoc
 // @Summary Membuat laporan baru
 // @Description Menambahkan data laporan

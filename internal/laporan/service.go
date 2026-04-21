@@ -12,6 +12,10 @@ func GetLaporanServicesID(id string) (LaporanFullResponse, error) {
 	return GetId(id)
 }
 
+func GetHistoryServices() ([]HistoryResponse, error) {
+	return getAllHistory()
+}
+
 func GetLaporanDetailServices() ([]LaporanDetailResponse, error) {
 	return GetAllDetail()
 }
@@ -30,6 +34,17 @@ func CreateLaporanServices(permintaanID string, userID string, req LaporanReques
 	}
 
 	err := Create(data)
+	if err != nil {
+		return nil, err
+	}
+	datahis := &History{
+		LaporanID:    data.ID,
+		ProgrammerID: userID,
+		OldStatus:    data.Status,
+		OldProgress:  data.LaporanProgress,
+	}
+
+	err = CreateHistory(datahis)
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +78,11 @@ func CreateVerifikasiService(userID string, LaporanID string) (*VerifikasiRespon
 
 func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanUpdateRequest) (*LaporanFullResponse, error) {
 
+	existing, err := GetId(id)
+	if err != nil {
+		return nil, err
+	}
+
 	data := &Laporan{
 		PermintaanID:    permintaanID,
 		ProgrammerID:    userID,
@@ -70,7 +90,7 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 		Status:          req.Status,
 	}
 
-	err := Update(id, data)
+	err = Update(id, data)
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +100,20 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	datahis := &History{
+		LaporanID:    existing.ID,
+		ProgrammerID: userID,
+		OldStatus:    existing.Status,
+		NewStatus:    data.Status,
+		OldProgress:  existing.LaporanProgress,
+		NewProgress:  data.LaporanProgress,
+	}
+
+	err = CreateHistory(datahis)
+	if err != nil {
+		return nil, err
 	}
 
 	result, err := GetId(id)
