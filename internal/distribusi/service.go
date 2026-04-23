@@ -31,6 +31,27 @@ func CreateDistribusiServices(permintaanID string, adminID string, req Distribus
 	return &result, nil
 }
 
+func CreateKomentarServices(distribusiID string, userID string, req KomentarDistribusiRequest) (*KomentarResponse, error) {
+
+	data := &KomentarDistribusi{
+		DistribusiID: distribusiID,
+		UserID:       userID,
+		Komentars:    req.Komentars,
+	}
+
+	err := CreateKomentar(data)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := GetKomentarById(data.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 func UpdateDistribusiServices(id string, permintaanID string, adminID string, req DistribusiRequest) (*DistribusiDetailResponse, error) {
 	data := &Distribusi{
 		PermintaanID: permintaanID,

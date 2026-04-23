@@ -3,6 +3,8 @@ package pelaksana
 import (
 	"aplikasi-internal/config"
 	"database/sql"
+	"fmt"
+	"strings"
 )
 
 func GetAll() ([]PelaksanaResponse, error) {
@@ -44,7 +46,7 @@ func GetAllDetail(userID string) ([]PelaksanaDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			dp.id,
-			d.id, d.permintaan_id, mp.name, ma.name, d.komentar,
+			d.id, d.permintaan_id, mp.name, ma.name,
 			u.id, u.username, u.full_name, u.profile_picture,
 			dp.is_read,
 			dp.created_at, dp.updated_at
@@ -67,7 +69,7 @@ func GetAllDetail(userID string) ([]PelaksanaDetailResponse, error) {
 		var data PelaksanaDetailResponse
 		err := rows.Scan(
 			&data.ID,
-			&data.Distribusi.ID, &data.Distribusi.PermintaanID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi, &data.Distribusi.Komentar,
+			&data.Distribusi.ID, &data.Distribusi.PermintaanID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi,
 			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 			&data.IsRead,
 			&data.CreatedAt, &data.UpdatedAt,
@@ -75,8 +77,25 @@ func GetAllDetail(userID string) ([]PelaksanaDetailResponse, error) {
 		if err != nil {
 			return nil, err
 		}
+		data.Distribusi.Komentars = []KomentarInfo{}
 		pelaksana = append(pelaksana, data)
 	}
+
+	ids := make([]string, len(pelaksana))
+	for i, d := range pelaksana {
+		ids[i] = d.Distribusi.ID
+	}
+
+	komentarMap, err := getKomentarByDistribusiIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	for i, d := range pelaksana {
+		if k, ok := komentarMap[d.Distribusi.ID]; ok {
+			pelaksana[i].Distribusi.Komentars = k
+		}
+	}
+
 	return pelaksana, err
 }
 
@@ -85,7 +104,7 @@ func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 	err := config.DB.QueryRow(`
 		SELECT
 			dp.id,
-			d.id, d.permintaan_id, mp.name, ma.name, d.komentar,
+			d.id, d.permintaan_id, mp.name, ma.name,
 			u.id, u.username, u.full_name, u.profile_picture,
 			dp.is_read,
 			dp.created_at, dp.updated_at
@@ -98,7 +117,7 @@ func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 		WHERE dp.id = $1
 	`, id).Scan(
 		&data.ID,
-		&data.Distribusi.ID, &data.Distribusi.PermintaanID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi, &data.Distribusi.Komentar,
+		&data.Distribusi.ID, &data.Distribusi.PermintaanID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi,
 		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 		&data.IsRead,
 		&data.CreatedAt, &data.UpdatedAt,
@@ -106,7 +125,58 @@ func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 	if err != nil {
 		return PelaksanaDetailResponse{}, err
 	}
+
+	komentarMap, err := getKomentarByDistribusiIDs([]string{data.Distribusi.ID})
+
+	if err != nil {
+		return PelaksanaDetailResponse{}, err
+	}
+
+	if k, ok := komentarMap[data.Distribusi.ID]; ok {
+		data.Distribusi.Komentars = k
+	} else {
+		data.Distribusi.Komentars = []KomentarInfo{}
+	}
+
 	return data, err
+}
+
+func getKomentarByDistribusiIDs(ids []string) (map[string][]KomentarInfo, error) {
+	result := make(map[string][]KomentarInfo)
+	if len(ids) == 0 {
+		return result, nil
+	}
+
+	placeholders := make([]string, len(ids))
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+		args[i] = id
+	}
+
+	query := fmt.Sprintf(`
+		SELECT kd.distribusi_id, kd.id, u.full_name, kd.komentars, kd.created_at
+		FROM komentar_distribusi kd
+		LEFT JOIN users u ON kd.user_id = u.id
+		WHERE kd.distribusi_id IN (%s)
+		ORDER BY kd.created_at ASC
+	`, strings.Join(placeholders, ","))
+
+	rows, err := config.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var distribusiID string
+		var p KomentarInfo
+		if err := rows.Scan(&distribusiID, &p.ID, &p.FullName, &p.Komentar, &p.CreatedAt); err != nil {
+			return nil, err
+		}
+		result[distribusiID] = append(result[distribusiID], p)
+	}
+	return result, nil
 }
 
 func IsDistribusiIdExists(distribusi_id string) (bool, error) {

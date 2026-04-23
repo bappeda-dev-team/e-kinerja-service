@@ -20,12 +20,19 @@ type PelaksanaResponse struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type KomentarInfo struct {
+	ID         string          `json:"id"`
+	FullName   string          `json:"full_name"`
+	Komentar  string          `json:"komentar"`
+	CreatedAt  time.Time       `json:"created_at"`
+}
+
 type DistribusiInfo struct {
-	ID       	 string `json:"id"`
-	PermintaanID string `json:"permintaan_id"`
-	Pemda    	 string `json:"pemda"`
-	Aplikasi 	 string `json:"aplikasi"`
-	Komentar 	 string `json:"komentar"`
+	ID       	 string 		`json:"id"`
+	PermintaanID string 		`json:"permintaan_id"`
+	Pemda    	 string 		`json:"pemda"`
+	Aplikasi 	 string 		`json:"aplikasi"`
+	Komentars 	 []KomentarInfo `json:"komentars"`
 }
 
 type ProgrammerInfo struct {

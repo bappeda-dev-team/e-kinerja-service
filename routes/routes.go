@@ -93,6 +93,7 @@ func SetupRoutes(r *echo.Echo) {
 	d.POST("", distribusi.CreateDistribusi)
 	d.PUT("/:id", distribusi.UpdateDistribusi)
 	d.DELETE("/:id", distribusi.DeleteDistribusi)
+	d.POST("/komentar/:distribusi_id", distribusi.CreateKomentarDistribusi)
 
 	dp := r.Group("/pelaksana")
 	dp.Use(middle_ware.JWTMiddleware)

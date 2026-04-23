@@ -17,6 +17,10 @@ type DistribusiRequest struct {
 	Pelaksana     []string `json:"pelaksana"`
 }
 
+type KomentarDistribusiRequest struct {
+	Komentars      string   `json:"komentars"`
+}
+
 func (r *DistribusiRequest) NormalizePelaksana() {
 	ids := r.ProgrammerIDs
 	if len(r.Pelaksana) > 0 {
@@ -100,6 +104,13 @@ type VerifikasiInfo struct {
 	StatusVerified string `json:"status_verified"`
 }
 
+type KomentarInfo struct {
+	ID         string          `json:"id"`
+	FullName   string          `json:"full_name"`
+	Komentars  string          `json:"komentar"`
+	CreatedAt  time.Time       `json:"created_at"`
+}
+
 type DistribusiDetailResponse struct {
 	ID         string          `json:"id"`
 	Permintaan PermintaanInfo  `json:"permintaan"`
@@ -114,9 +125,17 @@ type DistribusiFullResponse struct {
 	ID         string          `json:"id"`
 	Permintaan PermintaanInfo  `json:"permintaan"`
 	Admin      AdminInfo       `json:"admin"`
-	Komentar   string          `json:"komentar"`
+	Komentar   []KomentarInfo  `json:"komentars"`
 	Pelaksana  []PelaksanaInfo `json:"pelaksana"`
 	Verifikasi VerifikasiInfo  `json:"verifikasi"`
+	CreatedAt  time.Time       `json:"created_at"`
+	UpdatedAt  time.Time       `json:"updated_at"`
+}
+
+type KomentarResponse struct {
+	ID         string          `json:"id"`
+	FullName   string          `json:"full_name"`
+	Komentars  string          `json:"komentars"`
 	CreatedAt  time.Time       `json:"created_at"`
 	UpdatedAt  time.Time       `json:"updated_at"`
 }

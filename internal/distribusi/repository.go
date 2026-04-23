@@ -14,8 +14,8 @@ func GetAll() ([]DistribusiFullResponse, error) {
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
-			v.id, v.status_verified, v.komentar,
-			d.komentar, d.created_at, d.updated_at
+			v.id, v.status_verified, v.komentar, 
+			d.created_at, d.updated_at
 		FROM distribusi d
 		LEFT JOIN permintaan p ON d.permintaan_id = p.id
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
@@ -42,7 +42,7 @@ func GetAll() ([]DistribusiFullResponse, error) {
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 			&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
 			&vID, &vStatus, &vKomentar,
-			&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
+			&data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -53,6 +53,7 @@ func GetAll() ([]DistribusiFullResponse, error) {
 			Komentar:       vKomentar.String,
 		}
 		data.Pelaksana = []PelaksanaInfo{}
+		data.Komentar = []KomentarInfo{}
 		distribusi = append(distribusi, data)
 	}
 
@@ -71,6 +72,16 @@ func GetAll() ([]DistribusiFullResponse, error) {
 		}
 	}
 
+	komentarMap, err := getKomentarByDistribusiIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	for i, d := range distribusi {
+		if k, ok := komentarMap[d.ID]; ok {
+			distribusi[i].Komentar = k
+		}
+	}
+
 	return distribusi, nil
 
 }
@@ -85,7 +96,7 @@ func GetById(id string) (DistribusiFullResponse, error) {
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
 			v.id, v.status_verified, v.komentar,
-			d.komentar, d.created_at, d.updated_at
+			d.created_at, d.updated_at
 		FROM distribusi d
 		LEFT JOIN permintaan p ON d.permintaan_id = p.id
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
@@ -103,7 +114,7 @@ func GetById(id string) (DistribusiFullResponse, error) {
 		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 		&data.Admin.ID, &data.Admin.Username, &data.Admin.FullName, &data.Admin.ProfilePicture,
 		&vID, &vStatus, &vKomentar,
-		&data.Komentar, &data.CreatedAt, &data.UpdatedAt,
+		&data.CreatedAt, &data.UpdatedAt,
 	)
 	if err != nil {
 		return DistribusiFullResponse{}, err
@@ -115,6 +126,7 @@ func GetById(id string) (DistribusiFullResponse, error) {
 	}
 
 	pelaksanaMap, err := getPelaksanaByDistribusiIDs([]string{data.ID})
+	komentarMap, err := getKomentarByDistribusiIDs([]string{data.ID})
 	if err != nil {
 		return DistribusiFullResponse{}, err
 	}
@@ -122,6 +134,12 @@ func GetById(id string) (DistribusiFullResponse, error) {
 		data.Pelaksana = p
 	} else {
 		data.Pelaksana = []PelaksanaInfo{}
+	}
+
+	if k, ok := komentarMap[data.ID]; ok {
+		data.Komentar = k
+	} else {
+		data.Komentar = []KomentarInfo{}
 	}
 
 	return data, nil
@@ -159,6 +177,43 @@ func getPelaksanaByDistribusiIDs(ids []string) (map[string][]PelaksanaInfo, erro
 		var distribusiID string
 		var p PelaksanaInfo
 		if err := rows.Scan(&distribusiID, &p.ID, &p.Username, &p.FullName); err != nil {
+			return nil, err
+		}
+		result[distribusiID] = append(result[distribusiID], p)
+	}
+	return result, nil
+}
+func getKomentarByDistribusiIDs(ids []string) (map[string][]KomentarInfo, error) {
+	result := make(map[string][]KomentarInfo)
+	if len(ids) == 0 {
+		return result, nil
+	}
+
+	placeholders := make([]string, len(ids))
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+		args[i] = id
+	}
+
+	query := fmt.Sprintf(`
+		SELECT kd.distribusi_id, kd.id, u.full_name, kd.komentars, kd.created_at
+		FROM komentar_distribusi kd
+		LEFT JOIN users u ON kd.user_id = u.id
+		WHERE kd.distribusi_id IN (%s)
+		ORDER BY kd.created_at ASC
+	`, strings.Join(placeholders, ","))
+
+	rows, err := config.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var distribusiID string
+		var p KomentarInfo
+		if err := rows.Scan(&distribusiID, &p.ID, &p.FullName, &p.Komentars, &p.CreatedAt); err != nil {
 			return nil, err
 		}
 		result[distribusiID] = append(result[distribusiID], p)
@@ -285,6 +340,26 @@ func ReplacePelaksana(distribusiID string, programmerIDs []string) error {
 	return InsertPelaksana(distribusiID, programmerIDs)
 }
 
+func GetKomentarById(id string) (KomentarResponse, error) {
+	var data KomentarResponse
+	err := config.DB.QueryRow(`
+		SELECT
+			kd.id,
+			u.full_name, kd.komentars,
+			kd.created_at, kd.updated_at
+		FROM komentar_distribusi kd
+		LEFT JOIN users u ON kd.user_id = u.id
+		WHERE kd.id = $1
+	`, id).Scan(
+		&data.ID, &data.FullName, &data.Komentars,
+		&data.CreatedAt, &data.UpdatedAt,
+	)
+	if err != nil {
+		return KomentarResponse{}, err
+	}
+	return data, err
+}
+
 func Create(data *Distribusi) error {
 	query := `
 		INSERT INTO distribusi (permintaan_id, admin_id, komentar)
@@ -299,6 +374,27 @@ func Create(data *Distribusi) error {
 		data.Komentar,
 	).Scan(
 		&data.ID,
+		&data.CreatedAt,
+		&data.UpdatedAt,
+	)
+
+	return err
+}
+func CreateKomentar(data *KomentarDistribusi) error {
+	query := `
+		INSERT INTO komentar_distribusi (distribusi_id, user_id, komentars)
+		VALUES ($1, $2, $3)
+		RETURNING id, is_read,  created_at, updated_at
+	`
+
+	err := config.DB.QueryRow(
+		query,
+		data.DistribusiID,
+		data.UserID,
+		data.Komentars,
+	).Scan(
+		&data.ID,
+		&data.IsRead,
 		&data.CreatedAt,
 		&data.UpdatedAt,
 	)

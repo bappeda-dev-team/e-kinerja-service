@@ -181,3 +181,44 @@ func DeleteDistribusi(c echo.Context) error {
 	return c.JSON(http.StatusOK,
 		helpers.SuccessResponse(200, "Berhasil menghapus data", nil))
 }
+
+func CreateKomentarDistribusi(c echo.Context) error {
+	distribusiID := c.Param("distribusi_id")
+	userIDInterface := c.Get("user_id")
+
+	if userIDInterface == nil {
+		return c.JSON(401, "user tidak ditemukan di token")
+	}
+
+	userID := userIDInterface.(string)
+
+	if _, err := uuid.Parse(distribusiID); err != nil {
+		return exception.BadRequest("UUID tidak valid")
+	}
+
+	var req KomentarDistribusiRequest
+
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return exception.BadRequest("Validasi gagal")
+	}
+
+
+	result, err := CreateKomentarServices(distribusiID, userID, req)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return exception.ResourceNotFound("Data tidak ditemukan")
+		}
+
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return exception.BadRequest("distribusi_id tidak ditemukan")
+			}
+		}
+
+		return err
+	}
+
+	return c.JSON(http.StatusCreated,
+		helpers.SuccessResponse(201, "Berhasil membuat data", result))
+}
