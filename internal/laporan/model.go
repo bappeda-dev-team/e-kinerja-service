@@ -122,3 +122,13 @@ type History struct {
 	NewProgress	 	   string	 `json:"new_progress"`
 	CreatedAt          time.Time `json:"created_at"`
 }
+
+type KomentarLaporan struct {
+	ID           string    `json:"id"`
+	LaporanID 	 string    `json:"laporan_id"`
+	UserID 		 string    `json:"user_id"`
+	Komentar     string    `json:"komentar"`
+	IsRead       bool      `json:"is_read"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}

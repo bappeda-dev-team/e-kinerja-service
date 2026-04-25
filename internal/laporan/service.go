@@ -77,6 +77,27 @@ func CreateVerifikasiService(userID string, LaporanID string) (*VerifikasiRespon
 	return &result, nil
 }
 
+func CreateKomentarServices(laporanID string, userID string, req KomentarLaporanRequest) (*KomentarResponse, error) {
+
+	data := &KomentarLaporan{
+		LaporanID: laporanID,
+		UserID:    userID,
+		Komentar:  req.Komentar,
+	}
+
+	err := CreateKomentar(data)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := GetKomentarById(data.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanUpdateRequest, lampiran StringArray) (*LaporanFullResponse, error) {
 
 	existing, err := GetId(id)

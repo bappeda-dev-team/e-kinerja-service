@@ -118,6 +118,7 @@ func SetupRoutes(r *echo.Echo) {
 	l.PUT("/:id", laporan.UpdateLaporan)
 	l.DELETE("/:id", laporan.DeleteLaporan)
 	l.PATCH("/:id/lampiran", laporan.UploadLampiran)
+	l.POST("/komentar/:laporan_id", laporan.CreateKomentarLaporan)
 
 	sd := r.Group("/superadmin-dashboard")
 	sd.Use(middle_ware.JWTMiddleware)

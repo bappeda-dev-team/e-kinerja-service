@@ -27,6 +27,10 @@ type VerifikasiRequest struct {
 	LaporanID string `json:"laporan_id" validate:"required,uuid4"`
 }
 
+type KomentarLaporanRequest struct {
+	Komentar      string   `json:"komentar"`
+}
+
 // === Response ===
 
 type LaporanResponse struct {
@@ -125,4 +129,12 @@ type HistoryResponse struct {
 	OldProgress	 	   string	 `json:"old_progress"`
 	NewProgress	 	   string	 `json:"new_progress"`
 	CreatedAt          time.Time `json:"created_at"`
+}
+
+type KomentarResponse struct {
+	ID         string          `json:"id"`
+	FullName   string          `json:"full_name"`
+	Komentar   string          `json:"komentar"`
+	CreatedAt  time.Time       `json:"created_at"`
+	UpdatedAt  time.Time       `json:"updated_at"`
 }

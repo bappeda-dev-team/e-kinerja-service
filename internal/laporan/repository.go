@@ -385,6 +385,26 @@ func GetVerifId(id string) (VerifikasiResponse, error) {
 	return data, err
 }
 
+func GetKomentarById(id string) (KomentarResponse, error) {
+	var data KomentarResponse
+	err := config.DB.QueryRow(`
+		SELECT
+			kl.id,
+			u.full_name, kl.komentar,
+			kl.created_at, kl.updated_at
+		FROM komentar_laporan kl
+		LEFT JOIN users u ON kl.user_id = u.id
+		WHERE kl.id = $1
+	`, id).Scan(
+		&data.ID, &data.FullName, &data.Komentar,
+		&data.CreatedAt, &data.UpdatedAt,
+	)
+	if err != nil {
+		return KomentarResponse{}, err
+	}
+	return data, err
+}
+
 func Create(data *Laporan) error {
 	query := `
 		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, laporan_progress, status, lampiran)
@@ -444,6 +464,28 @@ func CreateVerifikasi(data *Verifikasi) error {
 	).Scan(
 		&data.ID,
 		&data.StatusVerified,
+		&data.CreatedAt,
+		&data.UpdatedAt,
+	)
+
+	return err
+}
+
+func CreateKomentar(data *KomentarLaporan) error {
+	query := `
+		INSERT INTO komentar_laporan (laporan_id, user_id, komentar)
+		VALUES ($1, $2, $3)
+		RETURNING id, is_read,  created_at, updated_at
+	`
+
+	err := config.DB.QueryRow(
+		query,
+		data.LaporanID,
+		data.UserID,
+		data.Komentar,
+	).Scan(
+		&data.ID,
+		&data.IsRead,
 		&data.CreatedAt,
 		&data.UpdatedAt,
 	)
