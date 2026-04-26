@@ -62,12 +62,18 @@ func GetAll() ([]LaporanFullResponse, error) {
 		// 	}
 		// }
 		data.Verifikasi = []VerifikasiInfo{}
+		data.Komentars = []KomentarInfo{}
 		laporan = append(laporan, data)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+
+	ids := make([]string, len(laporan))
+		for i, l := range laporan {
+			ids[i] = l.ID
+		}
 
 	if len(laporan) > 0 {
 		ids := make([]string, len(laporan))
@@ -82,6 +88,16 @@ func GetAll() ([]LaporanFullResponse, error) {
 			if v, ok := verifikasiMap[l.ID]; ok {
 				laporan[i].Verifikasi = v
 			}
+		}
+	}
+
+	komentarMap, err := getKomentarByLaporanIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	for i, d := range laporan {
+		if k, ok := komentarMap[d.ID]; ok {
+			laporan[i].Komentars = k
 		}
 	}
 
@@ -137,6 +153,7 @@ func GetId(id string) (LaporanFullResponse, error) {
 	}
 
 	verifikasiMap, err := getVerifikasiByLaporanIDs([]string{data.ID})
+	laporanMap, err := getKomentarByLaporanIDs([]string{data.ID})
 	if err != nil {
 		return LaporanFullResponse{}, err
 	}
@@ -144,6 +161,11 @@ func GetId(id string) (LaporanFullResponse, error) {
 		data.Verifikasi = p
 	} else {
 		data.Verifikasi = []VerifikasiInfo{}
+	}
+	if k, ok := laporanMap[data.ID]; ok {
+		data.Komentars = k
+	} else {
+		data.Komentars = []KomentarInfo{}
 	}
 
 	return data, err
@@ -194,6 +216,11 @@ func GetAllByProgrammer(userID string) ([]LaporanFullResponse, error) {
 		return nil, err
 	}
 
+	ids := make([]string, len(laporan))
+		for i, l := range laporan {
+			ids[i] = l.ID
+		}
+
 	if len(laporan) > 0 {
 		ids := make([]string, len(laporan))
 		for i, l := range laporan {
@@ -207,6 +234,16 @@ func GetAllByProgrammer(userID string) ([]LaporanFullResponse, error) {
 			if v, ok := verifikasiMap[l.ID]; ok {
 				laporan[i].Verifikasi = v
 			}
+		}
+	}
+
+	komentarMap, err := getKomentarByLaporanIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	for i, d := range laporan {
+		if k, ok := komentarMap[d.ID]; ok {
+			laporan[i].Komentars = k
 		}
 	}
 
@@ -228,7 +265,7 @@ func getVerifikasiByLaporanIDs(ids []string) (map[string][]VerifikasiInfo, error
 
 	query := fmt.Sprintf(`
 		SELECT DISTINCT ON (l.id)
-		l.id, v.id, v.komentar, v.status_verified, v.is_submitted_to_verified, v.created_at, v.updated_at
+		l.id, v.id, v.status_verified, v.is_submitted_to_verified, v.created_at, v.updated_at
 		FROM verifikasi v
 		LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
 		WHERE l.id IN (%s)
@@ -244,7 +281,7 @@ func getVerifikasiByLaporanIDs(ids []string) (map[string][]VerifikasiInfo, error
 	for rows.Next() {
 		var laporanID string
 		var v VerifikasiInfo
-		if err := rows.Scan(&laporanID, &v.ID, &v.Komentar, &v.StatusVerified, &v.IsSubmittedToVerified, &v.CreatedAt, &v.UpdatedAt); err != nil {
+		if err := rows.Scan(&laporanID, &v.ID, &v.StatusVerified, &v.IsSubmittedToVerified, &v.CreatedAt, &v.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result[laporanID] = append(result[laporanID], v)
@@ -273,6 +310,44 @@ func getAllHistory() ([]HistoryResponse, error) {
 	}
 
 	return history, err
+}
+
+func getKomentarByLaporanIDs(ids []string) (map[string][]KomentarInfo, error) {
+	result := make(map[string][]KomentarInfo)
+	if len(ids) == 0 {
+		return result, nil
+	}
+
+	placeholders := make([]string, len(ids))
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+		args[i] = id
+	}
+
+	query := fmt.Sprintf(`
+		SELECT kl.laporan_id, kl.id, u.full_name, kl.komentar, kl.created_at
+		FROM komentar_laporan kl
+		LEFT JOIN users u ON kl.user_id = u.id
+		WHERE kl.laporan_id IN (%s)
+		ORDER BY kl.created_at ASC
+	`, strings.Join(placeholders, ","))
+
+	rows, err := config.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var laporanID string
+		var p KomentarInfo
+		if err := rows.Scan(&laporanID, &p.ID, &p.FullName, &p.Komentar, &p.CreatedAt); err != nil {
+			return nil, err
+		}
+		result[laporanID] = append(result[laporanID], p)
+	}
+	return result, nil
 }
 
 func GetAllDetail() ([]LaporanDetailResponse, error) {

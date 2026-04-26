@@ -75,11 +75,17 @@ type ProgrammerInfo struct {
 
 type VerifikasiInfo struct {
 	ID             		  string    `json:"id"`
-	Komentar      		  *string   `json:"komentar"`
 	StatusVerified 		  string    `json:"status_verified"`
 	IsSubmittedToVerified bool   	`json:"is_submitted_to_verified"`
 	CreatedAt      		  time.Time `json:"created_at"`
 	UpdatedAt      		  time.Time `json:"updated_at"`
+}
+
+type KomentarInfo struct {
+	ID         string          `json:"id"`
+	FullName   string          `json:"full_name"`
+	Komentar   string          `json:"komentar"`
+	CreatedAt  time.Time       `json:"created_at"`
 }
 
 type LaporanDetailResponse struct {
@@ -116,6 +122,7 @@ type LaporanFullResponse struct {
 	Status          string           `json:"status"`
 	Lampiran		StringArray	     `json:"lampiran"`
 	Verifikasi      []VerifikasiInfo `json:"verifikasi"`
+	Komentars       []KomentarInfo   `json:"komentars"`
 	CreatedAt       time.Time        `json:"created_at"`
 	UpdatedAt       time.Time        `json:"updated_at"`
 }
