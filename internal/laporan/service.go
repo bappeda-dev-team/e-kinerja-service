@@ -25,10 +25,15 @@ func GetLaporanDetailServicesID(id string) (LaporanDetailResponse, error) {
 }
 
 func CreateLaporanServices(permintaanID string, userID string, req LaporanRequest, lampiran StringArray) (*LaporanFullResponse, error) {
+	var penugasanID *string
+	if req.PenugasanID != "" {
+		penugasanID = &req.PenugasanID
+	}
 
 	data := &Laporan{
 		PermintaanID:    permintaanID,
 		ProgrammerID:    userID,
+		PenugasanID:     penugasanID,
 		LaporanProgress: req.LaporanProgress,
 		Status:          req.Status,
 		Lampiran:        lampiran,
@@ -108,6 +113,7 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 	data := &Laporan{
 		PermintaanID:    permintaanID,
 		ProgrammerID:    userID,
+		PenugasanID:     existing.PenugasanID,
 		LaporanProgress: req.LaporanProgress,
 		Status:          req.Status,
 		Lampiran:        lampiran,

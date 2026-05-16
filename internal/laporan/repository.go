@@ -14,15 +14,13 @@ func GetAll() ([]LaporanFullResponse, error) {
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
-			l.laporan_progress, l.status, l.lampiran,
-			
+			l.penugasan_id, l.laporan_progress, l.status, l.lampiran,
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
 		LEFT JOIN permintaan p ON l.permintaan_id = p.id
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users u ON l.programmer_id = u.id
-
 	`)
 	if err != nil {
 		return nil, err
@@ -41,26 +39,12 @@ func GetAll() ([]LaporanFullResponse, error) {
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
-			&data.LaporanProgress, &data.Status, &data.Lampiran,
-			// &vID, &vKomentar, &vStatus,
+			&data.PenugasanID, &data.LaporanProgress, &data.Status, &data.Lampiran,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
-		// if vID.Valid || vKomentar.Valid || vStatus.Valid {
-		// 	data.Verifikasi = &VerifikasiInfo{}
-
-		// 	if vID.Valid {
-		// 		data.Verifikasi.ID = &vID.String
-		// 	}
-		// 	if vKomentar.Valid {
-		// 		data.Verifikasi.Komentar = &vKomentar.String
-		// 	}
-		// 	if vStatus.Valid {
-		// 		data.Verifikasi.StatusVerified = &vStatus.String
-		// 	}
-		// }
 		data.Verifikasi = []VerifikasiInfo{}
 		data.Komentars = []KomentarInfo{}
 		laporan = append(laporan, data)
@@ -106,22 +90,19 @@ func GetAll() ([]LaporanFullResponse, error) {
 
 func GetId(id string) (LaporanFullResponse, error) {
 	var data LaporanFullResponse
-	// var vID, vKomentar, vStatus sql.NullString
 	err := config.DB.QueryRow(`
 		SELECT
 			l.id,
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
-			l.laporan_progress, l.status, l.lampiran,
-			
+			l.penugasan_id, l.laporan_progress, l.status, l.lampiran,
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
 		LEFT JOIN permintaan p ON l.permintaan_id = p.id
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users u ON l.programmer_id = u.id
-		
 		WHERE l.id = $1
 	`, id).Scan(
 		&data.ID,
@@ -131,8 +112,7 @@ func GetId(id string) (LaporanFullResponse, error) {
 		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 		&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
-		&data.LaporanProgress, &data.Status, &data.Lampiran,
-		// &vID, &vKomentar, &vStatus,
+		&data.PenugasanID, &data.LaporanProgress, &data.Status, &data.Lampiran,
 		&data.CreatedAt, &data.UpdatedAt,
 	)
 	// if vID.Valid || vKomentar.Valid || vStatus.Valid {
@@ -178,7 +158,7 @@ func GetAllByProgrammer(userID string) ([]LaporanFullResponse, error) {
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			u.id, u.username, u.full_name, u.profile_picture,
-			l.laporan_progress, l.status, l.lampiran,
+			l.penugasan_id, l.laporan_progress, l.status, l.lampiran,
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
 		LEFT JOIN permintaan p ON l.permintaan_id = p.id
@@ -203,7 +183,7 @@ func GetAllByProgrammer(userID string) ([]LaporanFullResponse, error) {
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
 			&data.Permintaan.TanggalPesanan, &data.Permintaan.TanggalDeadline, &data.Permintaan.Lampiran,
 			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
-			&data.LaporanProgress, &data.Status, &data.Lampiran,
+			&data.PenugasanID, &data.LaporanProgress, &data.Status, &data.Lampiran,
 			&data.CreatedAt, &data.UpdatedAt,
 		)
 		if err != nil {
@@ -217,15 +197,11 @@ func GetAllByProgrammer(userID string) ([]LaporanFullResponse, error) {
 	}
 
 	ids := make([]string, len(laporan))
-		for i, l := range laporan {
-			ids[i] = l.ID
-		}
+	for i, l := range laporan {
+		ids[i] = l.ID
+	}
 
 	if len(laporan) > 0 {
-		ids := make([]string, len(laporan))
-		for i, l := range laporan {
-			ids[i] = l.ID
-		}
 		verifikasiMap, err := getVerifikasiByLaporanIDs(ids)
 		if err != nil {
 			return nil, err
@@ -482,8 +458,8 @@ func GetKomentarById(id string) (KomentarResponse, error) {
 
 func Create(data *Laporan) error {
 	query := `
-		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, laporan_progress, status, lampiran)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, penugasan_id, laporan_progress, status, lampiran)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at
 	`
 
@@ -491,6 +467,7 @@ func Create(data *Laporan) error {
 		query,
 		data.PermintaanID,
 		data.ProgrammerID,
+		data.PenugasanID,
 		data.LaporanProgress,
 		data.Status,
 		data.Lampiran,
@@ -571,13 +548,14 @@ func CreateKomentar(data *KomentarLaporan) error {
 func Update(id string, data *Laporan) error {
 	query := `
 		UPDATE laporan_kinerja
-		SET permintaan_id = $1,
-			programmer_id = $2,
-			laporan_progress = $3,
-			status           = $4,
-			lampiran         = $5,
-		    updated_at = NOW()
-		WHERE id = $6
+		SET permintaan_id    = $1,
+			programmer_id    = $2,
+			penugasan_id     = $3,
+			laporan_progress = $4,
+			status           = $5,
+			lampiran         = $6,
+			updated_at       = NOW()
+		WHERE id = $7
 		RETURNING updated_at
 	`
 
@@ -585,6 +563,7 @@ func Update(id string, data *Laporan) error {
 		query,
 		data.PermintaanID,
 		data.ProgrammerID,
+		data.PenugasanID,
 		data.LaporanProgress,
 		data.Status,
 		data.Lampiran,

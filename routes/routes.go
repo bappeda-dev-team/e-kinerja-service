@@ -3,6 +3,7 @@ package routes
 import (
 	"aplikasi-internal/internal/all_activity"
 	"aplikasi-internal/internal/distribusi"
+	"aplikasi-internal/internal/penugasan"
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/laporan"
 	"aplikasi-internal/internal/master_aplikasi"
@@ -142,6 +143,18 @@ func SetupRoutes(r *echo.Echo) {
 	aa.Use(middle_ware.JWTMiddleware)
 	aa.Use(middle_ware.RoleMiddleware("super_admin", "admin"))
 	aa.GET("", all_activity.GetAllActivity)
+
+	png := r.Group("/penugasan")
+	png.Use(middle_ware.JWTMiddleware)
+	png.Use(middle_ware.RoleMiddleware("admin", "programmer"))
+
+	png.GET("", penugasan.GetAllPenugasan)
+	png.GET("/:id", penugasan.GetPenugasanByID)
+	png.POST("", penugasan.CreatePenugasan)
+	png.PUT("/:id", penugasan.UpdatePenugasan)
+	png.PATCH("/:id/status", penugasan.UpdateStatusPenugasan)
+	png.PATCH("/:id/reassign", penugasan.ReassignPenugasan)
+	png.DELETE("/:id", penugasan.DeletePenugasan)
 
 	pn := r.Group("/penilaian")
 	pn.Use(middle_ware.JWTMiddleware)

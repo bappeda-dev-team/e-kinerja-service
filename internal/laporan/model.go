@@ -92,14 +92,15 @@ func splitPGArray(s string) []string {
 }
 
 type Laporan struct {
-	ID              string    `json:"id"`
-	PermintaanID    string    `json:"permintaan_id"`
-	ProgrammerID    string    `json:"programmer_id"`
-	LaporanProgress string    `json:"laporan_progress"`
-	Status          string    `json:"status"`
-	Lampiran        StringArray    `json:"lampiran"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	ID              string      `json:"id"`
+	PermintaanID    string      `json:"permintaan_id"`
+	ProgrammerID    string      `json:"programmer_id"`
+	PenugasanID     *string     `json:"penugasan_id"`
+	LaporanProgress string      `json:"laporan_progress"`
+	Status          string      `json:"status"`
+	Lampiran        StringArray `json:"lampiran"`
+	CreatedAt       time.Time   `json:"created_at"`
+	UpdatedAt       time.Time   `json:"updated_at"`
 }
 
 type Verifikasi struct {
