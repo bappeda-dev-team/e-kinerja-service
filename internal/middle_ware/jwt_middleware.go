@@ -31,7 +31,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			tokenString,
 			&helpers.JwtCustomClaims{},
 			func(token *jwt.Token) (interface{}, error) {
-				return helpers.SECRET_KEY, nil
+				return helpers.GetSecretKey(), nil
 			},
 		)
 

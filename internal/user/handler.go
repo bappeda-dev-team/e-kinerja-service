@@ -30,16 +30,14 @@ func Login(c echo.Context) error {
 				helpers.FormatValidationError(err)))
 	}
 
-	token, err := LoginService(req)
+	loginResp, err := LoginService(req)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized,
 			helpers.ErrorResponse(401, err.Error(), nil))
 	}
 
 	return c.JSON(http.StatusOK,
-		helpers.SuccessResponse(200, "login berhasil", map[string]string{
-			"token": token,
-		}))
+		helpers.SuccessResponse(200, "login berhasil", loginResp))
 }
 
 func GetAllUser(c echo.Context) error {

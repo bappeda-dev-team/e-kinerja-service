@@ -2,7 +2,9 @@ package user
 
 import (
 	"aplikasi-internal/internal/helpers"
+	refreshtoken "aplikasi-internal/internal/refresh_token"
 	"errors"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -123,15 +125,15 @@ func UpdateProfilePictureService(id string, pictureURL string) error {
 	return UpdateProfilePicture(id, pictureURL)
 }
 
-func LoginService(req LoginRequest) (string, error) {
+func LoginService(req LoginRequest) (*LoginResponse, error) {
 
 	user, err := GetUserByUsername(req.Username)
 	if err != nil {
-		return "", errors.New("username tidak ditemukan")
+		return nil, errors.New("username tidak ditemukan")
 	}
 
 	if !user.IsActive {
-		return "", errors.New("user tidak aktif")
+		return nil, errors.New("user tidak aktif")
 	}
 
 	err = bcrypt.CompareHashAndPassword(
@@ -140,21 +142,32 @@ func LoginService(req LoginRequest) (string, error) {
 	)
 
 	if err != nil {
-		return "", errors.New("password salah")
+		return nil, errors.New("password salah")
 	}
 
-	token, err := helpers.GenerateToken(
+	accessToken, err := helpers.GenerateToken(
 		user.ID,
 		user.Username,
 		user.RoleID,
 		user.RoleName,
 	)
-
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	rawRefresh, err := helpers.GenerateRefreshToken()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := refreshtoken.Save(user.ID, rawRefresh, time.Now().Add(7*24*time.Hour)); err != nil {
+		return nil, err
+	}
+
+	return &LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: rawRefresh,
+	}, nil
 }
 
 func DeactivateUserService(id string) error {

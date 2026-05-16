@@ -1,10 +1,20 @@
 package helpers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
+
+func GetSecretKey() []byte {
+	if key := os.Getenv("JWT_SECRET"); key != "" {
+		return []byte(key)
+	}
+	return []byte("secret-key")
+}
 
 var SECRET_KEY = []byte("secret-key")
 
@@ -24,11 +34,19 @@ func GenerateToken(userID string, username string, roleID string, roleName strin
 		RoleID:   roleID,
 		RoleName: roleName,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString(SECRET_KEY)
+	return token.SignedString(GetSecretKey())
+}
+
+func GenerateRefreshToken() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }

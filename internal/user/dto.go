@@ -26,6 +26,11 @@ type UpdateUserRequest struct {
 
 // === Response ===
 
+type LoginResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 type RoleResponse struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`

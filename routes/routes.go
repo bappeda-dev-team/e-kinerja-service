@@ -9,7 +9,9 @@ import (
 	"aplikasi-internal/internal/master_pemda"
 	"aplikasi-internal/internal/middle_ware"
 	"aplikasi-internal/internal/pelaksana"
+	"aplikasi-internal/internal/penilaian"
 	"aplikasi-internal/internal/permintaan"
+	refreshtoken "aplikasi-internal/internal/refresh_token"
 	"aplikasi-internal/internal/roles"
 	"aplikasi-internal/internal/superadmin_dashboard"
 	"aplikasi-internal/internal/user"
@@ -35,7 +37,8 @@ func SetupRoutes(r *echo.Echo) {
 
 	auth := r.Group("/auth")
 	auth.POST("/login", user.Login)
-	auth.POST("/logout", user.Logout, middle_ware.JWTMiddleware)
+	auth.POST("/refresh", refreshtoken.RefreshTokenHandler)
+	auth.POST("/logout", refreshtoken.LogoutHandler, middle_ware.JWTMiddleware)
 
 	r.GET("/users", user.GetAllUser)
 	r.GET("/users/:id", user.GetUserID)
@@ -139,4 +142,13 @@ func SetupRoutes(r *echo.Echo) {
 	aa.Use(middle_ware.JWTMiddleware)
 	aa.Use(middle_ware.RoleMiddleware("super_admin", "admin"))
 	aa.GET("", all_activity.GetAllActivity)
+
+	pn := r.Group("/penilaian")
+	pn.Use(middle_ware.JWTMiddleware)
+	pn.Use(middle_ware.RoleMiddleware("admin"))
+
+	pn.GET("", penilaian.GetAllPenilaian)
+	pn.GET("/:distribusi_id", penilaian.GetPenilaianByDistribusi)
+	pn.POST("", penilaian.CreatePenilaian)
+	pn.PATCH("/:id", penilaian.UpdatePenilaian)
 }
