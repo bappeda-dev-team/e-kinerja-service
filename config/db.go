@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -28,6 +29,11 @@ func ConnectDB() {
 	if err != nil {
 		log.Fatal("Gagal konek DB:", err)
 	}
+
+	DB.SetMaxOpenConns(25)
+	DB.SetMaxIdleConns(5)
+	DB.SetConnMaxLifetime(5 * time.Minute)
+	DB.SetConnMaxIdleTime(2 * time.Minute)
 
 	err = DB.Ping()
 	if err != nil {

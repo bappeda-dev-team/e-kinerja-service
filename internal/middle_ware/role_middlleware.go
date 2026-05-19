@@ -14,7 +14,7 @@ func RoleMiddleware(allowedRoles ...string) echo.MiddlewareFunc {
 			roleInterface := c.Get("name")
 
 			if roleInterface == nil {
-				return exception.Unauthentication("role tidak ditemukan")
+				return exception.Unauthorized("role tidak ditemukan")
 				// return c.JSON(http.StatusUnauthorized, "role tidak ditemukan")
 			}
 

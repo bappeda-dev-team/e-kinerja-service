@@ -37,6 +37,7 @@ func SetupRoutes(r *echo.Echo) {
 	r.DELETE("/roles/:id", roles.DeleteRole, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 
 	auth := r.Group("/auth")
+	auth.Use(middle_ware.AuthRateLimiter)
 	auth.POST("/login", user.Login)
 	auth.POST("/refresh", refreshtoken.RefreshTokenHandler)
 	auth.POST("/logout", refreshtoken.LogoutHandler, middle_ware.JWTMiddleware)

@@ -48,7 +48,7 @@ func GetLaporan(c echo.Context) error {
 
 	roleInterface := c.Get("name")
 	if roleInterface == nil {
-		return exception.Unauthentication("role tidak ditemukan")
+		return exception.Unauthorized("role tidak ditemukan")
 	}
 
 	roleName := roleInterface.(string)

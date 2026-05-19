@@ -34,15 +34,17 @@ func GetAllPenugasan(c echo.Context) error {
 	roleInterface := c.Get("name")
 
 	if userIDInterface == nil || roleInterface == nil {
-		return exception.Unauthentication("user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)
 	roleName := roleInterface.(string)
 
 	var programmerID string
-	if roleName == "programmer" && pelaksanaID == "" && distribusiID == "" {
+	if roleName == "programmer" {
 		programmerID = userID
+		pelaksanaID = ""
+		distribusiID = ""
 	}
 
 	result, err := GetAllService(pelaksanaID, distribusiID, programmerID)

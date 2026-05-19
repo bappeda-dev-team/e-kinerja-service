@@ -176,7 +176,7 @@ func DeletePelaksana(c echo.Context) error {
 func MarkAllReadPelaksana(c echo.Context) error {
 	userIDInterface := c.Get("user_id")
 	if userIDInterface == nil {
-		return exception.Unauthentication("user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)

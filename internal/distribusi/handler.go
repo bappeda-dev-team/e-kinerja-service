@@ -37,7 +37,15 @@ func handleDBError(err error) error {
 // @Failure 500 {object} helpers.APIResponse
 // @Router /distribusi [get]
 func GetDistribusi(c echo.Context) error {
-	result, err := GetDistribusiDetailServices()
+	sort := c.QueryParam("sort")
+	if sort == "" {
+		sort = "newest"
+	}
+	if sort != "newest" && sort != "deadline" {
+		return exception.BadRequest("sort tidak valid, gunakan: newest, deadline")
+	}
+
+	result, err := GetDistribusiDetailServices(sort)
 	if err != nil {
 		return err
 	}

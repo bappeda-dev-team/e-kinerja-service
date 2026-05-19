@@ -7,24 +7,34 @@ import (
 	"strings"
 )
 
-func GetAll() ([]DistribusiFullResponse, error) {
-	rows, err := config.DB.Query(`
-		SELECT DISTINCT ON (d.id)
-			d.id,
-			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
-			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
-			u.id, u.username, u.full_name, u.profile_picture,
-			v.id, v.status_verified, v.komentar, 
-			d.created_at, d.updated_at
-		FROM distribusi d
-		LEFT JOIN permintaan p ON d.permintaan_id = p.id
-		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
-		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
-		LEFT JOIN users u ON d.admin_id = u.id
-		LEFT JOIN laporan_kinerja l ON p.id = l.permintaan_id
-		LEFT JOIN verifikasi v ON l.id = v.laporan_id
-		ORDER BY d.id, v.updated_at DESC NULLS LAST
-	`)
+func GetAll(sort string) ([]DistribusiFullResponse, error) {
+	orderBy := "sub.created_at DESC"
+	if sort == "deadline" {
+		orderBy = "sub.tanggal_deadline ASC"
+	}
+
+	query := fmt.Sprintf(`
+		SELECT * FROM (
+			SELECT DISTINCT ON (d.id)
+				d.id,
+				p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+				p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
+				u.id, u.username, u.full_name, u.profile_picture,
+				v.id, v.status_verified, v.komentar,
+				d.created_at, d.updated_at
+			FROM distribusi d
+			LEFT JOIN permintaan p ON d.permintaan_id = p.id
+			LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+			LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+			LEFT JOIN users u ON d.admin_id = u.id
+			LEFT JOIN laporan_kinerja l ON p.id = l.permintaan_id
+			LEFT JOIN verifikasi v ON l.id = v.laporan_id
+			ORDER BY d.id, v.updated_at DESC NULLS LAST
+		) sub
+		ORDER BY %s
+	`, orderBy)
+
+	rows, err := config.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}

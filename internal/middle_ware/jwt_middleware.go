@@ -15,7 +15,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		authHeader := c.Request().Header.Get("Authorization")
 
 		if authHeader == "" {
-			return exception.Unauthentication("token tidak ada")
+			return exception.Unauthorized("token tidak ada")
 			// return c.JSON(http.StatusUnauthorized, "token tidak ada")
 		}
 

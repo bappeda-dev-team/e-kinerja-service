@@ -11,38 +11,25 @@ import (
 // === Request ===
 
 type DistribusiRequest struct {
-	PermintaanID  string   `json:"permintaan_id" validate:"required,uuid4"`
-	Komentar      string   `json:"komentar"`
-	ProgrammerIDs []string `json:"programmer_ids"`
-	Pelaksana     []string `json:"pelaksana"`
+	PermintaanID string   `json:"permintaan_id" validate:"required,uuid4"`
+	Komentar     string   `json:"komentar"`
+	Pelaksana    []string `json:"pelaksana"`
 }
 
 type KomentarDistribusiRequest struct {
-	Komentars      string   `json:"komentars"`
+	Komentars string `json:"komentars"`
 }
 
-func (r *DistribusiRequest) NormalizePelaksana() {
-	ids := r.ProgrammerIDs
-	if len(r.Pelaksana) > 0 {
-		ids = r.Pelaksana
-	}
-
-	if len(ids) == 0 {
-		return
-	}
-
-	r.ProgrammerIDs = append([]string(nil), ids...)
-	r.Pelaksana = append([]string(nil), ids...)
-}
+func (r *DistribusiRequest) NormalizePelaksana() {}
 
 func (r DistribusiRequest) ValidatePelaksana() error {
-	if len(r.ProgrammerIDs) == 0 {
-		return errors.New("pelaksana atau programmer_ids harus diisi")
+	if len(r.Pelaksana) == 0 {
+		return errors.New("pelaksana harus diisi")
 	}
 
-	for _, programmerID := range r.ProgrammerIDs {
+	for _, programmerID := range r.Pelaksana {
 		if _, err := uuid.Parse(programmerID); err != nil {
-			return errors.New("pelaksana atau programmer_ids harus berupa daftar UUID yang valid")
+			return errors.New("pelaksana harus berupa daftar UUID yang valid")
 		}
 	}
 

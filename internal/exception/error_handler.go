@@ -37,9 +37,8 @@ func InvalidInput(msg string) *baseException { return &baseException{http.Status
 func Validation(msg string) *baseException   { return &baseException{http.StatusBadRequest, msg} }
 
 // 401
-func Unauthentication(msg string) *baseException { return &baseException{http.StatusUnauthorized, msg} }
-func InvalidToken(msg string) *baseException     { return &baseException{http.StatusUnauthorized, msg} }
-func Unauthorized(msg string) *baseException     { return &baseException{http.StatusUnauthorized, msg} }
+func InvalidToken(msg string) *baseException { return &baseException{http.StatusUnauthorized, msg} }
+func Unauthorized(msg string) *baseException { return &baseException{http.StatusUnauthorized, msg} }
 
 // 403
 func Forbidden(msg string) *baseException    { return &baseException{http.StatusForbidden, msg} }

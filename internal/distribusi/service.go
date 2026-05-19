@@ -1,7 +1,7 @@
 package distribusi
 
-func GetDistribusiDetailServices() ([]DistribusiFullResponse, error) {
-	return GetAll()
+func GetDistribusiDetailServices(sort string) ([]DistribusiFullResponse, error) {
+	return GetAll(sort)
 }
 
 func GetDistribusiDetailServicesID(id string) (DistribusiFullResponse, error) {
@@ -19,7 +19,7 @@ func CreateDistribusiServices(permintaanID string, adminID string, req Distribus
 		return nil, err
 	}
 
-	if err := InsertPelaksana(data.ID, req.ProgrammerIDs); err != nil {
+	if err := InsertPelaksana(data.ID, req.Pelaksana); err != nil {
 		return nil, err
 	}
 
@@ -63,7 +63,7 @@ func UpdateDistribusiServices(id string, permintaanID string, adminID string, re
 		return nil, err
 	}
 
-	if err := ReplacePelaksana(id, req.ProgrammerIDs); err != nil {
+	if err := ReplacePelaksana(id, req.Pelaksana); err != nil {
 		return nil, err
 	}
 
