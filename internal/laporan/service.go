@@ -39,19 +39,27 @@ func CreateLaporanServices(permintaanID string, userID string, req LaporanReques
 		Lampiran:        lampiran,
 	}
 
-	err := Create(data)
+	tx, err := beginTx()
 	if err != nil {
 		return nil, err
 	}
+	defer tx.Rollback()
+
+	if err := createTx(tx, data); err != nil {
+		return nil, err
+	}
+
 	datahis := &History{
 		LaporanID:    data.ID,
 		ProgrammerID: userID,
 		OldStatus:    data.Status,
 		OldProgress:  data.LaporanProgress,
 	}
+	if err := createHistoryTx(tx, datahis); err != nil {
+		return nil, err
+	}
 
-	err = CreateHistory(datahis)
-	if err != nil {
+	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 
@@ -119,14 +127,18 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 		Lampiran:        lampiran,
 	}
 
-	err = Update(id, data)
+	tx, err := beginTx()
 	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	if err := updateTx(tx, id, data); err != nil {
 		return nil, err
 	}
 
 	if req.VerifikasiID != "" && req.StatusVerified != "" {
-		err = UpdateStatusVerified(req.VerifikasiID, req.StatusVerified, req.IsSubmittedToVerified)
-		if err != nil {
+		if err := updateStatusVerifiedTx(tx, req.VerifikasiID, req.StatusVerified, req.IsSubmittedToVerified); err != nil {
 			return nil, err
 		}
 	}
@@ -139,9 +151,11 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 		OldProgress:  existing.LaporanProgress,
 		NewProgress:  data.LaporanProgress,
 	}
+	if err := createHistoryTx(tx, datahis); err != nil {
+		return nil, err
+	}
 
-	err = CreateHistory(datahis)
-	if err != nil {
+	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 

@@ -3,7 +3,9 @@ package storage
 import (
 	"context"
 	"fmt"
+	"io"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,6 +26,35 @@ const (
 	FolderProfilePic = "users/profile"
 	FolderLampiran   = "permintaan/lampiran"
 )
+
+// allowedMIME maps each folder to the set of permitted content types.
+var allowedMIME = map[string]map[string]bool{
+	FolderPemda:      {"image/jpeg": true, "image/png": true, "image/webp": true},
+	FolderAplikasi:   {"image/jpeg": true, "image/png": true, "image/webp": true},
+	FolderProfilePic: {"image/jpeg": true, "image/png": true, "image/webp": true},
+	FolderLampiran:   {"image/jpeg": true, "image/png": true, "image/webp": true, "application/pdf": true},
+}
+
+func detectAndValidateMIME(file multipart.File, folder string) (string, error) {
+	buf := make([]byte, 512)
+	n, err := io.ReadFull(file, buf)
+	if err != nil && err != io.ErrUnexpectedEOF {
+		return "", fmt.Errorf("gagal membaca file: %w", err)
+	}
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		return "", fmt.Errorf("gagal reset file: %w", err)
+	}
+
+	mime := http.DetectContentType(buf[:n])
+	// DetectContentType may append "; charset=..." — strip it.
+	mime = strings.SplitN(mime, ";", 2)[0]
+
+	allowed, ok := allowedMIME[folder]
+	if !ok || !allowed[mime] {
+		return "", fmt.Errorf("tipe file tidak diizinkan: %s", mime)
+	}
+	return mime, nil
+}
 
 var (
 	s3Client      *s3.Client
@@ -62,14 +93,19 @@ func Init() error {
 // UploadFile mengupload file ke S3 dan mengembalikan public URL.
 // Gunakan konstanta Folder* sebagai argumen folder.
 func UploadFile(file multipart.File, header *multipart.FileHeader, folder string) (string, error) {
+	mime, err := detectAndValidateMIME(file, folder)
+	if err != nil {
+		return "", err
+	}
+
 	ext := strings.ToLower(filepath.Ext(header.Filename))
 	key := buildKey(folder, ext)
 
-	_, err := s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+	_, err = s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(bucketName),
 		Key:         aws.String(key),
 		Body:        file,
-		ContentType: aws.String(header.Header.Get("Content-Type")),
+		ContentType: aws.String(mime),
 	})
 	if err != nil {
 		return "", fmt.Errorf("gagal upload ke S3: %w", err)

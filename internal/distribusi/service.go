@@ -15,11 +15,19 @@ func CreateDistribusiServices(permintaanID string, adminID string, req Distribus
 		Komentar:     req.Komentar,
 	}
 
-	if err := Create(data); err != nil {
+	tx, err := beginTx()
+	if err != nil {
 		return nil, err
 	}
+	defer tx.Rollback()
 
-	if err := InsertPelaksana(data.ID, req.Pelaksana); err != nil {
+	if err := createTx(tx, data); err != nil {
+		return nil, err
+	}
+	if err := insertPelaksanaTx(tx, data.ID, req.Pelaksana); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 
@@ -59,11 +67,19 @@ func UpdateDistribusiServices(id string, permintaanID string, adminID string, re
 		Komentar:     req.Komentar,
 	}
 
-	if err := Update(id, data); err != nil {
+	tx, err := beginTx()
+	if err != nil {
 		return nil, err
 	}
+	defer tx.Rollback()
 
-	if err := ReplacePelaksana(id, req.Pelaksana); err != nil {
+	if err := updateTx(tx, id, data); err != nil {
+		return nil, err
+	}
+	if err := replacePelaksanaTx(tx, id, req.Pelaksana); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 

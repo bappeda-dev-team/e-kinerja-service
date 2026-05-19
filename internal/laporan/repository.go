@@ -456,50 +456,40 @@ func GetKomentarById(id string) (KomentarResponse, error) {
 	return data, err
 }
 
+type dbQueryRower interface {
+	QueryRow(query string, args ...interface{}) *sql.Row
+}
+
+type dbExecer interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
 func Create(data *Laporan) error {
-	query := `
+	return createTx(config.DB, data)
+}
+
+func createTx(db dbQueryRower, data *Laporan) error {
+	return db.QueryRow(`
 		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, penugasan_id, laporan_progress, status, lampiran)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at
-	`
-
-	err := config.DB.QueryRow(
-		query,
-		data.PermintaanID,
-		data.ProgrammerID,
-		data.PenugasanID,
-		data.LaporanProgress,
-		data.Status,
-		data.Lampiran,
-	).Scan(
-		&data.ID,
-		&data.CreatedAt,
-		&data.UpdatedAt,
+	`, data.PermintaanID, data.ProgrammerID, data.PenugasanID, data.LaporanProgress, data.Status, data.Lampiran).Scan(
+		&data.ID, &data.CreatedAt, &data.UpdatedAt,
 	)
-
-	return err
 }
+
 func CreateHistory(data *History) error {
-	query := `
+	return createHistoryTx(config.DB, data)
+}
+
+func createHistoryTx(db dbQueryRower, data *History) error {
+	return db.QueryRow(`
 		INSERT INTO progress_history (laporan_id, programmer_id, old_status, new_status, old_progress, new_progress)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at
-	`
-
-	err := config.DB.QueryRow(
-		query,
-		data.LaporanID,
-		data.ProgrammerID,
-		data.OldStatus,
-		data.NewStatus,
-		data.OldProgress,
-		data.NewProgress,
-	).Scan(
-		&data.ID,
-		&data.CreatedAt,
+	`, data.LaporanID, data.ProgrammerID, data.OldStatus, data.NewStatus, data.OldProgress, data.NewProgress).Scan(
+		&data.ID, &data.CreatedAt,
 	)
-
-	return err
 }
 
 func CreateVerifikasi(data *Verifikasi) error {
@@ -546,7 +536,11 @@ func CreateKomentar(data *KomentarLaporan) error {
 }
 
 func Update(id string, data *Laporan) error {
-	query := `
+	return updateTx(config.DB, id, data)
+}
+
+func updateTx(db dbQueryRower, id string, data *Laporan) error {
+	return db.QueryRow(`
 		UPDATE laporan_kinerja
 		SET permintaan_id    = $1,
 			programmer_id    = $2,
@@ -557,20 +551,7 @@ func Update(id string, data *Laporan) error {
 			updated_at       = NOW()
 		WHERE id = $7
 		RETURNING updated_at
-	`
-
-	err := config.DB.QueryRow(
-		query,
-		data.PermintaanID,
-		data.ProgrammerID,
-		data.PenugasanID,
-		data.LaporanProgress,
-		data.Status,
-		data.Lampiran,
-		id,
-	).Scan(&data.UpdatedAt)
-
-	return err
+	`, data.PermintaanID, data.ProgrammerID, data.PenugasanID, data.LaporanProgress, data.Status, data.Lampiran, id).Scan(&data.UpdatedAt)
 }
 
 func UpdateLampiran(id string, lampiran StringArray) error {
@@ -589,16 +570,22 @@ func UpdateLampiran(id string, lampiran StringArray) error {
 }
 
 func UpdateStatusVerified(id string, status string, isSubmitted bool) error {
-	query := `
+	return updateStatusVerifiedTx(config.DB, id, status, isSubmitted)
+}
+
+func updateStatusVerifiedTx(db dbExecer, id string, status string, isSubmitted bool) error {
+	_, err := db.Exec(`
 		UPDATE verifikasi
 		SET status_verified = $1,
 			is_submitted_to_verified = $2,
 		    updated_at = NOW()
 		WHERE id = $3
-	`
-
-	_, err := config.DB.Exec(query, status, isSubmitted, id)
+	`, status, isSubmitted, id)
 	return err
+}
+
+func beginTx() (*sql.Tx, error) {
+	return config.DB.Begin()
 }
 
 

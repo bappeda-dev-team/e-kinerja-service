@@ -329,8 +329,20 @@ func GetByIdDetail(id string) (DistribusiDetailResponse, error) {
 }
 
 func InsertPelaksana(distribusiID string, programmerIDs []string) error {
+	return insertPelaksanaTx(config.DB, distribusiID, programmerIDs)
+}
+
+func ReplacePelaksana(distribusiID string, programmerIDs []string) error {
+	return replacePelaksanaTx(config.DB, distribusiID, programmerIDs)
+}
+
+type dbExecer interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
+func insertPelaksanaTx(db dbExecer, distribusiID string, programmerIDs []string) error {
 	for _, programmerID := range programmerIDs {
-		_, err := config.DB.Exec(`
+		_, err := db.Exec(`
 			INSERT INTO distribusi_pelaksana (distribusi_id, programmer_id, is_read)
 			VALUES ($1, $2, $3)
 			ON CONFLICT (distribusi_id, programmer_id) DO NOTHING
@@ -342,12 +354,16 @@ func InsertPelaksana(distribusiID string, programmerIDs []string) error {
 	return nil
 }
 
-func ReplacePelaksana(distribusiID string, programmerIDs []string) error {
-	_, err := config.DB.Exec(`DELETE FROM distribusi_pelaksana WHERE distribusi_id = $1`, distribusiID)
+func replacePelaksanaTx(db dbExecer, distribusiID string, programmerIDs []string) error {
+	_, err := db.Exec(`DELETE FROM distribusi_pelaksana WHERE distribusi_id = $1`, distribusiID)
 	if err != nil {
 		return err
 	}
-	return InsertPelaksana(distribusiID, programmerIDs)
+	return insertPelaksanaTx(db, distribusiID, programmerIDs)
+}
+
+func beginTx() (*sql.Tx, error) {
+	return config.DB.Begin()
 }
 
 func GetKomentarById(id string) (KomentarResponse, error) {
@@ -370,25 +386,22 @@ func GetKomentarById(id string) (KomentarResponse, error) {
 	return data, err
 }
 
+type dbQueryRower interface {
+	QueryRow(query string, args ...interface{}) *sql.Row
+}
+
 func Create(data *Distribusi) error {
-	query := `
+	return createTx(config.DB, data)
+}
+
+func createTx(db dbQueryRower, data *Distribusi) error {
+	return db.QueryRow(`
 		INSERT INTO distribusi (permintaan_id, admin_id, komentar)
 		VALUES ($1, $2, $3)
 		RETURNING id, created_at, updated_at
-	`
-
-	err := config.DB.QueryRow(
-		query,
-		data.PermintaanID,
-		data.AdminID,
-		data.Komentar,
-	).Scan(
-		&data.ID,
-		&data.CreatedAt,
-		&data.UpdatedAt,
+	`, data.PermintaanID, data.AdminID, data.Komentar).Scan(
+		&data.ID, &data.CreatedAt, &data.UpdatedAt,
 	)
-
-	return err
 }
 func CreateKomentar(data *KomentarDistribusi) error {
 	query := `
@@ -413,7 +426,11 @@ func CreateKomentar(data *KomentarDistribusi) error {
 }
 
 func Update(id string, data *Distribusi) error {
-	query := `
+	return updateTx(config.DB, id, data)
+}
+
+func updateTx(db dbQueryRower, id string, data *Distribusi) error {
+	return db.QueryRow(`
 		UPDATE distribusi
 		SET permintaan_id = $1,
 			admin_id = $2,
@@ -421,17 +438,7 @@ func Update(id string, data *Distribusi) error {
 		    updated_at = NOW()
 		WHERE id = $4
 		RETURNING updated_at
-	`
-
-	err := config.DB.QueryRow(
-		query,
-		data.PermintaanID,
-		data.AdminID,
-		data.Komentar,
-		id,
-	).Scan(&data.UpdatedAt)
-
-	return err
+	`, data.PermintaanID, data.AdminID, data.Komentar, id).Scan(&data.UpdatedAt)
 }
 
 func Delete(id string) error {

@@ -44,6 +44,7 @@ func main() {
 		Validator: validator.New(),
 	}
 
+	e.Use(middleware.Secure())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{
