@@ -68,6 +68,20 @@ func GetUserID(c echo.Context) error {
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+func GetMe(c echo.Context) error {
+	userIDInterface := c.Get("user_id")
+	if userIDInterface == nil {
+		return exception.Unauthorized("user tidak ditemukan di token")
+	}
+
+	result, err := GetUserServicesID(userIDInterface.(string))
+	if err != nil {
+		return handleDBError(err)
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
+}
+
 func Create(c echo.Context) error {
 	var req RegisterRequest
 

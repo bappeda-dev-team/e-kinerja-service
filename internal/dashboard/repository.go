@@ -436,16 +436,12 @@ func scanActivities(rows interface {
 
 func fetchActivitiesSuperAdmin() ([]ActivityItem, error) {
 	rows, err := config.DB.Query(`
-		SELECT activity_type, activity_id, ref_id,
-			actor_id, actor_username, actor_full_name, actor_profile_picture,
-			pemda_name, aplikasi_name, menu,
-			status, komentar, created_at, updated_at
-		FROM (
+		SELECT * FROM (
 
-			SELECT 'permintaan' AS activity_type, p.id AS activity_id, p.id AS ref_id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
-				COALESCE(mp.name,''), COALESCE(ma.name,''), p.menu,
-				p.status, '' AS komentar, p.created_at, p.updated_at
+			SELECT 'permintaan' AS activity_type, p.id::text AS activity_id, p.id::text AS ref_id,
+				COALESCE(u.id::text,'') AS actor_id, COALESCE(u.username,'') AS actor_username, COALESCE(u.full_name,'') AS actor_full_name, COALESCE(u.profile_picture,'') AS actor_profile_picture,
+				COALESCE(mp.name,'') AS pemda_name, COALESCE(ma.name,'') AS aplikasi_name, p.menu AS menu,
+				p.status::text AS status, '' AS komentar, p.created_at, p.updated_at
 			FROM permintaan p
 			LEFT JOIN users u ON p.created_by = u.id
 			LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
@@ -453,8 +449,8 @@ func fetchActivitiesSuperAdmin() ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'distribusi', d.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'distribusi', d.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
 				'', COALESCE(d.komentar,''), d.created_at, d.updated_at
 			FROM distribusi d
@@ -465,8 +461,8 @@ func fetchActivitiesSuperAdmin() ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'pelaksana', dp.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'pelaksana', dp.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
 				'', '', dp.created_at, dp.updated_at
 			FROM distribusi_pelaksana dp
@@ -478,10 +474,10 @@ func fetchActivitiesSuperAdmin() ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'penugasan', pg.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'penugasan', pg.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				pg.status, COALESCE(pg.judul,''), pg.created_at, pg.updated_at
+				pg.status::text, COALESCE(pg.judul,''), pg.created_at, pg.updated_at
 			FROM penugasan pg
 			LEFT JOIN distribusi_pelaksana dp ON pg.distribusi_pelaksana_id = dp.id
 			LEFT JOIN distribusi d ON dp.distribusi_id = d.id
@@ -492,10 +488,10 @@ func fetchActivitiesSuperAdmin() ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'laporan', l.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'laporan', l.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				l.status, COALESCE(l.laporan_progress,''), l.created_at, l.updated_at
+				l.status::text, COALESCE(l.laporan_progress,''), l.created_at, l.updated_at
 			FROM laporan_kinerja l
 			LEFT JOIN permintaan p ON l.permintaan_id = p.id
 			LEFT JOIN users u ON l.programmer_id = u.id
@@ -504,10 +500,10 @@ func fetchActivitiesSuperAdmin() ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'verifikasi', v.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'verifikasi', v.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				v.status_verified, COALESCE(v.komentar,''), v.created_at, v.updated_at
+				v.status_verified::text, COALESCE(v.komentar,''), v.created_at, v.updated_at
 			FROM verifikasi v
 			LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
 			LEFT JOIN permintaan p ON l.permintaan_id = p.id
@@ -517,8 +513,8 @@ func fetchActivitiesSuperAdmin() ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'komentar_distribusi', kd.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'komentar_distribusi', kd.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
 				'', COALESCE(kd.komentars,''), kd.created_at, kd.updated_at
 			FROM komentar_distribusi kd
@@ -530,8 +526,8 @@ func fetchActivitiesSuperAdmin() ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'komentar_laporan', kl.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'komentar_laporan', kl.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
 				'', COALESCE(kl.komentar,''), kl.created_at, kl.updated_at
 			FROM komentar_laporan kl
@@ -554,16 +550,12 @@ func fetchActivitiesSuperAdmin() ([]ActivityItem, error) {
 
 func fetchActivitiesAdmin(adminID string) ([]ActivityItem, error) {
 	rows, err := config.DB.Query(`
-		SELECT activity_type, activity_id, ref_id,
-			actor_id, actor_username, actor_full_name, actor_profile_picture,
-			pemda_name, aplikasi_name, menu,
-			status, komentar, created_at, updated_at
-		FROM (
+		SELECT * FROM (
 
-			SELECT 'distribusi', d.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
-				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				'', COALESCE(d.komentar,''), d.created_at, d.updated_at
+			SELECT 'distribusi' AS activity_type, d.id::text AS activity_id, p.id::text AS ref_id,
+				COALESCE(u.id::text,'') AS actor_id, COALESCE(u.username,'') AS actor_username, COALESCE(u.full_name,'') AS actor_full_name, COALESCE(u.profile_picture,'') AS actor_profile_picture,
+				COALESCE(mp.name,'') AS pemda_name, COALESCE(ma.name,'') AS aplikasi_name, COALESCE(p.menu,'') AS menu,
+				'' AS status, COALESCE(d.komentar,'') AS komentar, d.created_at, d.updated_at
 			FROM distribusi d
 			LEFT JOIN permintaan p ON d.permintaan_id = p.id
 			LEFT JOIN users u ON d.admin_id = u.id
@@ -573,8 +565,8 @@ func fetchActivitiesAdmin(adminID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'pelaksana', dp.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'pelaksana', dp.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
 				'', '', dp.created_at, dp.updated_at
 			FROM distribusi_pelaksana dp
@@ -587,10 +579,10 @@ func fetchActivitiesAdmin(adminID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'penugasan', pg.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'penugasan', pg.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				pg.status, COALESCE(pg.judul,''), pg.created_at, pg.updated_at
+				pg.status::text, COALESCE(pg.judul,''), pg.created_at, pg.updated_at
 			FROM penugasan pg
 			LEFT JOIN distribusi_pelaksana dp ON pg.distribusi_pelaksana_id = dp.id
 			LEFT JOIN distribusi d ON dp.distribusi_id = d.id
@@ -602,10 +594,10 @@ func fetchActivitiesAdmin(adminID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'laporan', l.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'laporan', l.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				l.status, COALESCE(l.laporan_progress,''), l.created_at, l.updated_at
+				l.status::text, COALESCE(l.laporan_progress,''), l.created_at, l.updated_at
 			FROM laporan_kinerja l
 			LEFT JOIN permintaan p ON l.permintaan_id = p.id
 			LEFT JOIN users u ON l.programmer_id = u.id
@@ -615,10 +607,10 @@ func fetchActivitiesAdmin(adminID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'verifikasi', v.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'verifikasi', v.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				v.status_verified, COALESCE(v.komentar,''), v.created_at, v.updated_at
+				v.status_verified::text, COALESCE(v.komentar,''), v.created_at, v.updated_at
 			FROM verifikasi v
 			LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
 			LEFT JOIN permintaan p ON l.permintaan_id = p.id
@@ -629,8 +621,8 @@ func fetchActivitiesAdmin(adminID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'komentar_distribusi', kd.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'komentar_distribusi', kd.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
 				'', COALESCE(kd.komentars,''), kd.created_at, kd.updated_at
 			FROM komentar_distribusi kd
@@ -643,10 +635,10 @@ func fetchActivitiesAdmin(adminID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'penilaian', pn.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'penilaian', pn.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				pn.ketepatan_waktu, COALESCE(pn.komentar,''), pn.created_at, pn.updated_at
+				pn.ketepatan_waktu::text, COALESCE(pn.komentar,''), pn.created_at, pn.updated_at
 			FROM penilaian pn
 			LEFT JOIN distribusi d ON pn.distribusi_id = d.id
 			LEFT JOIN permintaan p ON d.permintaan_id = p.id
@@ -668,16 +660,12 @@ func fetchActivitiesAdmin(adminID string) ([]ActivityItem, error) {
 
 func fetchActivitiesProgrammer(programmerID string) ([]ActivityItem, error) {
 	rows, err := config.DB.Query(`
-		SELECT activity_type, activity_id, ref_id,
-			actor_id, actor_username, actor_full_name, actor_profile_picture,
-			pemda_name, aplikasi_name, menu,
-			status, komentar, created_at, updated_at
-		FROM (
+		SELECT * FROM (
 
-			SELECT 'pelaksana', dp.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
-				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				'', '', dp.created_at, dp.updated_at
+			SELECT 'pelaksana' AS activity_type, dp.id AS activity_id, p.id AS ref_id,
+				COALESCE(u.id::text,'') AS actor_id, COALESCE(u.username,'') AS actor_username, COALESCE(u.full_name,'') AS actor_full_name, COALESCE(u.profile_picture,'') AS actor_profile_picture,
+				COALESCE(mp.name,'') AS pemda_name, COALESCE(ma.name,'') AS aplikasi_name, COALESCE(p.menu,'') AS menu,
+				'' AS status, '' AS komentar, dp.created_at, dp.updated_at
 			FROM distribusi_pelaksana dp
 			LEFT JOIN distribusi d ON dp.distribusi_id = d.id
 			LEFT JOIN permintaan p ON d.permintaan_id = p.id
@@ -688,10 +676,10 @@ func fetchActivitiesProgrammer(programmerID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'penugasan', pg.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'penugasan', pg.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				pg.status, COALESCE(pg.judul,''), pg.created_at, pg.updated_at
+				pg.status::text, COALESCE(pg.judul,''), pg.created_at, pg.updated_at
 			FROM penugasan pg
 			LEFT JOIN distribusi_pelaksana dp ON pg.distribusi_pelaksana_id = dp.id
 			LEFT JOIN distribusi d ON dp.distribusi_id = d.id
@@ -703,10 +691,10 @@ func fetchActivitiesProgrammer(programmerID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'laporan', l.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'laporan', l.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				l.status, COALESCE(l.laporan_progress,''), l.created_at, l.updated_at
+				l.status::text, COALESCE(l.laporan_progress,''), l.created_at, l.updated_at
 			FROM laporan_kinerja l
 			LEFT JOIN permintaan p ON l.permintaan_id = p.id
 			LEFT JOIN users u ON l.programmer_id = u.id
@@ -716,10 +704,10 @@ func fetchActivitiesProgrammer(programmerID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'verifikasi', v.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'verifikasi', v.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				v.status_verified, COALESCE(v.komentar,''), v.created_at, v.updated_at
+				v.status_verified::text, COALESCE(v.komentar,''), v.created_at, v.updated_at
 			FROM verifikasi v
 			LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
 			LEFT JOIN permintaan p ON l.permintaan_id = p.id
@@ -730,8 +718,8 @@ func fetchActivitiesProgrammer(programmerID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'komentar_laporan', kl.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'komentar_laporan', kl.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
 				'', COALESCE(kl.komentar,''), kl.created_at, kl.updated_at
 			FROM komentar_laporan kl
@@ -755,16 +743,12 @@ func fetchActivitiesProgrammer(programmerID string) ([]ActivityItem, error) {
 
 func fetchActivitiesVerifikator(verifikatorID string) ([]ActivityItem, error) {
 	rows, err := config.DB.Query(`
-		SELECT activity_type, activity_id, ref_id,
-			actor_id, actor_username, actor_full_name, actor_profile_picture,
-			pemda_name, aplikasi_name, menu,
-			status, komentar, created_at, updated_at
-		FROM (
+		SELECT * FROM (
 
-			SELECT 'laporan', l.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
-				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				l.status, COALESCE(l.laporan_progress,''), l.created_at, l.updated_at
+			SELECT 'laporan' AS activity_type, l.id::text AS activity_id, p.id::text AS ref_id,
+				COALESCE(u.id::text,'') AS actor_id, COALESCE(u.username,'') AS actor_username, COALESCE(u.full_name,'') AS actor_full_name, COALESCE(u.profile_picture,'') AS actor_profile_picture,
+				COALESCE(mp.name,'') AS pemda_name, COALESCE(ma.name,'') AS aplikasi_name, COALESCE(p.menu,'') AS menu,
+				l.status::text AS status, COALESCE(l.laporan_progress,'') AS komentar, l.created_at, l.updated_at
 			FROM laporan_kinerja l
 			JOIN verifikasi v ON v.laporan_id = l.id AND v.is_submitted_to_verified = true
 			LEFT JOIN permintaan p ON l.permintaan_id = p.id
@@ -774,10 +758,10 @@ func fetchActivitiesVerifikator(verifikatorID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'verifikasi', v.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'verifikasi', v.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
-				v.status_verified, COALESCE(v.komentar,''), v.created_at, v.updated_at
+				v.status_verified::text, COALESCE(v.komentar,''), v.created_at, v.updated_at
 			FROM verifikasi v
 			LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
 			LEFT JOIN permintaan p ON l.permintaan_id = p.id
@@ -788,8 +772,8 @@ func fetchActivitiesVerifikator(verifikatorID string) ([]ActivityItem, error) {
 
 			UNION ALL
 
-			SELECT 'komentar_laporan', kl.id, p.id,
-				COALESCE(u.id,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
+			SELECT 'komentar_laporan', kl.id::text, p.id::text,
+				COALESCE(u.id::text,''), COALESCE(u.username,''), COALESCE(u.full_name,''), COALESCE(u.profile_picture,''),
 				COALESCE(mp.name,''), COALESCE(ma.name,''), COALESCE(p.menu,''),
 				'', COALESCE(kl.komentar,''), kl.created_at, kl.updated_at
 			FROM komentar_laporan kl

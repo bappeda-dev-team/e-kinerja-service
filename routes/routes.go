@@ -41,6 +41,8 @@ func SetupRoutes(r *echo.Echo) {
 	auth.POST("/refresh", refreshtoken.RefreshTokenHandler)
 	auth.POST("/logout", refreshtoken.LogoutHandler, middle_ware.JWTMiddleware)
 
+	r.GET("/me", user.GetMe, middle_ware.JWTMiddleware)
+
 	r.GET("/users", user.GetAllUser, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin", "admin"))
 	r.GET("/users/:id", user.GetUserID, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin", "admin"))
 	r.POST("/users", user.Create, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
