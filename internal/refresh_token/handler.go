@@ -20,8 +20,7 @@ func RefreshTokenHandler(c echo.Context) error {
 
 	pair, err := Refresh(req.RefreshToken)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized,
-			helpers.ErrorResponse(401, err.Error(), nil))
+		return err
 	}
 
 	return c.JSON(http.StatusOK,

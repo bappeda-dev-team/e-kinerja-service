@@ -2,9 +2,9 @@ package refresh_token
 
 import (
 	"aplikasi-internal/config"
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	"database/sql"
-	"errors"
 	"time"
 )
 
@@ -17,14 +17,14 @@ func Refresh(oldToken string) (*TokenPair, error) {
 	rt, err := FindByToken(oldToken)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, errors.New("refresh token tidak valid")
+			return nil, exception.Unauthorized("refresh token tidak valid")
 		}
 		return nil, err
 	}
 
 	if time.Now().After(rt.ExpiresAt) {
 		_ = DeleteByToken(oldToken)
-		return nil, errors.New("refresh token sudah expired")
+		return nil, exception.Unauthorized("refresh token sudah expired")
 	}
 
 	// ambil data user untuk generate access token baru
@@ -37,7 +37,7 @@ func Refresh(oldToken string) (*TokenPair, error) {
 	`, rt.UserID).Scan(&userID, &username, &roleID, &roleName)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, errors.New("user tidak ditemukan atau tidak aktif")
+			return nil, exception.Unauthorized("user tidak ditemukan atau tidak aktif")
 		}
 		return nil, err
 	}

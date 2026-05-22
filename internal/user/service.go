@@ -1,9 +1,9 @@
 package user
 
 import (
+	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
 	refreshtoken "aplikasi-internal/internal/refresh_token"
-	"errors"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -25,7 +25,7 @@ func CreateUserService(req RegisterRequest, pictureURL string) (*UserResponse, e
 		return nil, err
 	}
 	if !roleExists {
-		return nil, errors.New("role tidak ditemukan")
+		return nil, exception.ResourceNotFound("role tidak ditemukan")
 	}
 
 	// cek username duplicate
@@ -34,7 +34,7 @@ func CreateUserService(req RegisterRequest, pictureURL string) (*UserResponse, e
 		return nil, err
 	}
 	if usernameExists {
-		return nil, errors.New("username sudah digunakan")
+		return nil, exception.Conflict("username sudah digunakan")
 	}
 
 	// hash password
@@ -78,7 +78,7 @@ func UpdateUserService(id string, req UpdateUserRequest) (*UserResponseDetail, e
 			return nil, err
 		}
 		if !roleExists {
-			return nil, errors.New("role tidak ditemukan")
+			return nil, exception.ResourceNotFound("role tidak ditemukan")
 		}
 		fields["role_id"] = req.RoleID
 	}
@@ -88,7 +88,7 @@ func UpdateUserService(id string, req UpdateUserRequest) (*UserResponseDetail, e
 			return nil, err
 		}
 		if usernameExists {
-			return nil, errors.New("username sudah digunakan")
+			return nil, exception.Conflict("username sudah digunakan")
 		}
 		fields["username"] = req.Username
 	}
@@ -107,7 +107,7 @@ func UpdateUserService(id string, req UpdateUserRequest) (*UserResponseDetail, e
 	}
 
 	if len(fields) == 0 {
-		return nil, errors.New("tidak ada field yang diupdate")
+		return nil, exception.BadRequest("tidak ada field yang diupdate")
 	}
 
 	if err := UpdateUser(id, fields); err != nil {
@@ -129,11 +129,11 @@ func LoginService(req LoginRequest) (*LoginResponse, error) {
 
 	user, err := GetUserByUsername(req.Username)
 	if err != nil {
-		return nil, errors.New("username tidak ditemukan")
+		return nil, exception.Unauthorized("username tidak ditemukan")
 	}
 
 	if !user.IsActive {
-		return nil, errors.New("user tidak aktif")
+		return nil, exception.Unauthorized("user tidak aktif")
 	}
 
 	err = bcrypt.CompareHashAndPassword(
@@ -142,7 +142,7 @@ func LoginService(req LoginRequest) (*LoginResponse, error) {
 	)
 
 	if err != nil {
-		return nil, errors.New("password salah")
+		return nil, exception.Unauthorized("password salah")
 	}
 
 	accessToken, err := helpers.GenerateToken(

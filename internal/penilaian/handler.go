@@ -3,7 +3,6 @@ package penilaian
 import (
 	"aplikasi-internal/internal/exception"
 	"aplikasi-internal/internal/helpers"
-	"database/sql"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -20,13 +19,7 @@ func CreatePenilaian(c echo.Context) error {
 
 	result, err := CreatePenilaianService(req, penilaiID)
 	if err != nil {
-		msg := err.Error()
-		if msg == "distribusi tidak ditemukan" ||
-			msg == "tingkat_keberhasilan harus antara 0 dan 100" ||
-			msg == "format tanggal_selesai tidak valid, gunakan ISO 8601" {
-			return exception.BadRequest(msg)
-		}
-		return exception.InternalServer("Terjadi kesalahan pada server")
+		return err
 	}
 
 	return c.JSON(http.StatusCreated,
@@ -46,13 +39,7 @@ func UpdatePenilaian(c echo.Context) error {
 
 	result, err := UpdatePenilaianService(id, req)
 	if err != nil {
-		if err.Error() == "penilaian tidak ditemukan" {
-			return exception.ResourceNotFound("Penilaian tidak ditemukan")
-		}
-		if err.Error() == "format tanggal_selesai tidak valid" {
-			return exception.BadRequest(err.Error())
-		}
-		return exception.InternalServer("Terjadi kesalahan pada server")
+		return err
 	}
 
 	return c.JSON(http.StatusOK,
@@ -62,7 +49,7 @@ func UpdatePenilaian(c echo.Context) error {
 func GetAllPenilaian(c echo.Context) error {
 	result, err := GetAllPenilaianService()
 	if err != nil {
-		return exception.InternalServer("Terjadi kesalahan pada server")
+		return err
 	}
 	if result == nil {
 		result = []PenilaianResponse{}
@@ -79,10 +66,7 @@ func GetPenilaianByDistribusi(c echo.Context) error {
 
 	result, err := GetByDistribusiIDService(distribusiID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return exception.ResourceNotFound("Penilaian tidak ditemukan")
-		}
-		return exception.InternalServer("Terjadi kesalahan pada server")
+		return err
 	}
 
 	return c.JSON(http.StatusOK,

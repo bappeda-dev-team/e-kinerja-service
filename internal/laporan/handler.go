@@ -42,7 +42,7 @@ func handleDBError(err error) error {
 func GetLaporan(c echo.Context) error {
 	userIDInterface := c.Get("user_id")
 	if userIDInterface == nil {
-		return c.JSON(http.StatusUnauthorized, "user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 	userID := userIDInterface.(string)
 
@@ -119,7 +119,7 @@ func CreateLaporan(c echo.Context) error {
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
-		return c.JSON(401, "user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)
@@ -164,7 +164,7 @@ func CreateVerif(c echo.Context) error {
 	LaporanID := c.Param("laporan_id")
 
 	if userIDInterface == nil {
-		return c.JSON(401, "user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)
@@ -199,7 +199,7 @@ func UpdateLaporan(c echo.Context) error {
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
-		return c.JSON(401, "user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)
@@ -326,7 +326,7 @@ func CreateKomentarLaporan(c echo.Context) error {
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
-		return c.JSON(401, "user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)

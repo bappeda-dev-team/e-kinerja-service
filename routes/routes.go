@@ -30,8 +30,8 @@ func SetupRoutes(r *echo.Echo) {
 	// global error handler
 	r.HTTPErrorHandler = exception.GlobalExceptionHandler()
 
-	r.GET("/roles", roles.GetRoles)
-	r.GET("/roles/:id", roles.GetRoleID)
+	r.GET("/roles", roles.GetRoles, middle_ware.JWTMiddleware)
+	r.GET("/roles/:id", roles.GetRoleID, middle_ware.JWTMiddleware)
 	r.POST("/roles", roles.CreateRole, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 	r.PATCH("/roles/:id", roles.UpdateRole, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 	r.DELETE("/roles/:id", roles.DeleteRole, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
@@ -42,8 +42,8 @@ func SetupRoutes(r *echo.Echo) {
 	auth.POST("/refresh", refreshtoken.RefreshTokenHandler)
 	auth.POST("/logout", refreshtoken.LogoutHandler, middle_ware.JWTMiddleware)
 
-	r.GET("/users", user.GetAllUser)
-	r.GET("/users/:id", user.GetUserID)
+	r.GET("/users", user.GetAllUser, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin", "admin"))
+	r.GET("/users/:id", user.GetUserID, middle_ware.JWTMiddleware)
 	r.POST("/users", user.Create, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 	r.DELETE("/users/:id", user.DeleteUser, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 	r.PATCH("/users/:id/profile-picture", user.UploadProfilePic, middle_ware.JWTMiddleware)
@@ -95,10 +95,15 @@ func SetupRoutes(r *echo.Echo) {
 
 	d.GET("", distribusi.GetDistribusi)
 	d.GET("/:id", distribusi.GetDistribusiById)
-	d.POST("", distribusi.CreateDistribusi)
-	d.PUT("/:id", distribusi.UpdateDistribusi)
-	d.DELETE("/:id", distribusi.DeleteDistribusi)
 	d.POST("/komentar/:distribusi_id", distribusi.CreateKomentarDistribusi)
+
+	dAdmin := r.Group("/distribusi")
+	dAdmin.Use(middle_ware.JWTMiddleware)
+	dAdmin.Use(middle_ware.RoleMiddleware("super_admin", "admin"))
+
+	dAdmin.POST("", distribusi.CreateDistribusi)
+	dAdmin.PUT("/:id", distribusi.UpdateDistribusi)
+	dAdmin.DELETE("/:id", distribusi.DeleteDistribusi)
 
 	dp := r.Group("/pelaksana")
 	dp.Use(middle_ware.JWTMiddleware)
@@ -116,8 +121,8 @@ func SetupRoutes(r *echo.Echo) {
 	l.Use(middle_ware.RoleMiddleware("programmer", "verifikator"))
 
 	l.GET("", laporan.GetLaporan)
-	l.GET("/:id", laporan.GetLaporanID)
 	l.GET("/history", laporan.GetHistory)
+	l.GET("/:id", laporan.GetLaporanID)
 	l.POST("", laporan.CreateLaporan)
 	l.POST("/verif/:laporan_id", laporan.CreateVerif)
 	l.PUT("/:id", laporan.UpdateLaporan)
@@ -151,11 +156,16 @@ func SetupRoutes(r *echo.Echo) {
 
 	png.GET("", penugasan.GetAllPenugasan)
 	png.GET("/:id", penugasan.GetPenugasanByID)
-	png.POST("", penugasan.CreatePenugasan)
-	png.PUT("/:id", penugasan.UpdatePenugasan)
 	png.PATCH("/:id/status", penugasan.UpdateStatusPenugasan)
-	png.PATCH("/:id/reassign", penugasan.ReassignPenugasan)
-	png.DELETE("/:id", penugasan.DeletePenugasan)
+
+	pngAdmin := r.Group("/penugasan")
+	pngAdmin.Use(middle_ware.JWTMiddleware)
+	pngAdmin.Use(middle_ware.RoleMiddleware("admin"))
+
+	pngAdmin.POST("", penugasan.CreatePenugasan)
+	pngAdmin.PUT("/:id", penugasan.UpdatePenugasan)
+	pngAdmin.PATCH("/:id/reassign", penugasan.ReassignPenugasan)
+	pngAdmin.DELETE("/:id", penugasan.DeletePenugasan)
 
 	pn := r.Group("/penilaian")
 	pn.Use(middle_ware.JWTMiddleware)

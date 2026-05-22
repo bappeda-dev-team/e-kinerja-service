@@ -86,12 +86,12 @@ func CreateVerifikasi(c echo.Context) error {
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
-		return c.JSON(401, "user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)
 	if userID == "" {
-		return c.JSON(401, "user_id kosong di token")
+		return exception.Unauthorized("user_id kosong di token")
 	}
 
 	var req VerifikasiRequest
@@ -126,12 +126,12 @@ func UpdateVerifikasi(c echo.Context) error {
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
-		return c.JSON(401, "user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)
 	if userID == "" {
-		return c.JSON(401, "user_id kosong di token")
+		return exception.Unauthorized("user_id kosong di token")
 	}
 
 	if _, err := uuid.Parse(id); err != nil {

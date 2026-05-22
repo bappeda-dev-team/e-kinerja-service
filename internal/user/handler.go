@@ -25,15 +25,12 @@ func Login(c echo.Context) error {
 	var req LoginRequest
 
 	if err := helpers.BindAndValidate(c, &req); err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helpers.ErrorResponse(400, "Validasi gagal",
-				helpers.FormatValidationError(err)))
+		return exception.BadRequest(helpers.FormatValidationErrors(err))
 	}
 
 	loginResp, err := LoginService(req)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized,
-			helpers.ErrorResponse(401, err.Error(), nil))
+		return exception.Unauthorized(err.Error())
 	}
 
 	return c.JSON(http.StatusOK,
@@ -93,12 +90,6 @@ func Create(c echo.Context) error {
 
 	user, err := CreateUserService(req, pictureURL)
 	if err != nil {
-
-		if err.Error() == "role tidak ditemukan" ||
-			err.Error() == "username sudah digunakan" {
-			return exception.BadRequest(err.Error())
-		}
-
 		return err
 	}
 
@@ -182,12 +173,7 @@ func PatchUser(c echo.Context) error {
 
 	result, err := UpdateUserService(id, req)
 	if err != nil {
-		if err.Error() == "role tidak ditemukan" ||
-			err.Error() == "username sudah digunakan" ||
-			err.Error() == "tidak ada field yang diupdate" {
-			return exception.BadRequest(err.Error())
-		}
-		return handleDBError(err)
+		return err
 	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengupdate data", result))

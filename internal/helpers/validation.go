@@ -3,36 +3,29 @@ package helpers
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
 
-func FormatValidationError(err error) []string {
+func FormatValidationErrors(err error) string {
 	var validationErrors validator.ValidationErrors
-	var errorMessages []string
-
-	if errors.As(err, &validationErrors) {
-		for _, e := range validationErrors {
-			switch e.Tag() {
-
-			case "required":
-				errorMessages = append(errorMessages,
-					fmt.Sprintf("%s harus diisi", e.Field()))
-
-			case "min":
-				errorMessages = append(errorMessages,
-					fmt.Sprintf("%s minimal %s karakter", e.Field(), e.Param()))
-
-			case "max":
-				errorMessages = append(errorMessages,
-					fmt.Sprintf("%s maksimal %s karakter", e.Field(), e.Param()))
-
-			default:
-				errorMessages = append(errorMessages,
-					fmt.Sprintf("%s tidak valid", e.Field()))
-			}
-		}
+	if !errors.As(err, &validationErrors) {
+		return err.Error()
 	}
 
-	return errorMessages
+	msgs := make([]string, 0, len(validationErrors))
+	for _, e := range validationErrors {
+		switch e.Tag() {
+		case "required":
+			msgs = append(msgs, fmt.Sprintf("%s harus diisi", e.Field()))
+		case "min":
+			msgs = append(msgs, fmt.Sprintf("%s minimal %s karakter", e.Field(), e.Param()))
+		case "max":
+			msgs = append(msgs, fmt.Sprintf("%s maksimal %s karakter", e.Field(), e.Param()))
+		default:
+			msgs = append(msgs, fmt.Sprintf("%s tidak valid", e.Field()))
+		}
+	}
+	return strings.Join(msgs, "; ")
 }

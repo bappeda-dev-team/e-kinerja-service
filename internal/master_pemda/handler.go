@@ -52,8 +52,7 @@ func GetPemdaID(c echo.Context) error {
 
 		// kalau ID tidak ditemukan
 		if err == sql.ErrNoRows {
-			return c.JSON(http.StatusNotFound,
-				helpers.ErrorResponse(404, "Data tidak ditemukan", nil))
+			return exception.ResourceNotFound("Data tidak ditemukan")
 		}
 
 		return err

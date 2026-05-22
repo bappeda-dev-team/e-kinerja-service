@@ -1,7 +1,7 @@
 package penilaian
 
 import (
-	"errors"
+	"aplikasi-internal/internal/exception"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func hitungKetepatanWaktu(tanggalSelesai time.Time, deadline string) (string, er
 
 func CreatePenilaianService(req CreatePenilaianRequest, penilaiID string) (*PenilaianResponse, error) {
 	if req.TingkatKeberhasilan < 0 || req.TingkatKeberhasilan > 100 {
-		return nil, errors.New("tingkat_keberhasilan harus antara 0 dan 100")
+		return nil, exception.BadRequest("tingkat_keberhasilan harus antara 0 dan 100")
 	}
 
 	distribusiExists, err := CheckDistribusiExists(req.DistribusiID)
@@ -35,14 +35,14 @@ func CreatePenilaianService(req CreatePenilaianRequest, penilaiID string) (*Peni
 		return nil, err
 	}
 	if !distribusiExists {
-		return nil, errors.New("distribusi tidak ditemukan")
+		return nil, exception.ResourceNotFound("distribusi tidak ditemukan")
 	}
 
 	tanggalSelesai, err := time.Parse(time.RFC3339, req.TanggalSelesai)
 	if err != nil {
 		tanggalSelesai, err = time.Parse("2006-01-02", req.TanggalSelesai)
 		if err != nil {
-			return nil, errors.New("format tanggal_selesai tidak valid, gunakan ISO 8601")
+			return nil, exception.BadRequest("format tanggal_selesai tidak valid, gunakan ISO 8601")
 		}
 	}
 
@@ -75,7 +75,7 @@ func CreatePenilaianService(req CreatePenilaianRequest, penilaiID string) (*Peni
 func UpdatePenilaianService(id string, req UpdatePenilaianRequest) (*PenilaianResponse, error) {
 	existing, err := GetRawByID(id)
 	if err != nil {
-		return nil, errors.New("penilaian tidak ditemukan")
+		return nil, exception.ResourceNotFound("penilaian tidak ditemukan")
 	}
 
 	if req.TingkatKeberhasilan != nil {
@@ -89,7 +89,7 @@ func UpdatePenilaianService(id string, req UpdatePenilaianRequest) (*PenilaianRe
 		if err != nil {
 			ts, err = time.Parse("2006-01-02", req.TanggalSelesai)
 			if err != nil {
-				return nil, errors.New("format tanggal_selesai tidak valid")
+				return nil, exception.BadRequest("format tanggal_selesai tidak valid")
 			}
 		}
 		existing.TanggalSelesai = ts

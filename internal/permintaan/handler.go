@@ -95,7 +95,7 @@ func CreatePermintaan(c echo.Context) error {
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
-		return c.JSON(401, "user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)
@@ -153,7 +153,7 @@ func UpdatePermintaan(c echo.Context) error {
 	userIDInterface := c.Get("user_id")
 
 	if userIDInterface == nil {
-		return c.JSON(401, "user tidak ditemukan di token")
+		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)

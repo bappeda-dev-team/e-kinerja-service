@@ -3,6 +3,7 @@ package helpers
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"log"
 	"os"
 	"time"
 
@@ -10,13 +11,12 @@ import (
 )
 
 func GetSecretKey() []byte {
-	if key := os.Getenv("JWT_SECRET"); key != "" {
-		return []byte(key)
+	key := os.Getenv("JWT_SECRET")
+	if key == "" {
+		log.Fatal("JWT_SECRET environment variable is required")
 	}
-	return []byte("secret-key")
+	return []byte(key)
 }
-
-var SECRET_KEY = []byte("secret-key")
 
 type JwtCustomClaims struct {
 	UserID   string `json:"user_id"`

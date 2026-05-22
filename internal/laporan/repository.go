@@ -555,7 +555,7 @@ func updateTx(db dbQueryRower, id string, data *Laporan) error {
 }
 
 func UpdateLampiran(id string, lampiran StringArray) error {
-	result, err := config.DB.Exec(`UPDATE laporan_progress SET lampiran = $1, updated_at = NOW() WHERE id = $2`, lampiran, id)
+	result, err := config.DB.Exec(`UPDATE laporan_kinerja SET lampiran = $1, updated_at = NOW() WHERE id = $2`, lampiran, id)
 	if err != nil {
 		return err
 	}

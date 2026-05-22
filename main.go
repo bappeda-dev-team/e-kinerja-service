@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-migrate/migrate/v4"
@@ -45,8 +46,20 @@ func main() {
 	}
 
 	e.Use(middleware.Secure())
+	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
+	var originList []string
+	if allowedOrigins == "" {
+		originList = []string{
+			"http://localhost:3000",
+			"https://e-kinerja.zeabur.app",
+			"https://e-kinerja-stagingg.zeabur.app",
+		}
+	} else {
+		originList = strings.Split(allowedOrigins, ",")
+	}
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
+		AllowOrigins: originList,
 		AllowMethods: []string{
 			echo.GET,
 			echo.POST,

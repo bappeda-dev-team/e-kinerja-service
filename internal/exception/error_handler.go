@@ -63,21 +63,11 @@ func Database(msg string) *baseException {
 }
 func Service(msg string) *baseException { return &baseException{http.StatusInternalServerError, msg} }
 
-// ============================================================
-// API RESPONSE STRUCTURE
-// ============================================================
-
-type ApiResponse struct {
-	Status  int         `json:"status"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
-}
-
-func errorResponse(status int, message string, data interface{}) ApiResponse {
-	return ApiResponse{
-		Status:  status,
-		Message: message,
-		Data:    data,
+func errorResponse(status int, message string) map[string]interface{} {
+	return map[string]interface{}{
+		"code":    status,
+		"success": false,
+		"message": message,
 	}
 }
 
@@ -100,14 +90,14 @@ func GlobalExceptionHandler() func(err error, c echo.Context) {
 			if !ok {
 				msg = "Unknown error"
 			}
-			_ = c.JSON(he.Code, errorResponse(he.Code, msg, nil))
+			_ = c.JSON(he.Code, errorResponse(he.Code, msg))
 			return
 		}
 
 		// Handle custom exceptions
 		var httpErr HttpException
 		if errors.As(err, &httpErr) {
-			_ = c.JSON(httpErr.StatusCode(), errorResponse(httpErr.StatusCode(), httpErr.GetMessage(), nil))
+			_ = c.JSON(httpErr.StatusCode(), errorResponse(httpErr.StatusCode(), httpErr.GetMessage()))
 			return
 		}
 
@@ -116,7 +106,6 @@ func GlobalExceptionHandler() func(err error, c echo.Context) {
 		_ = c.JSON(http.StatusInternalServerError, errorResponse(
 			http.StatusInternalServerError,
 			"An unexpected error occurred. Please contact support.",
-			nil,
 		))
 	}
 }
