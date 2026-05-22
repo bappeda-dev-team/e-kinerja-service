@@ -184,6 +184,49 @@ func fetchLaporanByPermintaanIDs(permintaanIDs []string) (map[string][]LaporanIt
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
+func fetchAllPermintaanActive() ([]PermintaanItem, error) {
+	rows, err := config.DB.Query(`
+		SELECT
+			p.id,
+			mp.id, mp.name, mp.logo,
+			ma.id, ma.name, ma.logo,
+			p.menu, p.kondisi_awal, p.kondisi_diharapkan,
+			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran, p.status,
+			u.id, u.username, u.full_name, u.profile_picture,
+			p.created_at, p.updated_at
+		FROM permintaan p
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+		LEFT JOIN users u ON p.created_by = u.id
+		WHERE p.is_archived = false
+		ORDER BY p.created_at DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []PermintaanItem
+	for rows.Next() {
+		var item PermintaanItem
+		if err := rows.Scan(
+			&item.ID,
+			&item.Pemda.ID, &item.Pemda.Name, &item.Pemda.Logo,
+			&item.Aplikasi.ID, &item.Aplikasi.Name, &item.Aplikasi.Logo,
+			&item.Menu, &item.KondisiAwal, &item.KondisiDiharapkan,
+			&item.TanggalPesanan, &item.TanggalDeadline, &item.Lampiran, &item.Status,
+			&item.Pembuat.ID, &item.Pembuat.Username, &item.Pembuat.FullName, &item.Pembuat.ProfilePicture,
+			&item.CreatedAt, &item.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		item.Distribusi = []DistribusiItem{}
+		item.Laporan = []LaporanItem{}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
 func fetchPermintaanByIDs(ids []string) ([]PermintaanItem, error) {
 	if len(ids) == 0 {
 		return []PermintaanItem{}, nil
@@ -306,15 +349,29 @@ func fetchPenugasanByProgrammerID(programmerID string) ([]PenugasanItem, error) 
 	return items, rows.Err()
 }
 
-func fetchLaporanByProgrammerID(programmerID string) ([]LaporanItem, error) {
+func fetchLaporanByProgrammerID(programmerID string) ([]ProgrammerLaporanItem, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			l.id,
 			u.id, u.username, u.full_name, u.profile_picture,
 			l.laporan_progress, l.status,
+			COALESCE(v.status_verified::text, ''),
+			COALESCE(v.is_submitted_to_verified, false),
+			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo,
+			p.menu, p.kondisi_awal, p.kondisi_diharapkan, p.tanggal_deadline,
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
 		LEFT JOIN users u ON l.programmer_id = u.id
+		LEFT JOIN permintaan p ON l.permintaan_id = p.id
+		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
+		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
+		LEFT JOIN LATERAL (
+			SELECT status_verified, is_submitted_to_verified
+			FROM verifikasi
+			WHERE laporan_id = l.id
+			ORDER BY updated_at DESC
+			LIMIT 1
+		) v ON true
 		WHERE l.programmer_id = $1
 		ORDER BY l.created_at DESC
 	`, programmerID)
@@ -323,13 +380,18 @@ func fetchLaporanByProgrammerID(programmerID string) ([]LaporanItem, error) {
 	}
 	defer rows.Close()
 
-	var items []LaporanItem
+	var items []ProgrammerLaporanItem
 	for rows.Next() {
-		var item LaporanItem
+		var item ProgrammerLaporanItem
 		if err := rows.Scan(
 			&item.ID,
 			&item.Programmer.ID, &item.Programmer.Username, &item.Programmer.FullName, &item.Programmer.ProfilePicture,
 			&item.LaporanProgress, &item.Status,
+			&item.StatusVerified, &item.IsSubmittedToVerified,
+			&item.Permintaan.ID,
+			&item.Permintaan.Pemda.ID, &item.Permintaan.Pemda.Name, &item.Permintaan.Pemda.Logo,
+			&item.Permintaan.Aplikasi.ID, &item.Permintaan.Aplikasi.Name, &item.Permintaan.Aplikasi.Logo,
+			&item.Permintaan.Menu, &item.Permintaan.KondisiAwal, &item.Permintaan.KondisiDiharapkan, &item.Permintaan.TanggalDeadline,
 			&item.CreatedAt, &item.UpdatedAt,
 		); err != nil {
 			return nil, err
@@ -341,7 +403,7 @@ func fetchLaporanByProgrammerID(programmerID string) ([]LaporanItem, error) {
 
 // ── Verifikator ───────────────────────────────────────────────────────────────
 
-func fetchLaporanPendingVerifikasi() ([]VerifikatorLaporanItem, error) {
+func fetchLaporanSubmitted() ([]VerifikatorLaporanItem, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			l.id,
@@ -352,6 +414,8 @@ func fetchLaporanPendingVerifikasi() ([]VerifikatorLaporanItem, error) {
 			p.created_at, p.updated_at,
 			u.id, u.username, u.full_name, u.profile_picture,
 			l.laporan_progress, l.status,
+			v.status_verified::text,
+			v.is_submitted_to_verified,
 			l.created_at, l.updated_at
 		FROM laporan_kinerja l
 		LEFT JOIN permintaan p ON l.permintaan_id = p.id
@@ -359,9 +423,15 @@ func fetchLaporanPendingVerifikasi() ([]VerifikatorLaporanItem, error) {
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users pu ON p.created_by = pu.id
 		LEFT JOIN users u ON l.programmer_id = u.id
-		JOIN verifikasi v ON v.laporan_id = l.id
-		WHERE v.status_verified = 'pending'
-		ORDER BY l.created_at ASC
+		JOIN LATERAL (
+			SELECT status_verified, is_submitted_to_verified
+			FROM verifikasi
+			WHERE laporan_id = l.id
+			ORDER BY updated_at DESC
+			LIMIT 1
+		) v ON true
+		WHERE v.is_submitted_to_verified = true
+		ORDER BY l.created_at DESC
 	`)
 	if err != nil {
 		return nil, err
@@ -382,6 +452,7 @@ func fetchLaporanPendingVerifikasi() ([]VerifikatorLaporanItem, error) {
 			&perm.CreatedAt, &perm.UpdatedAt,
 			&item.Programmer.ID, &item.Programmer.Username, &item.Programmer.FullName, &item.Programmer.ProfilePicture,
 			&item.LaporanProgress, &item.Status,
+			&item.StatusVerified, &item.IsSubmittedToVerified,
 			&item.CreatedAt, &item.UpdatedAt,
 		); err != nil {
 			return nil, err

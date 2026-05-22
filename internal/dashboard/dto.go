@@ -118,6 +118,28 @@ type LaporanItem struct {
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
+type PermintaanLiteItem struct {
+	ID                string       `json:"id"`
+	Pemda             PemdaInfo    `json:"pemda"`
+	Aplikasi          AplikasiInfo `json:"aplikasi"`
+	Menu              string       `json:"menu"`
+	KondisiAwal       string       `json:"kondisi_awal"`
+	KondisiDiharapkan string       `json:"kondisi_diharapkan"`
+	TanggalDeadline   time.Time    `json:"tanggal_deadline"`
+}
+
+type ProgrammerLaporanItem struct {
+	ID                    string             `json:"id"`
+	Programmer            UserInfo           `json:"programmer"`
+	LaporanProgress       string             `json:"laporan_progress"`
+	Status                string             `json:"status"`
+	StatusVerified        string             `json:"status_verified"`
+	IsSubmittedToVerified bool               `json:"is_submitted_to_verified"`
+	Permintaan            PermintaanLiteItem `json:"permintaan"`
+	CreatedAt             time.Time          `json:"created_at"`
+	UpdatedAt             time.Time          `json:"updated_at"`
+}
+
 type PermintaanItem struct {
 	ID                string           `json:"id"`
 	Pemda             PemdaInfo        `json:"pemda"`
@@ -167,25 +189,29 @@ type PenugasanItem struct {
 }
 
 type ProgrammerDashboardResponse struct {
-	TotalPenugasan int             `json:"total_penugasan"`
-	TotalLaporan   int             `json:"total_laporan"`
-	Penugasan      []PenugasanItem `json:"penugasan"`
-	Laporan        []LaporanItem   `json:"laporan"`
+	TotalPenugasan int                     `json:"total_penugasan"`
+	TotalLaporan   int                     `json:"total_laporan"`
+	Penugasan      []PenugasanItem         `json:"penugasan"`
+	Laporan        []ProgrammerLaporanItem `json:"laporan"`
 }
 
 type VerifikatorLaporanItem struct {
-	ID              string       `json:"id"`
-	Permintaan      PermintaanItem `json:"permintaan"`
-	Programmer      UserInfo     `json:"programmer"`
-	LaporanProgress string       `json:"laporan_progress"`
-	Status          string       `json:"status"`
-	CreatedAt       time.Time    `json:"created_at"`
-	UpdatedAt       time.Time    `json:"updated_at"`
+	ID                    string         `json:"id"`
+	Permintaan            PermintaanItem `json:"permintaan"`
+	Programmer            UserInfo       `json:"programmer"`
+	LaporanProgress       string         `json:"laporan_progress"`
+	Status                string         `json:"status"`
+	StatusVerified        string         `json:"status_verified"`
+	IsSubmittedToVerified bool           `json:"is_submitted_to_verified"`
+	CreatedAt             time.Time      `json:"created_at"`
+	UpdatedAt             time.Time      `json:"updated_at"`
 }
 
 type VerifikatorDashboardResponse struct {
-	TotalMenunggu int                      `json:"total_menunggu"`
-	Laporan       []VerifikatorLaporanItem `json:"laporan"`
+	TotalMenunggu      int                      `json:"total_menunggu"`
+	TotalRevisi        int                      `json:"total_revisi"`
+	TotalTerverifikasi int                      `json:"total_terverifikasi"`
+	Laporan            []VerifikatorLaporanItem `json:"laporan"`
 }
 
 // ── Activity feed types ───────────────────────────────────────────────────────

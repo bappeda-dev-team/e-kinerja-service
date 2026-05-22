@@ -57,7 +57,20 @@ func GetSuperAdminDashboardService() (SuperAdminDashboardResponse, error) {
 }
 
 func GetAdminDashboardService(adminID string) (AdminDashboardResponse, error) {
-	distribusiMap, distribusiIDs, err := fetchDistribusiByAdminID(adminID)
+	items, err := fetchAllPermintaanActive()
+	if err != nil {
+		return AdminDashboardResponse{}, err
+	}
+	if len(items) == 0 {
+		return AdminDashboardResponse{Permintaan: []PermintaanItem{}}, nil
+	}
+
+	permIDs := make([]string, len(items))
+	for i, item := range items {
+		permIDs[i] = item.ID
+	}
+
+	distribusiMap, distribusiIDs, err := fetchDistribusiByPermintaanIDs(permIDs)
 	if err != nil {
 		return AdminDashboardResponse{}, err
 	}
@@ -68,28 +81,20 @@ func GetAdminDashboardService(adminID string) (AdminDashboardResponse, error) {
 	}
 
 	totalDistribusi := 0
-	totalPelaksana := 0
-	permIDSet := make(map[string]struct{})
+	pelaksanaSet := make(map[string]struct{})
 
 	for permID, dList := range distribusiMap {
-		permIDSet[permID] = struct{}{}
 		for i, d := range dList {
 			if pList, ok := pelaksanaMap[d.ID]; ok {
 				distribusiMap[permID][i].Pelaksana = pList
-				totalPelaksana += len(pList)
+			}
+			if d.Admin.ID == adminID {
+				totalDistribusi++
+				for _, p := range distribusiMap[permID][i].Pelaksana {
+					pelaksanaSet[p.ID] = struct{}{}
+				}
 			}
 		}
-		totalDistribusi += len(dList)
-	}
-
-	permIDs := make([]string, 0, len(permIDSet))
-	for id := range permIDSet {
-		permIDs = append(permIDs, id)
-	}
-
-	items, err := fetchPermintaanByIDs(permIDs)
-	if err != nil {
-		return AdminDashboardResponse{}, err
 	}
 
 	laporanMap, _, err := fetchLaporanByPermintaanIDs(permIDs)
@@ -109,7 +114,7 @@ func GetAdminDashboardService(adminID string) (AdminDashboardResponse, error) {
 	return AdminDashboardResponse{
 		TotalPermintaan: len(items),
 		TotalDistribusi: totalDistribusi,
-		TotalPelaksana:  totalPelaksana,
+		TotalPelaksana:  len(pelaksanaSet),
 		Permintaan:      items,
 	}, nil
 }
@@ -128,7 +133,7 @@ func GetProgrammerDashboardService(programmerID string) (ProgrammerDashboardResp
 		return ProgrammerDashboardResponse{}, err
 	}
 	if laporan == nil {
-		laporan = []LaporanItem{}
+		laporan = []ProgrammerLaporanItem{}
 	}
 
 	return ProgrammerDashboardResponse{
@@ -140,7 +145,7 @@ func GetProgrammerDashboardService(programmerID string) (ProgrammerDashboardResp
 }
 
 func GetVerifikatorDashboardService() (VerifikatorDashboardResponse, error) {
-	laporan, err := fetchLaporanPendingVerifikasi()
+	laporan, err := fetchLaporanSubmitted()
 	if err != nil {
 		return VerifikatorDashboardResponse{}, err
 	}
@@ -148,9 +153,23 @@ func GetVerifikatorDashboardService() (VerifikatorDashboardResponse, error) {
 		laporan = []VerifikatorLaporanItem{}
 	}
 
+	totalMenunggu, totalRevisi, totalTerverifikasi := 0, 0, 0
+	for _, l := range laporan {
+		switch l.StatusVerified {
+		case "pending":
+			totalMenunggu++
+		case "revision":
+			totalRevisi++
+		case "approved":
+			totalTerverifikasi++
+		}
+	}
+
 	return VerifikatorDashboardResponse{
-		TotalMenunggu: len(laporan),
-		Laporan:       laporan,
+		TotalMenunggu:      totalMenunggu,
+		TotalRevisi:        totalRevisi,
+		TotalTerverifikasi: totalTerverifikasi,
+		Laporan:            laporan,
 	}, nil
 }
 
