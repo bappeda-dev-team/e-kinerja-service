@@ -24,6 +24,12 @@ type UpdateUserRequest struct {
 	IsActive *bool  `json:"is_active"`
 }
 
+type UpdateMeRequest struct {
+	Username string `json:"username"  validate:"omitempty,min=4"`
+	FullName string `json:"full_name" validate:"omitempty,min=3"`
+	Password string `json:"password"  validate:"omitempty,min=6"`
+}
+
 // === Response ===
 
 type LoginResponse struct {

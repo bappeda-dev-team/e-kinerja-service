@@ -82,6 +82,60 @@ func GetMe(c echo.Context) error {
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
 }
 
+func PatchMe(c echo.Context) error {
+	userIDInterface := c.Get("user_id")
+	if userIDInterface == nil {
+		return exception.Unauthorized("user tidak ditemukan di token")
+	}
+
+	var req UpdateMeRequest
+	if err := helpers.BindAndValidate(c, &req); err != nil {
+		return exception.BadRequest("Validasi gagal")
+	}
+
+	result, err := UpdateUserService(userIDInterface.(string), UpdateUserRequest{
+		Username: req.Username,
+		FullName: req.FullName,
+		Password: req.Password,
+	})
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengupdate profil", result))
+}
+
+func UploadMyProfilePic(c echo.Context) error {
+	userIDInterface := c.Get("user_id")
+	if userIDInterface == nil {
+		return exception.Unauthorized("user tidak ditemukan di token")
+	}
+
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		return exception.BadRequest("File tidak ditemukan, gunakan field 'file'")
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return exception.BadRequest("Gagal membuka file")
+	}
+	defer file.Close()
+
+	pictureURL, err := storage.UploadFile(file, fileHeader, storage.FolderProfilePic)
+	if err != nil {
+		return err
+	}
+
+	if err := UpdateProfilePictureService(userIDInterface.(string), pictureURL); err != nil {
+		return handleDBError(err)
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Foto profil berhasil disimpan", map[string]string{
+		"profile_picture": pictureURL,
+	}))
+}
+
 func Create(c echo.Context) error {
 	var req RegisterRequest
 

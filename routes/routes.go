@@ -42,6 +42,8 @@ func SetupRoutes(r *echo.Echo) {
 	auth.POST("/logout", refreshtoken.LogoutHandler, middle_ware.JWTMiddleware)
 
 	r.GET("/me", user.GetMe, middle_ware.JWTMiddleware)
+	r.PATCH("/me", user.PatchMe, middle_ware.JWTMiddleware)
+	r.PATCH("/me/profile-picture", user.UploadMyProfilePic, middle_ware.JWTMiddleware)
 
 	r.GET("/users", user.GetAllUser, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin", "admin"))
 	r.GET("/users/:id", user.GetUserID, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin", "admin"))
