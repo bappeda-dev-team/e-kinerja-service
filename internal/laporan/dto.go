@@ -11,13 +11,13 @@ type LaporanRequest struct {
 	PermintaanID    string `json:"permintaan_id" form:"permintaan_id" validate:"required,uuid4"`
 	PenugasanID     string `json:"penugasan_id" form:"penugasan_id"`
 	LaporanProgress string `json:"laporan_progress" form:"laporan_progress" validate:"required,min=3"`
-	Status          string `json:"status" form:"status" validate:"required"`
+	Status          string `json:"status" form:"status" validate:"required,oneof=0 25 50 75 100"`
 }
 
 type LaporanUpdateRequest struct {
 	PermintaanID    	  string `json:"permintaan_id" validate:"required,uuid4"`
 	LaporanProgress 	  string `json:"laporan_progress" validate:"required,min=3"`
-	Status          	  string `json:"status" validate:"required"`
+	Status          	  string `json:"status" validate:"required,oneof=0 25 50 75 100"`
 	VerifikasiID    	  string `json:"verifikasi_id"`
 	StatusVerified  	  string `json:"status_verified"`
 	IsSubmittedToVerified bool   `json:"is_submitted_to_verified"`

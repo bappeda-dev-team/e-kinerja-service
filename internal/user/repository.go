@@ -100,6 +100,16 @@ func UpdateProfilePicture(id string, profilePicture string) error {
 	return err
 }
 
+func GetUserRoleNameByID(id string) (string, error) {
+	var roleName string
+	err := config.DB.QueryRow(`
+		SELECT r.name FROM users u
+		LEFT JOIN roles r ON u.role_id = r.id
+		WHERE u.id = $1
+	`, id).Scan(&roleName)
+	return roleName, err
+}
+
 func GetUserByUsername(username string) (*UserRole, error) {
 
 	query := `

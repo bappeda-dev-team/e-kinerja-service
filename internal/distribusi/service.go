@@ -1,5 +1,23 @@
 package distribusi
 
+import (
+	"aplikasi-internal/internal/exception"
+	"aplikasi-internal/internal/user"
+)
+
+func validateAllProgrammer(ids []string) error {
+	for _, id := range ids {
+		roleName, err := user.GetUserRoleNameByID(id)
+		if err != nil {
+			return exception.ResourceNotFound("programmer tidak ditemukan: " + id)
+		}
+		if roleName != "programmer" {
+			return exception.BadRequest("user bukan programmer: " + id)
+		}
+	}
+	return nil
+}
+
 func GetDistribusiDetailServices(sort string) ([]DistribusiFullResponse, error) {
 	return GetAll(sort)
 }
@@ -9,6 +27,10 @@ func GetDistribusiDetailServicesID(id string) (DistribusiFullResponse, error) {
 }
 
 func CreateDistribusiServices(permintaanID string, adminID string, req DistribusiRequest) (*DistribusiDetailResponse, error) {
+	if err := validateAllProgrammer(req.Pelaksana); err != nil {
+		return nil, err
+	}
+
 	data := &Distribusi{
 		PermintaanID: permintaanID,
 		AdminID:      adminID,
@@ -61,6 +83,10 @@ func CreateKomentarServices(distribusiID string, userID string, req KomentarDist
 }
 
 func UpdateDistribusiServices(id string, permintaanID string, adminID string, req DistribusiRequest) (*DistribusiDetailResponse, error) {
+	if err := validateAllProgrammer(req.Pelaksana); err != nil {
+		return nil, err
+	}
+
 	data := &Distribusi{
 		PermintaanID: permintaanID,
 		AdminID:      adminID,

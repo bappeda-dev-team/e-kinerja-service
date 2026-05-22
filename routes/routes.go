@@ -42,7 +42,7 @@ func SetupRoutes(r *echo.Echo) {
 	auth.POST("/logout", refreshtoken.LogoutHandler, middle_ware.JWTMiddleware)
 
 	r.GET("/users", user.GetAllUser, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin", "admin"))
-	r.GET("/users/:id", user.GetUserID, middle_ware.JWTMiddleware)
+	r.GET("/users/:id", user.GetUserID, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin", "admin"))
 	r.POST("/users", user.Create, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 	r.DELETE("/users/:id", user.DeleteUser, middle_ware.JWTMiddleware, middle_ware.RoleMiddleware("super_admin"))
 	r.PATCH("/users/:id/profile-picture", user.UploadProfilePic, middle_ware.JWTMiddleware)
@@ -111,9 +111,14 @@ func SetupRoutes(r *echo.Echo) {
 	dp.GET("", pelaksana.GetPelaksana)
 	dp.PATCH("/mark-all-read", pelaksana.MarkAllReadPelaksana)
 	dp.GET("/:id", pelaksana.GetPelaksanaID)
-	dp.POST("", pelaksana.CreatePelaksana)
-	dp.PUT("/:id", pelaksana.UpdatePelaksana)
-	dp.DELETE("/:id", pelaksana.DeletePelaksana)
+
+	dpAdmin := r.Group("/pelaksana")
+	dpAdmin.Use(middle_ware.JWTMiddleware)
+	dpAdmin.Use(middle_ware.RoleMiddleware("admin"))
+
+	dpAdmin.POST("", pelaksana.CreatePelaksana)
+	dpAdmin.PUT("/:id", pelaksana.UpdatePelaksana)
+	dpAdmin.DELETE("/:id", pelaksana.DeletePelaksana)
 
 	l := r.Group("/laporan")
 	l.Use(middle_ware.JWTMiddleware)

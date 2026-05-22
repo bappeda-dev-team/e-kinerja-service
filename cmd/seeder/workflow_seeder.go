@@ -58,7 +58,7 @@ func SeedWorkflow(db *sql.DB) {
 	var laporanID string
 	err = db.QueryRow(`
 		INSERT INTO laporan_kinerja (permintaan_id, programmer_id, laporan_progress, status)
-		VALUES ($1, $2, 'Sudah selesai implementasi fitur export Excel dan PDF', 'hijau')
+		VALUES ($1, $2, 'Sudah selesai implementasi fitur export Excel dan PDF', '100')
 		RETURNING id
 	`, permintaanID, programmerID).Scan(&laporanID)
 	if err != nil {

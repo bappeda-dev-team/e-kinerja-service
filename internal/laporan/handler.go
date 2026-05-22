@@ -283,8 +283,25 @@ func DeleteLaporan(c echo.Context) error {
 
 func UploadLampiran(c echo.Context) error {
 	id := c.Param("id")
+	userIDInterface := c.Get("user_id")
+	roleInterface := c.Get("name")
+
+	if userIDInterface == nil || roleInterface == nil {
+		return exception.Unauthorized("user tidak ditemukan di token")
+	}
+
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
+	}
+
+	if roleInterface.(string) == "programmer" {
+		existing, err := GetId(id)
+		if err != nil {
+			return handleDBError(err)
+		}
+		if existing.Programmer.ID != userIDInterface.(string) {
+			return exception.AccessDenied("akses ditolak")
+		}
 	}
 
 	form, err := c.MultipartForm()

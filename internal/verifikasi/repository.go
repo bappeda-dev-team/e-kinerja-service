@@ -164,45 +164,17 @@ func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
 }
 
 func Create(data *Verifikasi) error {
-	tx, err := config.DB.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	err = tx.QueryRow(`
+	return config.DB.QueryRow(`
 		INSERT INTO verifikasi (laporan_id, verifikator_id, komentar, status_verified)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at
 	`, data.LaporanID, data.VerifikatorID, data.Komentar, data.StatusVerified).Scan(
 		&data.ID, &data.CreatedAt, &data.UpdatedAt,
 	)
-	if err != nil {
-		return err
-	}
-
-	statusLaporan := statusLaporanFromVerified(data.StatusVerified)
-	_, err = tx.Exec(`UPDATE laporan_kinerja SET status = $1, updated_at = NOW() WHERE id = $2`, statusLaporan, data.LaporanID)
-	if err != nil {
-		return err
-	}
-
-	return tx.Commit()
-}
-
-func statusLaporanFromVerified(s string) string {
-	switch s {
-	case "approved":
-		return "hijau"
-	case "revision":
-		return "kuning"
-	default:
-		return "putih"
-	}
 }
 
 func Update(id string, data *Verifikasi) error {
-	query := `
+	return config.DB.QueryRow(`
 		UPDATE verifikasi
 		SET laporan_id = $1,
 			verifikator_id = $2,
@@ -211,24 +183,7 @@ func Update(id string, data *Verifikasi) error {
 		    updated_at = NOW()
 		WHERE id = $5
 		RETURNING updated_at
-	`
-
-	err := config.DB.QueryRow(
-		query,
-		data.LaporanID,
-		data.VerifikatorID,
-		data.Komentar,
-		data.StatusVerified,
-		id,
-	).Scan(&data.UpdatedAt)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = config.DB.Exec(`UPDATE laporan_kinerja SET status = $1, updated_at = NOW() WHERE id = $2`, statusLaporanFromVerified(data.StatusVerified), data.LaporanID)
-
-	return err
+	`, data.LaporanID, data.VerifikatorID, data.Komentar, data.StatusVerified, id).Scan(&data.UpdatedAt)
 }
 
 func Delete(id string) error {
