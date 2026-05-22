@@ -164,72 +164,42 @@ func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
 }
 
 func Create(data *Verifikasi) error {
-	query := `
+	tx, err := config.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	err = tx.QueryRow(`
 		INSERT INTO verifikasi (laporan_id, verifikator_id, komentar, status_verified)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at
-	`
-
-	err := config.DB.QueryRow(
-		query,
-		data.LaporanID,
-		data.VerifikatorID,
-		data.Komentar,
-		data.StatusVerified,
-	).Scan(
-		&data.ID,
-		&data.CreatedAt,
-		&data.UpdatedAt,
+	`, data.LaporanID, data.VerifikatorID, data.Komentar, data.StatusVerified).Scan(
+		&data.ID, &data.CreatedAt, &data.UpdatedAt,
 	)
+	if err != nil {
+		return err
+	}
 
-	return err
+	statusLaporan := statusLaporanFromVerified(data.StatusVerified)
+	_, err = tx.Exec(`UPDATE laporan_kinerja SET status = $1, updated_at = NOW() WHERE id = $2`, statusLaporan, data.LaporanID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
-// func Create(data *Verifikasi) error {
-// 	query := `
-// 		INSERT INTO verifikasi (laporan_id, verifikator_id, komentar, status_verified)
-// 		VALUES ($1, $2, $3, $4)
-// 		RETURNING id, created_at, updated_at
-// 	`
-
-// 	err := config.DB.QueryRow(
-// 		query,
-// 		data.LaporanID,
-// 		data.VerifikatorID,
-// 		data.Komentar,
-// 		data.StatusVerified,
-// 	).Scan(
-// 		&data.ID,
-// 		&data.CreatedAt,
-// 		&data.UpdatedAt,
-// 	)
-
-// 	if err != nil {
-// 		return err
-// 	}
-
-// var statusLaporan string
-// switch data.StatusVerified {
-// case "pending":
-// 	statusLaporan = "putih"
-// case "approved":
-// 	statusLaporan = "hijau"
-// case "revision":
-// 	statusLaporan = "kuning"
-// default:
-// 	statusLaporan = "putih"
-// }
-
-// updateQuery := `
-// 	UPDATE laporan_kinerja
-// 	SET status = $1, updated_at = NOW()
-// 	WHERE id = $2
-// `
-
-// _, err = config.DB.Exec(updateQuery, statusLaporan, data.LaporanID)
-
-// 	return err
-// }
+func statusLaporanFromVerified(s string) string {
+	switch s {
+	case "approved":
+		return "hijau"
+	case "revision":
+		return "kuning"
+	default:
+		return "putih"
+	}
+}
 
 func Update(id string, data *Verifikasi) error {
 	query := `
@@ -256,25 +226,7 @@ func Update(id string, data *Verifikasi) error {
 		return err
 	}
 
-	var statusLaporan string
-	switch data.StatusVerified {
-	case "pending":
-		statusLaporan = "putih"
-	case "approved":
-		statusLaporan = "hijau"
-	case "revision":
-		statusLaporan = "kuning"
-	default:
-		statusLaporan = "putih"
-	}
-
-	updateQuery := `
-		UPDATE laporan_kinerja
-		SET status = $1, updated_at = NOW()
-		WHERE id = $2
-	`
-
-	_, err = config.DB.Exec(updateQuery, statusLaporan, data.LaporanID)
+	_, err = config.DB.Exec(`UPDATE laporan_kinerja SET status = $1, updated_at = NOW() WHERE id = $2`, statusLaporanFromVerified(data.StatusVerified), data.LaporanID)
 
 	return err
 }

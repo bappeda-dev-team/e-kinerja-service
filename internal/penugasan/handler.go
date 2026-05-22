@@ -61,9 +61,19 @@ func GetPenugasanByID(c echo.Context) error {
 		return exception.BadRequest("UUID tidak valid")
 	}
 
+	userIDInterface := c.Get("user_id")
+	roleInterface := c.Get("name")
+	if userIDInterface == nil || roleInterface == nil {
+		return exception.Unauthorized("user tidak ditemukan di token")
+	}
+
 	result, err := GetByIDService(id)
 	if err != nil {
 		return handleDBError(err)
+	}
+
+	if roleInterface.(string) == "programmer" && (result.Pelaksana == nil || result.Pelaksana.ProgrammerID != userIDInterface.(string)) {
+		return exception.AccessDenied("akses ditolak")
 	}
 
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Berhasil mengambil data", result))
@@ -116,6 +126,22 @@ func UpdateStatusPenugasan(c echo.Context) error {
 	id := c.Param("id")
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
+	}
+
+	userIDInterface := c.Get("user_id")
+	roleInterface := c.Get("name")
+	if userIDInterface == nil || roleInterface == nil {
+		return exception.Unauthorized("user tidak ditemukan di token")
+	}
+
+	if roleInterface.(string) == "programmer" {
+		existing, err := GetByIDService(id)
+		if err != nil {
+			return handleDBError(err)
+		}
+		if existing.Pelaksana == nil || existing.Pelaksana.ProgrammerID != userIDInterface.(string) {
+			return exception.AccessDenied("akses ditolak")
+		}
 	}
 
 	var req UpdateStatusRequest

@@ -159,29 +159,6 @@ func CreateLaporan(c echo.Context) error {
 	return c.JSON(http.StatusCreated,
 		helpers.SuccessResponse(201, "Berhasil membuat data", result))
 }
-func CreateVerif(c echo.Context) error {
-	userIDInterface := c.Get("user_id")
-	LaporanID := c.Param("laporan_id")
-
-	if userIDInterface == nil {
-		return exception.Unauthorized("user tidak ditemukan di token")
-	}
-
-	userID := userIDInterface.(string)
-
-	if _, err := uuid.Parse(LaporanID); err != nil {
-		return exception.BadRequest("UUID tidak valid")
-	}
-
-	result, err := CreateVerifikasiService(userID, LaporanID)
-	if err != nil {
-		return handleDBError(err)
-	}
-
-	return c.JSON(http.StatusCreated,
-		helpers.SuccessResponse(201, "Berhasil membuat data", result))
-}
-
 // UpdateLaporan godoc
 // @Summary Update laporan
 // @Description Mengupdate data laporan
@@ -197,15 +174,27 @@ func CreateVerif(c echo.Context) error {
 func UpdateLaporan(c echo.Context) error {
 	id := c.Param("id")
 	userIDInterface := c.Get("user_id")
+	roleInterface := c.Get("name")
 
-	if userIDInterface == nil {
+	if userIDInterface == nil || roleInterface == nil {
 		return exception.Unauthorized("user tidak ditemukan di token")
 	}
 
 	userID := userIDInterface.(string)
+	roleName := roleInterface.(string)
 
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
+	}
+
+	if roleName == "programmer" {
+		existing, err := GetId(id)
+		if err != nil {
+			return handleDBError(err)
+		}
+		if existing.Programmer.ID != userID {
+			return exception.AccessDenied("akses ditolak")
+		}
 	}
 
 	var req LaporanUpdateRequest
@@ -262,9 +251,25 @@ func UpdateLaporan(c echo.Context) error {
 // @Router /laporan/{id} [delete]
 func DeleteLaporan(c echo.Context) error {
 	id := c.Param("id")
+	userIDInterface := c.Get("user_id")
+	roleInterface := c.Get("name")
+
+	if userIDInterface == nil || roleInterface == nil {
+		return exception.Unauthorized("user tidak ditemukan di token")
+	}
 
 	if _, err := uuid.Parse(id); err != nil {
 		return exception.BadRequest("UUID tidak valid")
+	}
+
+	if roleInterface.(string) == "programmer" {
+		existing, err := GetId(id)
+		if err != nil {
+			return handleDBError(err)
+		}
+		if existing.Programmer.ID != userIDInterface.(string) {
+			return exception.AccessDenied("akses ditolak")
+		}
 	}
 
 	err := DeleteLaporanServices(id)
@@ -319,6 +324,30 @@ func UploadLampiran(c echo.Context) error {
 	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Lampiran berhasil disimpan", map[string]interface{}{
 		"lampiran": urls,
 	}))
+}
+
+func SubmitLaporan(c echo.Context) error {
+	id := c.Param("id")
+	userIDInterface := c.Get("user_id")
+	if userIDInterface == nil {
+		return exception.Unauthorized("user tidak ditemukan di token")
+	}
+	if _, err := uuid.Parse(id); err != nil {
+		return exception.BadRequest("UUID tidak valid")
+	}
+
+	result, err := SubmitLaporanService(id, userIDInterface.(string))
+	if err != nil {
+		if err == errForbidden {
+			return exception.AccessDenied("laporan bukan milik anda")
+		}
+		if err == errAlreadyApproved {
+			return exception.BadRequest(err.Error())
+		}
+		return handleDBError(err)
+	}
+
+	return c.JSON(http.StatusOK, helpers.SuccessResponse(200, "Laporan berhasil disubmit ke verifikasi", result))
 }
 
 func CreateKomentarLaporan(c echo.Context) error {

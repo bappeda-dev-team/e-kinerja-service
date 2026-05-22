@@ -1,5 +1,7 @@
 package laporan
 
+import "fmt"
+
 func GetLaporanServices() ([]LaporanFullResponse, error) {
 	return GetAll()
 }
@@ -111,7 +113,7 @@ func CreateKomentarServices(laporanID string, userID string, req KomentarLaporan
 	return &result, nil
 }
 
-func UpdateLaporanServices(id string, permintaanID string, userID string, req LaporanUpdateRequest, lampiran StringArray) (*LaporanFullResponse, error) {
+func UpdateLaporanServices(id string, permintaanID string, _ string, req LaporanUpdateRequest, lampiran StringArray) (*LaporanFullResponse, error) {
 
 	existing, err := GetId(id)
 	if err != nil {
@@ -120,7 +122,7 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 
 	data := &Laporan{
 		PermintaanID:    permintaanID,
-		ProgrammerID:    userID,
+		ProgrammerID:    existing.Programmer.ID,
 		PenugasanID:     existing.PenugasanID,
 		LaporanProgress: req.LaporanProgress,
 		Status:          req.Status,
@@ -145,7 +147,7 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 
 	datahis := &History{
 		LaporanID:    existing.ID,
-		ProgrammerID: userID,
+		ProgrammerID: existing.Programmer.ID,
 		OldStatus:    existing.Status,
 		NewStatus:    data.Status,
 		OldProgress:  existing.LaporanProgress,
@@ -170,6 +172,28 @@ func UpdateLaporanServices(id string, permintaanID string, userID string, req La
 func DeleteLaporanServices(id string) error {
 	return Delete(id)
 }
+
+func SubmitLaporanService(laporanID string, programmerID string) (*LaporanFullResponse, error) {
+	existing, err := GetId(laporanID)
+	if err != nil {
+		return nil, err
+	}
+	if existing.Programmer.ID != programmerID {
+		return nil, errForbidden
+	}
+
+	if _, err := SubmitToVerifikasi(laporanID); err != nil {
+		return nil, err
+	}
+
+	result, err := GetId(laporanID)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+var errForbidden = fmt.Errorf("forbidden")
 
 func UpdateLampiranServices(id string, urls []string) error {
 	return UpdateLampiran(id, StringArray(urls))

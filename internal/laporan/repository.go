@@ -588,6 +588,47 @@ func beginTx() (*sql.Tx, error) {
 	return config.DB.Begin()
 }
 
+// SubmitToVerifikasi upsert verifikasi untuk laporan: insert jika belum ada,
+// update ke pending jika sudah ada. Mengembalikan (verifikasiID, error).
+// Mengembalikan error jika verifikasi terakhir sudah approved.
+func SubmitToVerifikasi(laporanID string) (string, error) {
+	var verifikasiID string
+	var currentStatus string
+
+	err := config.DB.QueryRow(`
+		SELECT id, status_verified FROM verifikasi
+		WHERE laporan_id = $1
+		ORDER BY updated_at DESC
+		LIMIT 1
+	`, laporanID).Scan(&verifikasiID, &currentStatus)
+
+	if err != nil && err != sql.ErrNoRows {
+		return "", err
+	}
+
+	if err == nil {
+		if currentStatus == "approved" {
+			return "", errAlreadyApproved
+		}
+		_, err = config.DB.Exec(`
+			UPDATE verifikasi
+			SET status_verified = 'pending', is_submitted_to_verified = true, updated_at = NOW()
+			WHERE id = $1
+		`, verifikasiID)
+		return verifikasiID, err
+	}
+
+	// Belum ada verifikasi — insert baru tanpa verifikator_id (diisi verifikator saat PUT)
+	err = config.DB.QueryRow(`
+		INSERT INTO verifikasi (laporan_id, status_verified, is_submitted_to_verified)
+		VALUES ($1, 'pending', true)
+		RETURNING id
+	`, laporanID).Scan(&verifikasiID)
+	return verifikasiID, err
+}
+
+var errAlreadyApproved = fmt.Errorf("laporan sudah diapprove, tidak bisa submit ulang")
+
 
 func Delete(id string) error {
 	query := `

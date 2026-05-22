@@ -123,7 +123,7 @@ func SetupRoutes(r *echo.Echo) {
 	l.GET("/history", laporan.GetHistory)
 	l.GET("/:id", laporan.GetLaporanID)
 	l.POST("", laporan.CreateLaporan)
-	l.POST("/verif/:laporan_id", laporan.CreateVerif)
+	l.POST("/:id/submit", laporan.SubmitLaporan)
 	l.PUT("/:id", laporan.UpdateLaporan)
 	l.DELETE("/:id", laporan.DeleteLaporan)
 	l.PATCH("/:id/lampiran", laporan.UploadLampiran)

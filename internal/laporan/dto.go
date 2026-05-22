@@ -8,10 +8,10 @@ import (
 // === Request ===
 
 type LaporanRequest struct {
-	PermintaanID    string `form:"permintaan_id" validate:"required,uuid4"`
-	PenugasanID     string `form:"penugasan_id"`
-	LaporanProgress string `form:"laporan_progress" validate:"required,min=3"`
-	Status          string `form:"status" validate:"required"`
+	PermintaanID    string `json:"permintaan_id" form:"permintaan_id" validate:"required,uuid4"`
+	PenugasanID     string `json:"penugasan_id" form:"penugasan_id"`
+	LaporanProgress string `json:"laporan_progress" form:"laporan_progress" validate:"required,min=3"`
+	Status          string `json:"status" form:"status" validate:"required"`
 }
 
 type LaporanUpdateRequest struct {
