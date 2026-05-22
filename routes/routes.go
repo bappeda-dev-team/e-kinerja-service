@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"aplikasi-internal/internal/all_activity"
 	"aplikasi-internal/internal/distribusi"
 	"aplikasi-internal/internal/penugasan"
 	"aplikasi-internal/internal/exception"
@@ -14,7 +13,7 @@ import (
 	"aplikasi-internal/internal/permintaan"
 	refreshtoken "aplikasi-internal/internal/refresh_token"
 	"aplikasi-internal/internal/roles"
-	"aplikasi-internal/internal/superadmin_dashboard"
+	"aplikasi-internal/internal/dashboard"
 	"aplikasi-internal/internal/user"
 	"aplikasi-internal/internal/verifikasi"
 
@@ -130,10 +129,11 @@ func SetupRoutes(r *echo.Echo) {
 	l.PATCH("/:id/lampiran", laporan.UploadLampiran)
 	l.POST("/komentar/:laporan_id", laporan.CreateKomentarLaporan)
 
-	sd := r.Group("/superadmin-dashboard")
-	sd.Use(middle_ware.JWTMiddleware)
-	sd.Use(middle_ware.RoleMiddleware("super_admin"))
-	sd.GET("", superadmin_dashboard.GetSuperadminDashboard)
+	db := r.Group("/dashboard")
+	db.Use(middle_ware.JWTMiddleware)
+	db.Use(middle_ware.RoleMiddleware("super_admin", "admin", "programmer", "verifikator"))
+	db.GET("", dashboard.GetDashboard)
+	db.GET("/activity", dashboard.GetActivity)
 
 	v := r.Group("/verifikasi")
 	v.Use(middle_ware.JWTMiddleware)
@@ -144,11 +144,6 @@ func SetupRoutes(r *echo.Echo) {
 	v.POST("", verifikasi.CreateVerifikasi)
 	v.PUT("/:id", verifikasi.UpdateVerifikasi)
 	v.DELETE("/:id", verifikasi.DeleteVerifikasi)
-
-	aa := r.Group("/all-activity")
-	aa.Use(middle_ware.JWTMiddleware)
-	aa.Use(middle_ware.RoleMiddleware("super_admin", "admin"))
-	aa.GET("", all_activity.GetAllActivity)
 
 	png := r.Group("/penugasan")
 	png.Use(middle_ware.JWTMiddleware)
