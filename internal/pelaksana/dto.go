@@ -21,18 +21,36 @@ type PelaksanaResponse struct {
 }
 
 type KomentarInfo struct {
-	ID         string          `json:"id"`
-	FullName   string          `json:"full_name"`
-	Komentar  string          `json:"komentar"`
-	CreatedAt  time.Time       `json:"created_at"`
+	ID        string    `json:"id"`
+	FullName  string    `json:"full_name"`
+	Komentar  string    `json:"komentar"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type PemdaInfo struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Logo string `json:"logo"`
+}
+
+type AplikasiInfo struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Logo string `json:"logo"`
+}
+
+type PermintaanLite struct {
+	ID              string    `json:"id"`
+	TanggalDeadline time.Time `json:"tanggal_deadline"`
 }
 
 type DistribusiInfo struct {
-	ID       	 string 		`json:"id"`
-	PermintaanID string 		`json:"permintaan_id"`
-	Pemda    	 string 		`json:"pemda"`
-	Aplikasi 	 string 		`json:"aplikasi"`
-	Komentars 	 []KomentarInfo `json:"komentars"`
+	ID           string         `json:"id"`
+	PermintaanID string         `json:"permintaan_id"`
+	Pemda        PemdaInfo      `json:"pemda"`
+	Aplikasi     AplikasiInfo   `json:"aplikasi"`
+	Permintaan   PermintaanLite `json:"permintaan"`
+	Komentars    []KomentarInfo `json:"komentars"`
 }
 
 type ProgrammerInfo struct {

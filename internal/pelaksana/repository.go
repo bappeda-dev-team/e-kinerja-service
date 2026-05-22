@@ -46,7 +46,10 @@ func GetAllDetail(userID string) ([]PelaksanaDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			dp.id,
-			d.id, d.permintaan_id, mp.name, ma.name,
+			d.id, d.permintaan_id,
+			COALESCE(mp.id::text,''), COALESCE(mp.name,''), COALESCE(mp.logo,''),
+			COALESCE(ma.id::text,''), COALESCE(ma.name,''), COALESCE(ma.logo,''),
+			COALESCE(p.id::text,''), COALESCE(p.tanggal_deadline, '0001-01-01'),
 			u.id, u.username, u.full_name, u.profile_picture,
 			dp.is_read,
 			dp.created_at, dp.updated_at
@@ -69,7 +72,10 @@ func GetAllDetail(userID string) ([]PelaksanaDetailResponse, error) {
 		var data PelaksanaDetailResponse
 		err := rows.Scan(
 			&data.ID,
-			&data.Distribusi.ID, &data.Distribusi.PermintaanID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi,
+			&data.Distribusi.ID, &data.Distribusi.PermintaanID,
+			&data.Distribusi.Pemda.ID, &data.Distribusi.Pemda.Name, &data.Distribusi.Pemda.Logo,
+			&data.Distribusi.Aplikasi.ID, &data.Distribusi.Aplikasi.Name, &data.Distribusi.Aplikasi.Logo,
+			&data.Distribusi.Permintaan.ID, &data.Distribusi.Permintaan.TanggalDeadline,
 			&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 			&data.IsRead,
 			&data.CreatedAt, &data.UpdatedAt,
@@ -104,7 +110,10 @@ func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 	err := config.DB.QueryRow(`
 		SELECT
 			dp.id,
-			d.id, d.permintaan_id, mp.name, ma.name,
+			d.id, d.permintaan_id,
+			COALESCE(mp.id::text,''), COALESCE(mp.name,''), COALESCE(mp.logo,''),
+			COALESCE(ma.id::text,''), COALESCE(ma.name,''), COALESCE(ma.logo,''),
+			COALESCE(p.id::text,''), COALESCE(p.tanggal_deadline, '0001-01-01'),
 			u.id, u.username, u.full_name, u.profile_picture,
 			dp.is_read,
 			dp.created_at, dp.updated_at
@@ -117,7 +126,10 @@ func GetByIdDetail(id string) (PelaksanaDetailResponse, error) {
 		WHERE dp.id = $1
 	`, id).Scan(
 		&data.ID,
-		&data.Distribusi.ID, &data.Distribusi.PermintaanID, &data.Distribusi.Pemda, &data.Distribusi.Aplikasi,
+		&data.Distribusi.ID, &data.Distribusi.PermintaanID,
+		&data.Distribusi.Pemda.ID, &data.Distribusi.Pemda.Name, &data.Distribusi.Pemda.Logo,
+		&data.Distribusi.Aplikasi.ID, &data.Distribusi.Aplikasi.Name, &data.Distribusi.Aplikasi.Logo,
+		&data.Distribusi.Permintaan.ID, &data.Distribusi.Permintaan.TanggalDeadline,
 		&data.Programmer.ID, &data.Programmer.Username, &data.Programmer.FullName, &data.Programmer.ProfilePicture,
 		&data.IsRead,
 		&data.CreatedAt, &data.UpdatedAt,
