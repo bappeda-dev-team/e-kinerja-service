@@ -44,6 +44,7 @@ func GetAllDetail() ([]VerifikasiDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT
 			v.id,
+			COALESCE(d.id::text, ''),
 			l.id, l.laporan_progress, l.status,
 			up.id, up.username, up.full_name, up.profile_picture,
 			uv.id, uv.username, uv.full_name, uv.profile_picture,
@@ -51,6 +52,7 @@ func GetAllDetail() ([]VerifikasiDetailResponse, error) {
 			v.created_at, v.updated_at
 		FROM verifikasi v
 		LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
+		LEFT JOIN distribusi d ON d.permintaan_id = l.permintaan_id
 		LEFT JOIN users up ON l.programmer_id = up.id
 		LEFT JOIN users uv ON v.verifikator_id = uv.id
 	`)
@@ -64,6 +66,7 @@ func GetAllDetail() ([]VerifikasiDetailResponse, error) {
 		var data VerifikasiDetailResponse
 		err := rows.Scan(
 			&data.ID,
+			&data.DistribusiID,
 			&data.Laporan.ID, &data.Laporan.LaporanProgress, &data.Laporan.Status,
 			&data.Laporan.Programmer.ID, &data.Laporan.Programmer.Username, &data.Laporan.Programmer.FullName, &data.Laporan.Programmer.ProfilePicture,
 			&data.Verifikator.ID, &data.Verifikator.Username, &data.Verifikator.FullName, &data.Verifikator.ProfilePicture,
@@ -81,6 +84,7 @@ func GetAllBylaporan() ([]VerifikasiDetailResponse, error) {
 	rows, err := config.DB.Query(`
 		SELECT DISTINCT ON (l.id)
 			v.id,
+			COALESCE(d.id::text, ''),
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			l.id, l.laporan_progress, l.status,
@@ -91,6 +95,7 @@ func GetAllBylaporan() ([]VerifikasiDetailResponse, error) {
 		FROM verifikasi v
 		LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
 		LEFT JOIN permintaan p ON l.permintaan_id = p.id
+		LEFT JOIN distribusi d ON d.permintaan_id = p.id
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users up ON l.programmer_id = up.id
@@ -107,6 +112,7 @@ func GetAllBylaporan() ([]VerifikasiDetailResponse, error) {
 		var data VerifikasiDetailResponse
 		err := rows.Scan(
 			&data.ID,
+			&data.DistribusiID,
 			&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo,
 			&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 			&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,
@@ -130,6 +136,7 @@ func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
 	err := config.DB.QueryRow(`
 		SELECT
 			v.id,
+			COALESCE(d.id::text, ''),
 			p.id, mp.id, mp.name, mp.logo, ma.id, ma.name, ma.logo, p.menu, p.kondisi_awal, p.kondisi_diharapkan,
 			p.tanggal_pesanan, p.tanggal_deadline, p.lampiran,
 			l.id, l.laporan_progress, l.status,
@@ -140,6 +147,7 @@ func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
 		FROM verifikasi v
 		LEFT JOIN laporan_kinerja l ON v.laporan_id = l.id
 		LEFT JOIN permintaan p ON l.permintaan_id = p.id
+		LEFT JOIN distribusi d ON d.permintaan_id = p.id
 		LEFT JOIN master_pemda mp ON p.pemda_id = mp.id
 		LEFT JOIN master_aplikasi ma ON p.aplikasi_id = ma.id
 		LEFT JOIN users up ON l.programmer_id = up.id
@@ -147,6 +155,7 @@ func GetByIdDetail(id string) (VerifikasiDetailResponse, error) {
 		WHERE v.id = $1
 	`, id).Scan(
 		&data.ID,
+		&data.DistribusiID,
 		&data.Permintaan.ID, &data.Permintaan.Pemda.ID, &data.Permintaan.Pemda.Name, &data.Permintaan.Pemda.Logo,
 		&data.Permintaan.Aplikasi.ID, &data.Permintaan.Aplikasi.Name, &data.Permintaan.Aplikasi.Logo,
 		&data.Permintaan.Menu, &data.Permintaan.KondisiAwal, &data.Permintaan.KondisiDiharapkan,

@@ -72,6 +72,7 @@ type VerifikatorInfo struct {
 
 type VerifikasiDetailResponse struct {
 	ID             string          `json:"id"`
+	DistribusiID   string          `json:"distribusi_id"`
 	Permintaan     PermintaanInfo  `json:"permintaan"`
 	Laporan        LaporanInfo     `json:"laporan"`
 	Verifikator    VerifikatorInfo `json:"verifikator"`

@@ -5,12 +5,14 @@ import "time"
 type CreatePenilaianRequest struct {
 	DistribusiID        string `json:"distribusi_id" validate:"required,uuid4"`
 	TingkatKeberhasilan int    `json:"tingkat_keberhasilan" validate:"required,min=0,max=100"`
+	KetepatanWaktu      string `json:"ketepatan_waktu" validate:"required,oneof=lebih_awal tepat_waktu terlambat"`
 	Komentar            string `json:"komentar"`
 	TanggalSelesai      string `json:"tanggal_selesai" validate:"required"`
 }
 
 type UpdatePenilaianRequest struct {
 	TingkatKeberhasilan *int   `json:"tingkat_keberhasilan" validate:"omitempty,min=0,max=100"`
+	KetepatanWaktu      string `json:"ketepatan_waktu" validate:"omitempty,oneof=lebih_awal tepat_waktu terlambat"`
 	Komentar            string `json:"komentar"`
 	TanggalSelesai      string `json:"tanggal_selesai"`
 }

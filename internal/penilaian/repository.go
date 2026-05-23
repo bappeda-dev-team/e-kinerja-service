@@ -118,19 +118,6 @@ func GetByID(id string) (*PenilaianResponse, error) {
 	return &r, nil
 }
 
-func GetDeadlineByDistribusiID(distribusiID string) (string, error) {
-	var deadline string
-	err := config.DB.QueryRow(`
-		SELECT p.tanggal_deadline
-		FROM distribusi d
-		JOIN permintaan p ON d.permintaan_id = p.id
-		WHERE d.id = $1
-	`, distribusiID).Scan(&deadline)
-	if err != nil {
-		return "", err
-	}
-	return deadline, nil
-}
 
 func ExistsByID(id string) (bool, error) {
 	var exists bool

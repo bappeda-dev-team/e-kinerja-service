@@ -5,26 +5,6 @@ import (
 	"time"
 )
 
-func hitungKetepatanWaktu(tanggalSelesai time.Time, deadline string) (string, error) {
-	dl, err := time.Parse(time.RFC3339, deadline)
-	if err != nil {
-		// coba format date saja
-		dl, err = time.Parse("2006-01-02T15:04:05Z07:00", deadline)
-		if err != nil {
-			dl, err = time.Parse("2006-01-02 15:04:05+00", deadline)
-			if err != nil {
-				return "tepat_waktu", nil
-			}
-		}
-	}
-	if tanggalSelesai.Before(dl) {
-		return "lebih_awal", nil
-	} else if tanggalSelesai.Equal(dl) || tanggalSelesai.Before(dl.Add(24*time.Hour)) {
-		return "tepat_waktu", nil
-	}
-	return "terlambat", nil
-}
-
 func CreatePenilaianService(req CreatePenilaianRequest, penilaiID string) (*PenilaianResponse, error) {
 	if req.TingkatKeberhasilan < 0 || req.TingkatKeberhasilan > 100 {
 		return nil, exception.BadRequest("tingkat_keberhasilan harus antara 0 dan 100")
@@ -46,21 +26,11 @@ func CreatePenilaianService(req CreatePenilaianRequest, penilaiID string) (*Peni
 		}
 	}
 
-	deadline, err := GetDeadlineByDistribusiID(req.DistribusiID)
-	if err != nil {
-		return nil, err
-	}
-
-	ketepatanWaktu, err := hitungKetepatanWaktu(tanggalSelesai, deadline)
-	if err != nil {
-		return nil, err
-	}
-
 	p := &Penilaian{
 		DistribusiID:        req.DistribusiID,
 		PenilaiID:           penilaiID,
 		TingkatKeberhasilan: req.TingkatKeberhasilan,
-		KetepatanWaktu:      ketepatanWaktu,
+		KetepatanWaktu:      req.KetepatanWaktu,
 		Komentar:            req.Komentar,
 		TanggalSelesai:      tanggalSelesai,
 	}
@@ -81,6 +51,9 @@ func UpdatePenilaianService(id string, req UpdatePenilaianRequest) (*PenilaianRe
 	if req.TingkatKeberhasilan != nil {
 		existing.TingkatKeberhasilan = *req.TingkatKeberhasilan
 	}
+	if req.KetepatanWaktu != "" {
+		existing.KetepatanWaktu = req.KetepatanWaktu
+	}
 	if req.Komentar != "" {
 		existing.Komentar = req.Komentar
 	}
@@ -93,12 +66,6 @@ func UpdatePenilaianService(id string, req UpdatePenilaianRequest) (*PenilaianRe
 			}
 		}
 		existing.TanggalSelesai = ts
-
-		deadline, err := GetDeadlineByDistribusiID(existing.DistribusiID)
-		if err != nil {
-			return nil, err
-		}
-		existing.KetepatanWaktu, _ = hitungKetepatanWaktu(ts, deadline)
 	}
 
 	if err := Update(id, existing); err != nil {
